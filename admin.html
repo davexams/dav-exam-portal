@@ -104,7 +104,7 @@
                 
                 <form id="student-form" onsubmit="saveStudent(event)" class="space-y-4 mb-6 bg-gray-50 p-4 rounded border">
                     <input type="hidden" id="student-doc-id">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Roll Number</label>
                             <input type="text" id="stu-roll" required placeholder="e.g. 101" class="w-full p-2 border rounded text-sm">
@@ -116,6 +116,10 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Class & Section</label>
                             <input type="text" id="stu-class" required placeholder="e.g. 10-A" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Student Password</label>
+                            <input type="text" id="stu-pass" required placeholder="Set Password" class="w-full p-2 border rounded text-sm">
                         </div>
                     </div>
                     <div class="flex gap-2">
@@ -135,11 +139,12 @@
                                 <th class="p-2 border">Roll No</th>
                                 <th class="p-2 border">Student Name</th>
                                 <th class="p-2 border">Class</th>
+                                <th class="p-2 border">Password</th>
                                 <th class="p-2 border text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody id="admin-students-list">
-                            <tr><td colspan="4" class="p-4 text-center text-gray-500">Loading students...</td></tr>
+                            <tr><td colspan="5" class="p-4 text-center text-gray-500">Loading students...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -217,7 +222,6 @@
 
     <!-- JavaScript Logic -->
     <script>
-        // 1. Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
             authDomain: "myexamportal-abf3f.firebaseapp.com",
@@ -228,13 +232,10 @@
             measurementId: "G-G0VRMX7EQT"
         };
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         let isExamActive = false;
 
-        // 2. Admin Login Handling
         function handleAdminLogin(e) {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -252,11 +253,8 @@
         function handleAdminLogout() {
             document.getElementById('dashboard-container').classList.add('hidden');
             document.getElementById('login-container').classList.remove('hidden');
-            document.getElementById('login-form').reset();
-            document.getElementById('login-error').classList.add('hidden');
         }
 
-        // 3. Load Master Data
         function loadAllAdminData() {
             loadExamControlStatus();
             loadStudents();
@@ -264,7 +262,6 @@
             loadResultsAndStats();
         }
 
-        // 4. EXAM CONTROL FUNCTIONS (START / STOP)
         function loadExamControlStatus() {
             db.collection("exam_control").doc("current_exam").get().then(doc => {
                 if (doc.exists) {
@@ -313,17 +310,18 @@
             }).then(() => {
                 updateExamUI();
                 alert(isExamActive ? "Exam Started Successfully!" : "Exam Stopped Successfully!");
-            }).catch(err => alert("Error toggling exam: " + err.message));
+            });
         }
 
-        // 5. STUDENT MANAGEMENT
+        // STUDENT MANAGEMENT
         function saveStudent(e) {
             e.preventDefault();
             const id = document.getElementById('student-doc-id').value;
             const data = {
                 rollNo: document.getElementById('stu-roll').value,
                 name: document.getElementById('stu-name').value,
-                studentClass: document.getElementById('stu-class').value
+                studentClass: document.getElementById('stu-class').value,
+                password: document.getElementById('stu-pass').value
             };
 
             if (id) {
@@ -347,7 +345,7 @@
                 const tbody = document.getElementById('admin-students-list');
                 tbody.innerHTML = "";
                 if (snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-gray-500">No students added yet.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-gray-500">No students added yet.</td></tr>`;
                     return;
                 }
                 snapshot.forEach(doc => {
@@ -357,8 +355,9 @@
                             <td class="p-2 border font-medium">${s.rollNo || '-'}</td>
                             <td class="p-2 border">${s.name || '-'}</td>
                             <td class="p-2 border">${s.studentClass || '-'}</td>
+                            <td class="p-2 border font-mono text-blue-600">${s.password || '123456'}</td>
                             <td class="p-2 border text-center">
-                                <button onclick="editStudent('${doc.id}', '${s.rollNo || ''}', '${s.name || ''}', '${s.studentClass || ''}')" class="bg-amber-500 text-white text-xs px-2 py-1 rounded mr-1">Edit</button>
+                                <button onclick="editStudent('${doc.id}', '${s.rollNo || ''}', '${s.name || ''}', '${s.studentClass || ''}', '${s.password || ''}')" class="bg-amber-500 text-white text-xs px-2 py-1 rounded mr-1">Edit</button>
                                 <button onclick="deleteDoc('students', '${doc.id}', loadStudents)" class="bg-red-500 text-white text-xs px-2 py-1 rounded">Delete</button>
                             </td>
                         </tr>
@@ -367,11 +366,12 @@
             });
         }
 
-        function editStudent(id, roll, name, sClass) {
+        function editStudent(id, roll, name, sClass, pass) {
             document.getElementById('student-doc-id').value = id;
             document.getElementById('stu-roll').value = roll;
             document.getElementById('stu-name').value = name;
             document.getElementById('stu-class').value = sClass;
+            document.getElementById('stu-pass').value = pass;
             document.getElementById('stu-btn').innerText = "Update Student";
         }
 
@@ -381,7 +381,7 @@
             document.getElementById('stu-btn').innerText = "Save Student";
         }
 
-        // 6. TEACHER MANAGEMENT
+        // TEACHER MANAGEMENT
         function saveTeacher(e) {
             e.preventDefault();
             const id = document.getElementById('teacher-doc-id').value;
@@ -446,7 +446,6 @@
             document.getElementById('tea-btn').innerText = "Save Teacher";
         }
 
-        // 7. STATS AND RESULTS
         function loadResultsAndStats() {
             db.collection("question_bank").get().then(s => document.getElementById('stat-questions-count').innerText = s.size);
             
@@ -474,13 +473,12 @@
             });
         }
 
-        // General Delete Helper
         function deleteDoc(collection, id, callback) {
             if (confirm("Are you sure you want to delete this record?")) {
                 db.collection(collection).doc(id).delete().then(() => {
                     alert("Deleted!");
                     if(callback) callback();
-                }).catch(err => alert("Error: " + err.message));
+                });
             }
         }
     </script>
