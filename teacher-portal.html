@@ -54,7 +54,7 @@
                 <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Student Management (Add / Edit)</h2>
                 <form id="student-form" onsubmit="saveStudent(event)" class="space-y-4 mb-6 bg-gray-50 p-4 rounded border">
                     <input type="hidden" id="student-doc-id">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Roll Number</label>
                             <input type="text" id="stu-roll" required placeholder="e.g. 101" class="w-full p-2 border rounded text-sm">
@@ -66,6 +66,10 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Class & Section</label>
                             <input type="text" id="stu-class" required placeholder="e.g. 10-A" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Student Password</label>
+                            <input type="text" id="stu-pass" required placeholder="Set Password" class="w-full p-2 border rounded text-sm">
                         </div>
                     </div>
                     <div class="flex gap-2">
@@ -85,11 +89,12 @@
                                 <th class="p-2 border">Roll No</th>
                                 <th class="p-2 border">Student Name</th>
                                 <th class="p-2 border">Class</th>
+                                <th class="p-2 border">Password</th>
                                 <th class="p-2 border text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody id="teacher-students-list">
-                            <tr><td colspan="4" class="p-4 text-center text-gray-500">Loading students...</td></tr>
+                            <tr><td colspan="5" class="p-4 text-center text-gray-500">Loading students...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -191,7 +196,8 @@
             const data = {
                 rollNo: document.getElementById('stu-roll').value,
                 name: document.getElementById('stu-name').value,
-                studentClass: document.getElementById('stu-class').value
+                studentClass: document.getElementById('stu-class').value,
+                password: document.getElementById('stu-pass').value
             };
 
             if (id) {
@@ -214,7 +220,7 @@
                 const tbody = document.getElementById('teacher-students-list');
                 tbody.innerHTML = "";
                 if (snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-gray-500">No students found.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-gray-500">No students found.</td></tr>`;
                     return;
                 }
                 snapshot.forEach(doc => {
@@ -224,8 +230,9 @@
                             <td class="p-2 border font-medium">${s.rollNo || '-'}</td>
                             <td class="p-2 border">${s.name || '-'}</td>
                             <td class="p-2 border">${s.studentClass || '-'}</td>
+                            <td class="p-2 border font-mono text-blue-600">${s.password || '123456'}</td>
                             <td class="p-2 border text-center">
-                                <button onclick="editStudent('${doc.id}', '${s.rollNo || ''}', '${s.name || ''}', '${s.studentClass || ''}')" class="bg-amber-500 text-white text-xs px-2 py-1 rounded mr-1">Edit</button>
+                                <button onclick="editStudent('${doc.id}', '${s.rollNo || ''}', '${s.name || ''}', '${s.studentClass || ''}', '${s.password || ''}')" class="bg-amber-500 text-white text-xs px-2 py-1 rounded mr-1">Edit</button>
                                 <button onclick="deleteDoc('students', '${doc.id}', loadStudents)" class="bg-red-500 text-white text-xs px-2 py-1 rounded">Delete</button>
                             </td>
                         </tr>
@@ -234,11 +241,12 @@
             });
         }
 
-        function editStudent(id, roll, name, sClass) {
+        function editStudent(id, roll, name, sClass, pass) {
             document.getElementById('student-doc-id').value = id;
             document.getElementById('stu-roll').value = roll;
             document.getElementById('stu-name').value = name;
             document.getElementById('stu-class').value = sClass;
+            document.getElementById('stu-pass').value = pass;
             document.getElementById('stu-btn').innerText = "Update Student";
         }
 
