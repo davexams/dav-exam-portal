@@ -50,47 +50,151 @@
 
         <div class="max-w-6xl mx-auto p-6 space-y-8">
             
-            <!-- Quick Stats Overview -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-                    <h3 class="text-gray-500 text-sm font-semibold">Total Students</h3>
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-blue-500">
+                    <h3 class="text-gray-500 text-xs font-semibold uppercase">Total Students</h3>
                     <p id="stat-students-count" class="text-2xl font-bold text-gray-800 mt-1">0</p>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
-                    <h3 class="text-gray-500 text-sm font-semibold">Total Questions</h3>
+                <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-yellow-500">
+                    <h3 class="text-gray-500 text-xs font-semibold uppercase">Total Teachers</h3>
+                    <p id="stat-teachers-count" class="text-2xl font-bold text-gray-800 mt-1">0</p>
+                </div>
+                <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-green-500">
+                    <h3 class="text-gray-500 text-xs font-semibold uppercase">Total Questions</h3>
                     <p id="stat-questions-count" class="text-2xl font-bold text-gray-800 mt-1">0</p>
                 </div>
-                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
-                    <h3 class="text-gray-500 text-sm font-semibold">Exams Submitted</h3>
+                <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-purple-500">
+                    <h3 class="text-gray-500 text-xs font-semibold uppercase">Exams Submitted</h3>
                     <p id="stat-exams-count" class="text-2xl font-bold text-gray-800 mt-1">0</p>
                 </div>
             </div>
 
-            <!-- Manage Registered Students Section -->
+            <!-- EXAM CONTROL PANEL (START / STOP EXAM) -->
+            <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-amber-500">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Live Exam Control Center</h2>
+                
+                <div class="flex flex-wrap items-center justify-between gap-4 bg-gray-50 p-4 rounded-lg border">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700">Current Exam Status:</p>
+                        <span id="exam-status-badge" class="inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-700">
+                            Checking status...
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600">Active Subject</label>
+                            <input type="text" id="exam-subject-input" placeholder="e.g. Science" class="p-2 border rounded text-sm w-36">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600">Duration (Mins)</label>
+                            <input type="number" id="exam-duration-input" placeholder="30" class="p-2 border rounded text-sm w-24">
+                        </div>
+                        <button id="toggle-exam-btn" onclick="toggleExamState()" class="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded text-sm">
+                            Start Exam
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STUDENT MANAGEMENT SECTION -->
             <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Manage All Registered Students</h2>
+                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Student Management (Add / Edit)</h2>
+                
+                <form id="student-form" onsubmit="saveStudent(event)" class="space-y-4 mb-6 bg-gray-50 p-4 rounded border">
+                    <input type="hidden" id="student-doc-id">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Roll Number</label>
+                            <input type="text" id="stu-roll" required placeholder="e.g. 101" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Student Name</label>
+                            <input type="text" id="stu-name" required placeholder="e.g. Amit Kumar" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Class & Section</label>
+                            <input type="text" id="stu-class" required placeholder="e.g. 10-A" class="w-full p-2 border rounded text-sm">
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" id="stu-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-5 rounded text-sm">
+                            Save Student
+                        </button>
+                        <button type="button" onclick="resetStudentForm()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-1.5 px-4 rounded text-sm">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse border border-gray-200 text-sm">
                         <thead>
                             <tr class="bg-gray-100">
                                 <th class="p-2 border">Roll No</th>
                                 <th class="p-2 border">Student Name</th>
-                                <th class="p-2 border">Class / Sec</th>
+                                <th class="p-2 border">Class</th>
                                 <th class="p-2 border text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody id="admin-students-list">
-                            <tr>
-                                <td colspan="4" class="p-4 text-center text-gray-500">Loading students...</td>
-                            </tr>
+                            <tr><td colspan="4" class="p-4 text-center text-gray-500">Loading students...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Exam Results Logs Section -->
+            <!-- TEACHER MANAGEMENT SECTION -->
             <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Recent Student Exam Results</h2>
+                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Teacher Management (Add / Edit)</h2>
+                
+                <form id="teacher-form" onsubmit="saveTeacher(event)" class="space-y-4 mb-6 bg-gray-50 p-4 rounded border">
+                    <input type="hidden" id="teacher-doc-id">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Teacher Name</label>
+                            <input type="text" id="tea-name" required placeholder="e.g. Mr. Rajesh Sharma" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Email Address</label>
+                            <input type="email" id="tea-email" required placeholder="teacher@dav.com" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Subject Assigned</label>
+                            <input type="text" id="tea-subject" required placeholder="e.g. Physics / Mathematics" class="w-full p-2 border rounded text-sm">
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" id="tea-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-5 rounded text-sm">
+                            Save Teacher
+                        </button>
+                        <button type="button" onclick="resetTeacherForm()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-1.5 px-4 rounded text-sm">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse border border-gray-200 text-sm">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="p-2 border">Teacher Name</th>
+                                <th class="p-2 border">Email</th>
+                                <th class="p-2 border">Subject</th>
+                                <th class="p-2 border text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-teachers-list">
+                            <tr><td colspan="4" class="p-4 text-center text-gray-500">Loading teachers...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- EXAM RESULTS LOGS -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Submitted Exam Results</h2>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse border border-gray-200 text-sm">
                         <thead>
@@ -102,9 +206,7 @@
                             </tr>
                         </thead>
                         <tbody id="admin-results-list">
-                            <tr>
-                                <td colspan="4" class="p-4 text-center text-gray-500">Loading exam records...</td>
-                            </tr>
+                            <tr><td colspan="4" class="p-4 text-center text-gray-500">Loading exam records...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -115,7 +217,7 @@
 
     <!-- JavaScript Logic -->
     <script>
-        // 1. Aapki Firebase Configuration
+        // 1. Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
             authDomain: "myexamportal-abf3f.firebaseapp.com",
@@ -130,6 +232,7 @@
             firebase.initializeApp(firebaseConfig);
         }
         const db = firebase.firestore();
+        let isExamActive = false;
 
         // 2. Admin Login Handling
         function handleAdminLogin(e) {
@@ -137,17 +240,15 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // Secure Admin Credentials
             if (email === "admin@dav.com" && password === "admin123") {
                 document.getElementById('login-container').classList.add('hidden');
                 document.getElementById('dashboard-container').classList.remove('hidden');
-                loadAdminDashboardData();
+                loadAllAdminData();
             } else {
                 document.getElementById('login-error').classList.remove('hidden');
             }
         }
 
-        // 3. Admin Logout
         function handleAdminLogout() {
             document.getElementById('dashboard-container').classList.add('hidden');
             document.getElementById('login-container').classList.remove('hidden');
@@ -155,74 +256,230 @@
             document.getElementById('login-error').classList.add('hidden');
         }
 
-        // 4. Load Admin Dashboard Data
-        function loadAdminDashboardData() {
-            // Load Students List & Count
-            db.collection("students").get().then(snapshot => {
-                document.getElementById('stat-students-count').innerText = snapshot.size;
-                const tbody = document.getElementById('admin-students-list');
-                tbody.innerHTML = "";
-                
-                if(snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-gray-500">No students registered yet.</td></tr>`;
+        // 3. Load Master Data
+        function loadAllAdminData() {
+            loadExamControlStatus();
+            loadStudents();
+            loadTeachers();
+            loadResultsAndStats();
+        }
+
+        // 4. EXAM CONTROL FUNCTIONS (START / STOP)
+        function loadExamControlStatus() {
+            db.collection("exam_control").doc("current_exam").get().then(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    isExamActive = data.isActive || false;
+                    document.getElementById('exam-subject-input').value = data.subject || '';
+                    document.getElementById('exam-duration-input').value = data.duration || 30;
+                    updateExamUI();
                 } else {
-                    snapshot.forEach(doc => {
-                        const s = doc.data();
-                        tbody.innerHTML += `
-                            <tr class="hover:bg-gray-50">
-                                <td class="p-2 border font-medium">${s.rollNo || '-'}</td>
-                                <td class="p-2 border">${s.name || '-'}</td>
-                                <td class="p-2 border">${s.studentClass || '-'}</td>
-                                <td class="p-2 border text-center">
-                                    <button onclick="deleteDoc('students', '${doc.id}')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">
-                                        Remove Student
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                }
-            });
-
-            // Load Question Bank Count
-            db.collection("question_bank").get().then(snapshot => {
-                document.getElementById('stat-questions-count').innerText = snapshot.size;
-            });
-
-            // Load Exam Results Logs
-            db.collection("exam_results").get().then(snapshot => {
-                document.getElementById('stat-exams-count').innerText = snapshot.size;
-                const tbody = document.getElementById('admin-results-list');
-                tbody.innerHTML = "";
-
-                if(snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-gray-500">No exam results found.</td></tr>`;
-                } else {
-                    snapshot.forEach(doc => {
-                        const res = doc.data();
-                        tbody.innerHTML += `
-                            <tr class="hover:bg-gray-50">
-                                <td class="p-2 border font-medium">${res.rollNo || '-'}</td>
-                                <td class="p-2 border">${res.studentName || '-'}</td>
-                                <td class="p-2 border">${res.subject || 'General'}</td>
-                                <td class="p-2 border text-center">
-                                    <button onclick="deleteDoc('exam_results', '${doc.id}')" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">
-                                        Delete Record
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
-                    });
+                    updateExamUI();
                 }
             });
         }
 
-        // Delete Helper Function
-        function deleteDoc(collectionName, docId) {
-            if(confirm("Are you sure you want to delete this record?")) {
-                db.collection(collectionName).doc(docId).delete().then(() => {
-                    alert("Record deleted!");
-                    loadAdminDashboardData();
+        function updateExamUI() {
+            const badge = document.getElementById('exam-status-badge');
+            const btn = document.getElementById('toggle-exam-btn');
+            if (isExamActive) {
+                badge.innerText = "ACTIVE / STARTED";
+                badge.className = "inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800";
+                btn.innerText = "Stop Exam";
+                btn.className = "mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded text-sm";
+            } else {
+                badge.innerText = "INACTIVE / STOPPED";
+                badge.className = "inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800";
+                btn.innerText = "Start Exam";
+                btn.className = "mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded text-sm";
+            }
+        }
+
+        function toggleExamState() {
+            const subject = document.getElementById('exam-subject-input').value;
+            const duration = document.getElementById('exam-duration-input').value;
+
+            if (!isExamActive && (!subject || !duration)) {
+                alert("Please enter both Subject and Duration to start the exam!");
+                return;
+            }
+
+            isExamActive = !isExamActive;
+            db.collection("exam_control").doc("current_exam").set({
+                isActive: isExamActive,
+                subject: subject,
+                duration: Number(duration),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                updateExamUI();
+                alert(isExamActive ? "Exam Started Successfully!" : "Exam Stopped Successfully!");
+            }).catch(err => alert("Error toggling exam: " + err.message));
+        }
+
+        // 5. STUDENT MANAGEMENT
+        function saveStudent(e) {
+            e.preventDefault();
+            const id = document.getElementById('student-doc-id').value;
+            const data = {
+                rollNo: document.getElementById('stu-roll').value,
+                name: document.getElementById('stu-name').value,
+                studentClass: document.getElementById('stu-class').value
+            };
+
+            if (id) {
+                db.collection("students").doc(id).update(data).then(() => {
+                    alert("Student details updated!");
+                    resetStudentForm();
+                    loadStudents();
+                });
+            } else {
+                db.collection("students").add(data).then(() => {
+                    alert("Student added!");
+                    resetStudentForm();
+                    loadStudents();
+                });
+            }
+        }
+
+        function loadStudents() {
+            db.collection("students").get().then(snapshot => {
+                document.getElementById('stat-students-count').innerText = snapshot.size;
+                const tbody = document.getElementById('admin-students-list');
+                tbody.innerHTML = "";
+                if (snapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-gray-500">No students added yet.</td></tr>`;
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const s = doc.data();
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-2 border font-medium">${s.rollNo || '-'}</td>
+                            <td class="p-2 border">${s.name || '-'}</td>
+                            <td class="p-2 border">${s.studentClass || '-'}</td>
+                            <td class="p-2 border text-center">
+                                <button onclick="editStudent('${doc.id}', '${s.rollNo || ''}', '${s.name || ''}', '${s.studentClass || ''}')" class="bg-amber-500 text-white text-xs px-2 py-1 rounded mr-1">Edit</button>
+                                <button onclick="deleteDoc('students', '${doc.id}', loadStudents)" class="bg-red-500 text-white text-xs px-2 py-1 rounded">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        function editStudent(id, roll, name, sClass) {
+            document.getElementById('student-doc-id').value = id;
+            document.getElementById('stu-roll').value = roll;
+            document.getElementById('stu-name').value = name;
+            document.getElementById('stu-class').value = sClass;
+            document.getElementById('stu-btn').innerText = "Update Student";
+        }
+
+        function resetStudentForm() {
+            document.getElementById('student-doc-id').value = "";
+            document.getElementById('student-form').reset();
+            document.getElementById('stu-btn').innerText = "Save Student";
+        }
+
+        // 6. TEACHER MANAGEMENT
+        function saveTeacher(e) {
+            e.preventDefault();
+            const id = document.getElementById('teacher-doc-id').value;
+            const data = {
+                name: document.getElementById('tea-name').value,
+                email: document.getElementById('tea-email').value,
+                subject: document.getElementById('tea-subject').value
+            };
+
+            if (id) {
+                db.collection("teachers").doc(id).update(data).then(() => {
+                    alert("Teacher updated!");
+                    resetTeacherForm();
+                    loadTeachers();
+                });
+            } else {
+                db.collection("teachers").add(data).then(() => {
+                    alert("Teacher added!");
+                    resetTeacherForm();
+                    loadTeachers();
+                });
+            }
+        }
+
+        function loadTeachers() {
+            db.collection("teachers").get().then(snapshot => {
+                document.getElementById('stat-teachers-count').innerText = snapshot.size;
+                const tbody = document.getElementById('admin-teachers-list');
+                tbody.innerHTML = "";
+                if (snapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-gray-500">No teachers added yet.</td></tr>`;
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const t = doc.data();
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-2 border font-medium">${t.name || '-'}</td>
+                            <td class="p-2 border">${t.email || '-'}</td>
+                            <td class="p-2 border">${t.subject || '-'}</td>
+                            <td class="p-2 border text-center">
+                                <button onclick="editTeacher('${doc.id}', '${t.name || ''}', '${t.email || ''}', '${t.subject || ''}')" class="bg-amber-500 text-white text-xs px-2 py-1 rounded mr-1">Edit</button>
+                                <button onclick="deleteDoc('teachers', '${doc.id}', loadTeachers)" class="bg-red-500 text-white text-xs px-2 py-1 rounded">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        function editTeacher(id, name, email, subject) {
+            document.getElementById('teacher-doc-id').value = id;
+            document.getElementById('tea-name').value = name;
+            document.getElementById('tea-email').value = email;
+            document.getElementById('tea-subject').value = subject;
+            document.getElementById('tea-btn').innerText = "Update Teacher";
+        }
+
+        function resetTeacherForm() {
+            document.getElementById('teacher-doc-id').value = "";
+            document.getElementById('teacher-form').reset();
+            document.getElementById('tea-btn').innerText = "Save Teacher";
+        }
+
+        // 7. STATS AND RESULTS
+        function loadResultsAndStats() {
+            db.collection("question_bank").get().then(s => document.getElementById('stat-questions-count').innerText = s.size);
+            
+            db.collection("exam_results").get().then(snapshot => {
+                document.getElementById('stat-exams-count').innerText = snapshot.size;
+                const tbody = document.getElementById('admin-results-list');
+                tbody.innerHTML = "";
+                if (snapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-gray-500">No exam results recorded.</td></tr>`;
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const res = doc.data();
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-2 border font-medium">${res.rollNo || '-'}</td>
+                            <td class="p-2 border">${res.studentName || '-'}</td>
+                            <td class="p-2 border">${res.subject || 'General'}</td>
+                            <td class="p-2 border text-center">
+                                <button onclick="deleteDoc('exam_results', '${doc.id}', loadResultsAndStats)" class="bg-red-500 text-white text-xs px-2 py-1 rounded">Delete Log</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        // General Delete Helper
+        function deleteDoc(collection, id, callback) {
+            if (confirm("Are you sure you want to delete this record?")) {
+                db.collection(collection).doc(id).delete().then(() => {
+                    alert("Deleted!");
+                    if(callback) callback();
                 }).catch(err => alert("Error: " + err.message));
             }
         }
