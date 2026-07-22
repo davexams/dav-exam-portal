@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAV Public School - Online Examination Portal</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .school-header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border-radius: 0 0 15px 15px; }
+        .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .badge-exam { font-size: 0.9rem; padding: 6px 12px; border-radius: 20px; }
+        .question-card { border-left: 4px solid #0d6efd; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="school-header text-center py-4 mb-4 shadow">
+        <h2 class="fw-bold mb-1">DAV PUBLIC SCHOOL</h2>
+        <p class="mb-0 text-light opacity-75">Online Examination Portal</p>
+    </div>
+
+    <div class="container">
+        
+        <!-- SECTION 1: STUDENT LOGIN PANEL -->
+        <div id="login-section" class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card p-4">
+                    <h4 class="text-center mb-3 text-primary fw-bold">Student Login</h4>
+                    
+                    <div id="login-error" class="alert alert-danger d-none fw-semibold" role="alert"></div>
+
+                    <form id="student-login-form">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Roll Number</label>
+                            <input type="text" id="login-roll" class="form-control" placeholder="Enter Roll No." required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Password</label>
+                            <input type="password" id="login-pass" class="form-control" placeholder="Enter Password" required>
+                        </div>
+                        <button type="submit" id="login-btn" class="btn btn-primary w-100 fw-bold py-2">
+                            🔓 Start Examination
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: EXAM PANEL -->
+        <div id="exam-section" class="d-none">
+            <!-- Student & Exam Info Bar -->
+            <div class="card p-3 mb-4 bg-white">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="mb-0 text-secondary">Student: <span id="display-student-name" class="fw-bold text-dark">--</span> (Roll: <span id="display-student-roll" class="fw-bold text-dark">--</span>)</h5>
+                    </div>
+                    <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                        <span id="display-exam-title" class="badge bg-primary badge-exam">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Questions Container -->
+            <form id="exam-form">
+                <div id="questions-container"></div>
+                <div class="text-center my-4">
+                    <button type="submit" id="submit-exam-btn" class="btn btn-success btn-lg fw-bold px-5">
+                        ✅ Submit Examination
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- SECTION 3: RESULT PANEL -->
+        <div id="result-section" class="d-none row justify-content-center">
+            <div class="col-md-6 text-center">
+                <div class="card p-5">
+                    <div class="mb-3">
+                        <span style="font-size: 3.5rem;">🎉</span>
+                    </div>
+                    <h3 class="text-success fw-bold">Test Submitted Successfully!</h3>
+                    <p class="text-muted mt-2">Aapka exam result submit ho chuka hai. Double entry strictly restricted hai.</p>
+                    <hr>
+                    <div id="result-summary" class="fw-semibold text-secondary"></div>
+                    <button onclick="location.reload()" class="btn btn-outline-primary mt-4">Go to Login Page</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDKs & Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ⚙️ REPLACE WITH YOUR FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let activeStudent = null;
+        let activeExamTitle = "";
+        let loadedQuestions = [];
+
+        // 1. FETCH ACTIVE EXAM TITLE
+        async function fetchExamDetails() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "schedules"));
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    if (data.status === "ACTIVE") {
+                        activeExamTitle = data.examTitle || "Unit Test - 1";
+                    }
+                });
+                if (!activeExamTitle) activeExamTitle = "Unit Test - 1";
+            } catch (err) {
+                activeExamTitle = "Unit Test - 1";
+            }
+        }
+
+        // 2. DYNAMIC LOGIN WITH ATTEMPT CHECK
+        document.getElementById('student-login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const roll = document.getElementById('login-roll').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
+            const err = document.getElementById('login-error');
+            const loginBtn = document.getElementById('login-btn');
+
+            err.classList.add('d-none');
+            loginBtn.disabled = true;
+            loginBtn.innerText = "Verifying Credentials...";
+
+            try {
+                // A. Check Firestore Student DB
+                const studentRef = doc(db, "students", roll);
+                const studentSnap = await getDoc(studentRef);
+
+                if (studentSnap.exists() && studentSnap.data().password === pass) {
+                    activeStudent = { roll: roll, name: studentSnap.data().name };
+
+                    loginBtn.innerText = "Checking Attempt History...";
+                    await fetchExamDetails();
+
+                    // B. Check If Already Submitted
+                    const q = query(
+                        collection(db, "exam_results"), 
+                        where("studentRoll", "==", roll),
+                        where("examTitle", "==", activeExamTitle)
+                    );
+                    const existingSubmissions = await getDocs(q);
+
+                    if (!existingSubmissions.empty) {
+                        err.innerHTML = `⛔ <b>Access Denied!</b><br>Roll No. ${roll} has already completed '${activeExamTitle}'. Multiple attempts are prohibited.`;
+                        err.classList.remove('d-none');
+                        loginBtn.disabled = false;
+                        loginBtn.innerText = "🔓 Start Examination";
+                        return;
+                    }
+
+                    // C. Load Exam Questions
+                    loginBtn.innerText = "Loading Questions...";
+                    await loadQuestionsAndStart();
+
+                } else {
+                    err.innerText = "Invalid Roll Number or Password!";
+                    err.classList.remove('d-none');
+                    loginBtn.disabled = false;
+                    loginBtn.innerText = "🔓 Start Examination";
+                }
+            } catch (error) {
+                console.error(error);
+                err.innerText = "Login error. Please try again.";
+                err.classList.remove('d-none');
+                loginBtn.disabled = false;
+                loginBtn.innerText = "🔓 Start Examination";
+            }
+        });
+
+        // 3. LOAD QUESTIONS
+        async function loadQuestionsAndStart() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = "";
+            loadedQuestions = [];
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "questions"));
+                let count = 1;
+
+                querySnapshot.forEach((docSnap) => {
+                    const q = docSnap.data();
+                    loadedQuestions.push({ id: docSnap.id, ...q });
+
+                    const qCard = `
+                        <div class="card p-4 mb-3 question-card">
+                            <h5 class="fw-bold mb-3">Q${count}. ${q.questionText}</h5>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="q_${docSnap.id}" value="A" id="q_${docSnap.id}_a" required>
+                                <label class="form-check-label" for="q_${docSnap.id}_a">A) ${q.optionA}</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="q_${docSnap.id}" value="B" id="q_${docSnap.id}_b">
+                                <label class="form-check-label" for="q_${docSnap.id}_b">B) ${q.optionB}</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="q_${docSnap.id}" value="C" id="q_${docSnap.id}_c">
+                                <label class="form-check-label" for="q_${docSnap.id}_c">C) ${q.optionC}</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="q_${docSnap.id}" value="D" id="q_${docSnap.id}_d">
+                                <label class="form-check-label" for="q_${docSnap.id}_d">D) ${q.optionD}</label>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += qCard;
+                    count++;
+                });
+
+                document.getElementById('display-student-name').innerText = activeStudent.name;
+                document.getElementById('display-student-roll').innerText = activeStudent.roll;
+                document.getElementById('display-exam-title').innerText = activeExamTitle;
+
+                document.getElementById('login-section').classList.add('d-none');
+                document.getElementById('exam-section').classList.remove('d-none');
+
+            } catch (err) {
+                alert("Error loading questions.");
+            }
+        }
+
+        // 4. SUBMIT EXAM
+        document.getElementById('exam-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submit-exam-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Submitting Result...";
+
+            let score = 0;
+            loadedQuestions.forEach((q) => {
+                const selectedOption = document.querySelector(`input[name="q_${q.id}"]:checked`);
+                if (selectedOption && selectedOption.value === q.correctAnswer) {
+                    score++;
+                }
+            });
+
+            try {
+                await addDoc(collection(db, "exam_results"), {
+                    studentRoll: activeStudent.roll,
+                    studentName: activeStudent.name,
+                    examTitle: activeExamTitle,
+                    score: score,
+                    totalQuestions: loadedQuestions.length,
+                    submittedAt: new Date().toISOString()
+                });
+
+                document.getElementById('exam-section').classList.add('d-none');
+                document.getElementById('result-section').classList.remove('d-none');
+                document.getElementById('result-summary').innerHTML = `
+                    <p class="mb-1">Name: <b>${activeStudent.name}</b> | Roll: <b>${activeStudent.roll}</b></p>
+                    <p>Exam: <b>${activeExamTitle}</b></p>
+                `;
+
+            } catch (err) {
+                alert("Submission failed.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "✅ Submit Examination";
+            }
+        });
+    </script>
+</body>
+</html>

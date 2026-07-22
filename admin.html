@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAV Public School - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .admin-header { background: #0f172a; color: white; padding: 20px 0; }
+        .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+
+    <div class="admin-header text-center mb-4">
+        <h3 class="fw-bold mb-1">DAV PUBLIC SCHOOL - SUPER ADMIN PANEL</h3>
+        <p class="text-secondary mb-0">System Management (Teachers, Students & Global Exam Control)</p>
+    </div>
+
+    <div class="container pb-5">
+
+        <!-- GLOBAL EXAM SCHEDULE CONTROL -->
+        <div class="card p-4 mb-4">
+            <h4 class="text-primary fw-bold mb-3">⚙️ Global Exam Schedule Control</h4>
+            <form id="schedule-form" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label fw-semibold">Active Exam Title</label>
+                    <input type="text" id="schedule-exam-title" class="form-control" placeholder="e.g. Unit Test - 1 (2026-27)" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Exam Portal Status</label>
+                    <select id="schedule-status" class="form-select fw-semibold">
+                        <option value="ACTIVE" class="text-success fw-bold">🟢 ACTIVE (Portal Open)</option>
+                        <option value="INACTIVE" class="text-danger fw-bold">🔴 INACTIVE (Portal Closed)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100 fw-bold">💾 Save Global Status</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- TEACHERS MANAGEMENT MODULE -->
+        <div class="card p-4 mb-4 border-start border-4 border-warning">
+            <h4 class="text-warning text-dark fw-bold mb-3">👨‍🏫 Teacher Account Management</h4>
+            <form id="teacher-form" class="row g-3 mb-4">
+                <input type="hidden" id="teacher-doc-id">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Teacher Username / ID</label>
+                    <input type="text" id="teacher-id" class="form-control" placeholder="e.g. teacher_sci" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Teacher Name</label>
+                    <input type="text" id="teacher-name" class="form-control" placeholder="e.g. Vikram Singh" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Subject / Department</label>
+                    <input type="text" id="teacher-subject" class="form-control" placeholder="e.g. Science / Physics" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Password</label>
+                    <input type="text" id="teacher-pass" class="form-control" placeholder="e.g. t@pass2026" required>
+                </div>
+                <div class="col-12 text-end">
+                    <button type="submit" id="save-teacher-btn" class="btn btn-warning fw-bold px-4">➕ Add Teacher</button>
+                    <button type="button" id="cancel-teacher-btn" class="btn btn-secondary d-none" onclick="resetTeacherForm()">Cancel</button>
+                </div>
+            </form>
+
+            <h5 class="fw-bold mb-3">Registered Teachers List</h5>
+            <div class="table-responsive">
+                <table class="table table-hover border align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Teacher ID</th>
+                            <th>Name</th>
+                            <th>Subject</th>
+                            <th>Password</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teachers-table-body">
+                        <tr><td colspan="5" class="text-center">Loading Teachers...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- STUDENTS MANAGEMENT MODULE -->
+        <div class="card p-4 mb-4 border-start border-4 border-success">
+            <h4 class="text-success fw-bold mb-3">👨‍🎓 Student Account Management</h4>
+            <form id="student-form" class="row g-3 mb-4">
+                <input type="hidden" id="student-doc-id">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Roll Number</label>
+                    <input type="text" id="student-roll" class="form-control" placeholder="e.g. 101" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Student Name</label>
+                    <input type="text" id="student-name" class="form-control" placeholder="e.g. Rahul Sharma" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Password</label>
+                    <input type="text" id="student-pass" class="form-control" placeholder="e.g. pass123" required>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" id="save-student-btn" class="btn btn-success w-100 fw-bold">➕ Add Student</button>
+                    <button type="button" id="cancel-student-btn" class="btn btn-secondary ms-2 d-none" onclick="resetStudentForm()">Cancel</button>
+                </div>
+            </form>
+
+            <h5 class="fw-bold mb-3">Registered Students Roster</h5>
+            <div class="table-responsive">
+                <table class="table table-hover border align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Roll No.</th>
+                            <th>Student Name</th>
+                            <th>Password</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-table-body">
+                        <tr><td colspan="4" class="text-center">Loading Students...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firebase Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ⚙️ REPLACE WITH YOUR FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 1. GLOBAL SCHEDULE
+        async function loadSchedule() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "schedules"));
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    document.getElementById('schedule-exam-title').value = data.examTitle || "";
+                    document.getElementById('schedule-status').value = data.status || "INACTIVE";
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        document.getElementById('schedule-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await setDoc(doc(db, "schedules", "main_config"), {
+                examTitle: document.getElementById('schedule-exam-title').value.trim(),
+                status: document.getElementById('schedule-status').value,
+                updatedAt: new Date().toISOString()
+            });
+            alert("Global Schedule Saved!");
+        });
+
+        // 2. TEACHERS MANAGEMENT
+        async function loadTeachers() {
+            const tbody = document.getElementById('teachers-table-body');
+            tbody.innerHTML = "";
+            const snap = await getDocs(collection(db, "teachers"));
+            if (snap.empty) { tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No teachers registered.</td></tr>`; return; }
+            snap.forEach((docSnap) => {
+                const t = docSnap.data();
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${t.id}</b></td>
+                        <td>${t.name}</td>
+                        <td>${t.subject}</td>
+                        <td><code>${t.password}</code></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-primary me-1" onclick="editTeacher('${t.id}', '${t.name}', '${t.subject}', '${t.password}')">✏️ Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteTeacher('${t.id}')">🗑️ Delete</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        document.getElementById('teacher-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('teacher-id').value.trim();
+            await setDoc(doc(db, "teachers", id), {
+                id: id,
+                name: document.getElementById('teacher-name').value.trim(),
+                subject: document.getElementById('teacher-subject').value.trim(),
+                password: document.getElementById('teacher-pass').value.trim()
+            });
+            alert("Teacher account saved!");
+            resetTeacherForm();
+            loadTeachers();
+        });
+
+        window.editTeacher = (id, name, subject, pass) => {
+            document.getElementById('teacher-doc-id').value = id;
+            document.getElementById('teacher-id').value = id;
+            document.getElementById('teacher-id').disabled = true;
+            document.getElementById('teacher-name').value = name;
+            document.getElementById('teacher-subject').value = subject;
+            document.getElementById('teacher-pass').value = pass;
+            document.getElementById('save-teacher-btn').innerText = "💾 Update Teacher";
+            document.getElementById('cancel-teacher-btn').classList.remove('d-none');
+        };
+
+        window.resetTeacherForm = () => {
+            document.getElementById('teacher-doc-id').value = "";
+            document.getElementById('teacher-id').value = "";
+            document.getElementById('teacher-id').disabled = false;
+            document.getElementById('teacher-name').value = "";
+            document.getElementById('teacher-subject').value = "";
+            document.getElementById('teacher-pass').value = "";
+            document.getElementById('save-teacher-btn').innerText = "➕ Add Teacher";
+            document.getElementById('cancel-teacher-btn').classList.add('d-none');
+        };
+
+        window.deleteTeacher = async (id) => {
+            if (confirm(`Delete Teacher: ${id}?`)) {
+                await deleteDoc(doc(db, "teachers", id));
+                loadTeachers();
+            }
+        };
+
+        // 3. STUDENTS MANAGEMENT
+        async function loadStudents() {
+            const tbody = document.getElementById('students-table-body');
+            tbody.innerHTML = "";
+            const snap = await getDocs(collection(db, "students"));
+            if (snap.empty) { tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No students registered.</td></tr>`; return; }
+            snap.forEach((docSnap) => {
+                const s = docSnap.data();
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${s.roll}</b></td>
+                        <td>${s.name}</td>
+                        <td><code>${s.password}</code></td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-primary me-1" onclick="editStudent('${s.roll}', '${s.name}', '${s.password}')">✏️ Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteStudent('${s.roll}')">🗑️ Delete</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        document.getElementById('student-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const roll = document.getElementById('student-roll').value.trim();
+            await setDoc(doc(db, "students", roll), {
+                roll: roll,
+                name: document.getElementById('student-name').value.trim(),
+                password: document.getElementById('student-pass').value.trim()
+            });
+            alert("Student data saved!");
+            resetStudentForm();
+            loadStudents();
+        });
+
+        window.editStudent = (roll, name, pass) => {
+            document.getElementById('student-doc-id').value = roll;
+            document.getElementById('student-roll').value = roll;
+            document.getElementById('student-roll').disabled = true;
+            document.getElementById('student-name').value = name;
+            document.getElementById('student-pass').value = pass;
+            document.getElementById('save-student-btn').innerText = "💾 Update";
+            document.getElementById('cancel-student-btn').classList.remove('d-none');
+        };
+
+        window.resetStudentForm = () => {
+            document.getElementById('student-doc-id').value = "";
+            document.getElementById('student-roll').value = "";
+            document.getElementById('student-roll').disabled = false;
+            document.getElementById('student-name').value = "";
+            document.getElementById('student-pass').value = "";
+            document.getElementById('save-student-btn').innerText = "➕ Add Student";
+            document.getElementById('cancel-student-btn').classList.add('d-none');
+        };
+
+        window.deleteStudent = async (roll) => {
+            if (confirm(`Delete Student Roll: ${roll}?`)) {
+                await deleteDoc(doc(db, "students", roll));
+                loadStudents();
+            }
+        };
+
+        loadSchedule();
+        loadTeachers();
+        loadStudents();
+    </script>
+</body>
+</html>
