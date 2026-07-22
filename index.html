@@ -3,280 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DAV Public School - Online Examination Portal</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .school-header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border-radius: 0 0 15px 15px; }
-        .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .badge-exam { font-size: 0.9rem; padding: 6px 12px; border-radius: 20px; }
-        .question-card { border-left: 4px solid #0d6efd; }
-    </style>
+    <title>Student Portal - DAV Public School</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body>
+<body class="bg-gray-100 font-sans min-h-screen">
 
-    <!-- Header -->
-    <div class="school-header text-center py-4 mb-4 shadow">
-        <h2 class="fw-bold mb-1">DAV PUBLIC SCHOOL</h2>
-        <p class="mb-0 text-light opacity-75">Online Examination Portal</p>
-    </div>
+    <!-- STEP 1: STUDENT LOGIN SCREEN -->
+    <div id="student-login-container" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md border-t-4 border-blue-600">
+            <h2 class="text-2xl font-bold text-center text-blue-700 mb-2">DAV Student Online Exam</h2>
+            <p class="text-xs text-center text-gray-500 mb-6">Enter your registered details to begin</p>
+            
+            <div id="login-msg" class="hidden mb-4 p-3 rounded text-sm text-center"></div>
 
-    <div class="container">
-        
-        <!-- SECTION 1: STUDENT LOGIN PANEL -->
-        <div id="login-section" class="row justify-content-center">
-            <div class="col-md-5">
-                <div class="card p-4">
-                    <h4 class="text-center mb-3 text-primary fw-bold">Student Login</h4>
-                    
-                    <div id="login-error" class="alert alert-danger d-none fw-semibold" role="alert"></div>
-
-                    <form id="student-login-form">
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Roll Number</label>
-                            <input type="text" id="login-roll" class="form-control" placeholder="Enter Roll No." required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Password</label>
-                            <input type="password" id="login-pass" class="form-control" placeholder="Enter Password" required>
-                        </div>
-                        <button type="submit" id="login-btn" class="btn btn-primary w-100 fw-bold py-2">
-                            🔓 Start Examination
-                        </button>
-                    </form>
+            <form onsubmit="handleStudentLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Roll Number</label>
+                    <input type="text" id="stu-roll-input" required placeholder="e.g. 101" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-            </div>
-        </div>
-
-        <!-- SECTION 2: EXAM PANEL -->
-        <div id="exam-section" class="d-none">
-            <!-- Student & Exam Info Bar -->
-            <div class="card p-3 mb-4 bg-white">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <h5 class="mb-0 text-secondary">Student: <span id="display-student-name" class="fw-bold text-dark">--</span> (Roll: <span id="display-student-roll" class="fw-bold text-dark">--</span>)</h5>
-                    </div>
-                    <div class="col-md-6 text-md-end mt-2 mt-md-0">
-                        <span id="display-exam-title" class="badge bg-primary badge-exam">--</span>
-                    </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Student Name</label>
+                    <input type="text" id="stu-name-input" required placeholder="e.g. Amit Kumar" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-            </div>
-
-            <!-- Questions Container -->
-            <form id="exam-form">
-                <div id="questions-container"></div>
-                <div class="text-center my-4">
-                    <button type="submit" id="submit-exam-btn" class="btn btn-success btn-lg fw-bold px-5">
-                        ✅ Submit Examination
-                    </button>
-                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                    Verify & Start Exam
+                </button>
             </form>
         </div>
-
-        <!-- SECTION 3: RESULT PANEL -->
-        <div id="result-section" class="d-none row justify-content-center">
-            <div class="col-md-6 text-center">
-                <div class="card p-5">
-                    <div class="mb-3">
-                        <span style="font-size: 3.5rem;">🎉</span>
-                    </div>
-                    <h3 class="text-success fw-bold">Test Submitted Successfully!</h3>
-                    <p class="text-muted mt-2">Aapka exam result submit ho chuka hai. Double entry strictly restricted hai.</p>
-                    <hr>
-                    <div id="result-summary" class="fw-semibold text-secondary"></div>
-                    <button onclick="location.reload()" class="btn btn-outline-primary mt-4">Go to Login Page</button>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    <!-- Firebase SDKs & Script -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <!-- STEP 2: LIVE EXAM INTERFACE (Initially Hidden) -->
+    <div id="exam-container" class="hidden min-h-screen flex flex-col">
+        <!-- Header / Navbar -->
+        <nav class="bg-blue-800 text-white p-4 shadow-lg flex justify-between items-center sticky top-0 z-10">
+            <div>
+                <h1 class="text-lg font-bold" id="header-student-info">Student Exam</h1>
+                <p class="text-xs text-blue-200" id="header-subject-info">Subject: -</p>
+            </div>
+            <div class="bg-red-600 text-white px-4 py-2 rounded-lg text-lg font-mono font-bold shadow" id="exam-timer">
+                00:00
+            </div>
+        </nav>
 
-        // ⚙️ REPLACE WITH YOUR FIREBASE CONFIG
+        <!-- Exam Questions Area -->
+        <div class="max-w-4xl mx-auto p-6 w-full flex-grow space-y-6" id="questions-wrapper">
+            <p class="text-center text-gray-500">Loading Exam Questions...</p>
+        </div>
+
+        <!-- Submit Button Footer -->
+        <div class="bg-white border-t p-4 sticky bottom-0 text-center shadow-lg">
+            <button onclick="submitExam()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-8 rounded-lg text-lg">
+                Submit Exam Now
+            </button>
+        </div>
+    </div>
+
+    <!-- STEP 3: RESULT SCREEN (Initially Hidden) -->
+    <div id="result-container" class="hidden flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center border-t-4 border-green-500">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Exam Submitted Successfully!</h2>
+            <p class="text-gray-600 mb-6">Thank you. Your responses have been saved in the school portal database.</p>
+            <div class="bg-green-50 p-4 rounded-lg border border-green-200 mb-6">
+                <p class="text-sm text-green-800 font-semibold">Status: Completed</p>
+            </div>
+            <button onclick="location.reload()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">
+                Back to Home
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
+            authDomain: "myexamportal-abf3f.firebaseapp.com",
+            projectId: "myexamportal-abf3f",
+            storageBucket: "myexamportal-abf3f.firebasestorage.app",
+            messagingSenderId: "8464475917",
+            appId: "1:8464475917:web:dd31ca0bba84a56ae17244",
+            measurementId: "G-G0VRMX7EQT"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-        let activeStudent = null;
-        let activeExamTitle = "";
-        let loadedQuestions = [];
+        let currentStudent = null;
+        let examTimerInterval = null;
+        let fetchedQuestions = [];
 
-        // 1. FETCH ACTIVE EXAM TITLE
-        async function fetchExamDetails() {
-            try {
-                const querySnapshot = await getDocs(collection(db, "schedules"));
-                querySnapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    if (data.status === "ACTIVE") {
-                        activeExamTitle = data.examTitle || "Unit Test - 1";
-                    }
-                });
-                if (!activeExamTitle) activeExamTitle = "Unit Test - 1";
-            } catch (err) {
-                activeExamTitle = "Unit Test - 1";
-            }
+        function showMsg(text, isError) {
+            const msgBox = document.getElementById('login-msg');
+            msgBox.innerText = text;
+            msgBox.className = `mb-4 p-3 rounded text-sm text-center ${isError ? 'bg-red-100 text-red-700 border border-red-400' : 'bg-yellow-100 text-yellow-800'}`;
+            msgBox.classList.remove('hidden');
         }
 
-        // 2. DYNAMIC LOGIN WITH ATTEMPT CHECK
-        document.getElementById('student-login-form').addEventListener('submit', async function(e) {
+        async function handleStudentLogin(e) {
             e.preventDefault();
-            const roll = document.getElementById('login-roll').value.trim();
-            const pass = document.getElementById('login-pass').value.trim();
-            const err = document.getElementById('login-error');
-            const loginBtn = document.getElementById('login-btn');
+            const roll = document.getElementById('stu-roll-input').value.trim();
+            const name = document.getElementById('stu-name-input').value.trim();
 
-            err.classList.add('d-none');
-            loginBtn.disabled = true;
-            loginBtn.innerText = "Verifying Credentials...";
+            showMsg("Verifying student & live exam status...", false);
 
-            try {
-                // A. Check Firestore Student DB
-                const studentRef = doc(db, "students", roll);
-                const studentSnap = await getDoc(studentRef);
-
-                if (studentSnap.exists() && studentSnap.data().password === pass) {
-                    activeStudent = { roll: roll, name: studentSnap.data().name };
-
-                    loginBtn.innerText = "Checking Attempt History...";
-                    await fetchExamDetails();
-
-                    // B. Check If Already Submitted
-                    const q = query(
-                        collection(db, "exam_results"), 
-                        where("studentRoll", "==", roll),
-                        where("examTitle", "==", activeExamTitle)
-                    );
-                    const existingSubmissions = await getDocs(q);
-
-                    if (!existingSubmissions.empty) {
-                        err.innerHTML = `⛔ <b>Access Denied!</b><br>Roll No. ${roll} has already completed '${activeExamTitle}'. Multiple attempts are prohibited.`;
-                        err.classList.remove('d-none');
-                        loginBtn.disabled = false;
-                        loginBtn.innerText = "🔓 Start Examination";
-                        return;
-                    }
-
-                    // C. Load Exam Questions
-                    loginBtn.innerText = "Loading Questions...";
-                    await loadQuestionsAndStart();
-
-                } else {
-                    err.innerText = "Invalid Roll Number or Password!";
-                    err.classList.remove('d-none');
-                    loginBtn.disabled = false;
-                    loginBtn.innerText = "🔓 Start Examination";
-                }
-            } catch (error) {
-                console.error(error);
-                err.innerText = "Login error. Please try again.";
-                err.classList.remove('d-none');
-                loginBtn.disabled = false;
-                loginBtn.innerText = "🔓 Start Examination";
+            // 1. Check if Exam is Started by Admin
+            const examCtrlDoc = await db.collection("exam_control").doc("current_exam").get();
+            if (!examCtrlDoc.exists || !examCtrlDoc.data().isActive) {
+                showMsg("❌ No Live Exam currently active! Please wait for admin to start.", true);
+                return;
             }
-        });
 
-        // 3. LOAD QUESTIONS
-        async function loadQuestionsAndStart() {
-            const container = document.getElementById('questions-container');
-            container.innerHTML = "";
-            loadedQuestions = [];
+            const examData = examCtrlDoc.data();
 
-            try {
-                const querySnapshot = await getDocs(collection(db, "questions"));
-                let count = 1;
+            // 2. Verify Student Registration
+            const studentQuery = await db.collection("students").where("rollNo", "==", roll).get();
+            if (studentQuery.empty) {
+                showMsg("❌ Roll Number not registered by Teacher/Admin!", true);
+                return;
+            }
 
-                querySnapshot.forEach((docSnap) => {
-                    const q = docSnap.data();
-                    loadedQuestions.push({ id: docSnap.id, ...q });
+            currentStudent = { rollNo: roll, name: name, subject: examData.subject };
 
-                    const qCard = `
-                        <div class="card p-4 mb-3 question-card">
-                            <h5 class="fw-bold mb-3">Q${count}. ${q.questionText}</h5>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="q_${docSnap.id}" value="A" id="q_${docSnap.id}_a" required>
-                                <label class="form-check-label" for="q_${docSnap.id}_a">A) ${q.optionA}</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="q_${docSnap.id}" value="B" id="q_${docSnap.id}_b">
-                                <label class="form-check-label" for="q_${docSnap.id}_b">B) ${q.optionB}</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="q_${docSnap.id}" value="C" id="q_${docSnap.id}_c">
-                                <label class="form-check-label" for="q_${docSnap.id}_c">C) ${q.optionC}</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="q_${docSnap.id}" value="D" id="q_${docSnap.id}_d">
-                                <label class="form-check-label" for="q_${docSnap.id}_d">D) ${q.optionD}</label>
+            // 3. Start Exam Interface
+            document.getElementById('student-login-container').classList.add('hidden');
+            document.getElementById('exam-container').classList.remove('hidden');
+            
+            document.getElementById('header-student-info').innerText = `${name} (Roll: ${roll})`;
+            document.getElementById('header-subject-info').innerText = `Subject: ${examData.subject}`;
+
+            startTimer(examData.duration || 30);
+            loadQuestions();
+        }
+
+        function startTimer(durationMinutes) {
+            let timerSeconds = durationMinutes * 60;
+            const timerDisplay = document.getElementById('exam-timer');
+
+            examTimerInterval = setInterval(() => {
+                let mins = Math.floor(timerSeconds / 60);
+                let secs = timerSeconds % 60;
+                timerDisplay.innerText = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+                if (--timerSeconds < 0) {
+                    clearInterval(examTimerInterval);
+                    alert("Time's Up! Submitting exam automatically.");
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function loadQuestions() {
+            const wrapper = document.getElementById('questions-wrapper');
+            db.collection("question_bank").get().then(snapshot => {
+                wrapper.innerHTML = "";
+                if (snapshot.empty) {
+                    wrapper.innerHTML = `<p class="text-center text-gray-500">No questions found in Question Bank.</p>`;
+                    return;
+                }
+
+                let qIndex = 1;
+                fetchedQuestions = [];
+                snapshot.forEach(doc => {
+                    const q = doc.data();
+                    q.id = doc.id;
+                    fetchedQuestions.push(q);
+
+                    wrapper.innerHTML += `
+                        <div class="bg-white p-6 rounded-lg shadow-md border">
+                            <p class="font-bold text-gray-800 text-lg mb-4">Q${qIndex}. ${q.question}</p>
+                            <div class="space-y-2">
+                                <label class="flex items-center p-3 border rounded hover:bg-blue-50 cursor-pointer">
+                                    <input type="radio" name="q_${doc.id}" value="A" class="mr-3"> (A) ${q.options?.A || ''}
+                                </label>
+                                <label class="flex items-center p-3 border rounded hover:bg-blue-50 cursor-pointer">
+                                    <input type="radio" name="q_${doc.id}" value="B" class="mr-3"> (B) ${q.options?.B || ''}
+                                </label>
+                                <label class="flex items-center p-3 border rounded hover:bg-blue-50 cursor-pointer">
+                                    <input type="radio" name="q_${doc.id}" value="C" class="mr-3"> (C) ${q.options?.C || ''}
+                                </label>
+                                <label class="flex items-center p-3 border rounded hover:bg-blue-50 cursor-pointer">
+                                    <input type="radio" name="q_${doc.id}" value="D" class="mr-3"> (D) ${q.options?.D || ''}
+                                </label>
                             </div>
                         </div>
                     `;
-                    container.innerHTML += qCard;
-                    count++;
+                    qIndex++;
                 });
-
-                document.getElementById('display-student-name').innerText = activeStudent.name;
-                document.getElementById('display-student-roll').innerText = activeStudent.roll;
-                document.getElementById('display-exam-title').innerText = activeExamTitle;
-
-                document.getElementById('login-section').classList.add('d-none');
-                document.getElementById('exam-section').classList.remove('d-none');
-
-            } catch (err) {
-                alert("Error loading questions.");
-            }
+            });
         }
 
-        // 4. SUBMIT EXAM
-        document.getElementById('exam-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const submitBtn = document.getElementById('submit-exam-btn');
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Submitting Result...";
-
-            let score = 0;
-            loadedQuestions.forEach((q) => {
-                const selectedOption = document.querySelector(`input[name="q_${q.id}"]:checked`);
-                if (selectedOption && selectedOption.value === q.correctAnswer) {
-                    score++;
-                }
+        function submitExam() {
+            clearInterval(examTimerInterval);
+            const answers = {};
+            fetchedQuestions.forEach(q => {
+                const selected = document.querySelector(`input[name="q_${q.id}"]:checked`);
+                answers[q.id] = selected ? selected.value : null;
             });
 
-            try {
-                await addDoc(collection(db, "exam_results"), {
-                    studentRoll: activeStudent.roll,
-                    studentName: activeStudent.name,
-                    examTitle: activeExamTitle,
-                    score: score,
-                    totalQuestions: loadedQuestions.length,
-                    submittedAt: new Date().toISOString()
-                });
-
-                document.getElementById('exam-section').classList.add('d-none');
-                document.getElementById('result-section').classList.remove('d-none');
-                document.getElementById('result-summary').innerHTML = `
-                    <p class="mb-1">Name: <b>${activeStudent.name}</b> | Roll: <b>${activeStudent.roll}</b></p>
-                    <p>Exam: <b>${activeExamTitle}</b></p>
-                `;
-
-            } catch (err) {
-                alert("Submission failed.");
-                submitBtn.disabled = false;
-                submitBtn.innerText = "✅ Submit Examination";
-            }
-        });
+            db.collection("exam_results").add({
+                rollNo: currentStudent.rollNo,
+                studentName: currentStudent.name,
+                subject: currentStudent.subject,
+                answers: answers,
+                submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById('exam-container').classList.add('hidden');
+                document.getElementById('result-container').classList.remove('hidden');
+            }).catch(err => alert("Error submitting exam: " + err.message));
+        }
     </script>
 </body>
 </html>
