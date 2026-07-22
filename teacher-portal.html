@@ -37,9 +37,8 @@
         </div>
     </div>
 
-    <!-- TEACHER DASHBOARD (Initially Hidden) -->
+    <!-- DASHBOARD -->
     <div id="dashboard-container" class="hidden">
-        <!-- Navbar -->
         <nav class="bg-blue-700 text-white p-4 shadow-lg flex justify-between items-center">
             <h1 class="text-xl font-bold">DAV Exam Portal - Teacher Dashboard</h1>
             <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-1 px-3 rounded">
@@ -49,7 +48,7 @@
 
         <div class="max-w-6xl mx-auto p-6 space-y-8">
             
-            <!-- SECTION 1: STUDENT MANAGEMENT (Add/Edit) -->
+            <!-- STUDENT MANAGEMENT -->
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Student Management (Add / Edit)</h2>
                 <form id="student-form" onsubmit="saveStudent(event)" class="space-y-4 mb-6 bg-gray-50 p-4 rounded border">
@@ -100,13 +99,13 @@
                 </div>
             </div>
 
-            <!-- SECTION 2: ADD QUESTION TO QUESTION BANK -->
+            <!-- QUESTION BANK ENTRY -->
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Add New Question to Question Bank</h2>
                 <form id="add-question-form" onsubmit="addQuestion(event)" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Subject</label>
+                            <label class="block text-sm font-medium text-gray-700">Subject / Section</label>
                             <input type="text" id="q-subject" required placeholder="e.g. Science" class="w-full p-2 border rounded">
                         </div>
                         <div>
@@ -143,7 +142,7 @@
                 </form>
             </div>
 
-            <!-- SECTION 3: QUESTION BANK LIST -->
+            <!-- QUESTION BANK LIST -->
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Question Bank List</h2>
                 <div id="questions-list" class="space-y-4">
@@ -189,7 +188,6 @@
             document.getElementById('login-container').classList.remove('hidden');
         }
 
-        // STUDENT FUNCTIONS
         function saveStudent(e) {
             e.preventDefault();
             const id = document.getElementById('student-doc-id').value;
@@ -256,7 +254,6 @@
             document.getElementById('stu-btn').innerText = "Save Student Record";
         }
 
-        // QUESTION BANK FUNCTIONS
         function addQuestion(e) {
             e.preventDefault();
             const questionData = {
@@ -319,5 +316,3 @@
     </script>
 </body>
 </html>
-
-
