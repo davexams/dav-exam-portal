@@ -3,176 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DAV Public School - Teacher Portal</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .teacher-header { background: #1e3c72; color: white; padding: 20px 0; }
-        .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-    </style>
+    <title>Teacher Portal - DAV Public School</title>
+    <!-- Tailwind CSS for Styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body>
+<body class="bg-gray-100 font-sans min-h-screen">
 
-    <div class="teacher-header text-center mb-4">
-        <h3 class="fw-bold mb-1">DAV PUBLIC SCHOOL - TEACHER PORTAL</h3>
-        <p class="text-light opacity-75 mb-0">Question Paper Creation & Exam Results Monitoring</p>
-    </div>
+    <!-- 1. LOGIN SCREEN -->
+    <div id="login-container" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+            <h2 class="text-2xl font-bold text-center text-blue-700 mb-6">DAV Teacher Portal Login</h2>
+            
+            <div id="login-error" class="hidden mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm text-center">
+                Invalid Email or Password!
+            </div>
 
-    <div class="container pb-5">
-
-        <!-- MODULE 1: ADD QUESTION PANEL -->
-        <div class="card p-4 mb-4 border-start border-4 border-primary">
-            <h4 class="text-primary fw-bold mb-3">📝 Question Bank Creator</h4>
-            <form id="add-question-form" class="row g-3">
-                <div class="col-12">
-                    <label class="form-label fw-semibold">Question Text</label>
-                    <textarea id="q-text" class="form-control" rows="2" placeholder="Enter Question Here..." required></textarea>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Teacher Email</label>
+                    <input type="email" id="email" required placeholder="teacher@dav.com" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Option A</label>
-                    <input type="text" id="q-opt-a" class="form-control" required>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                    <input type="password" id="password" required placeholder="••••••••" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Option B</label>
-                    <input type="text" id="q-opt-b" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Option C</label>
-                    <input type="text" id="q-opt-c" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Option D</label>
-                    <input type="text" id="q-opt-d" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold text-success">Correct Option</label>
-                    <select id="q-correct" class="form-select fw-bold text-success" required>
-                        <option value="A">Option A</option>
-                        <option value="B">Option B</option>
-                        <option value="C">Option C</option>
-                        <option value="D">Option D</option>
-                    </select>
-                </div>
-                <div class="col-md-6 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100 fw-bold">➕ Add Question to Paper</button>
-                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                    Login to Portal
+                </button>
             </form>
         </div>
-
-        <!-- MODULE 2: EXISTING QUESTIONS LIST -->
-        <div class="card p-4 mb-4">
-            <h5 class="fw-bold mb-3">Active Question Bank</h5>
-            <div id="questions-list">Loading Questions...</div>
-        </div>
-
-        <!-- MODULE 3: EXAM RESULTS VIEW -->
-        <div class="card p-4 mb-4">
-            <h4 class="text-success fw-bold mb-3">📊 Student Exam Submissions</h4>
-            <div class="table-responsive">
-                <table class="table table-hover border align-middle">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Roll No.</th>
-                            <th>Student Name</th>
-                            <th>Exam Title</th>
-                            <th>Score</th>
-                            <th>Submission Time</th>
-                        </tr>
-                    </thead>
-                    <tbody id="results-table-body">
-                        <tr><td colspan="5" class="text-center">Loading Results...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
     </div>
 
-    <!-- Firebase Script -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <!-- 2. TEACHER DASHBOARD (Initially Hidden) -->
+    <div id="dashboard-container" class="hidden">
+        <!-- Navbar -->
+        <nav class="bg-blue-700 text-white p-4 shadow-lg flex justify-between items-center">
+            <h1 class="text-xl font-bold">DAV Exam Portal - Teacher Dashboard</h1>
+            <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-1 px-3 rounded">
+                Logout
+            </button>
+        </nav>
 
-        // ⚙️ REPLACE WITH YOUR FIREBASE CONFIG
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // 1. ADD QUESTION
-        document.getElementById('add-question-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            try {
-                await addDoc(collection(db, "questions"), {
-                    questionText: document.getElementById('q-text').value.trim(),
-                    optionA: document.getElementById('q-opt-a').value.trim(),
-                    optionB: document.getElementById('q-opt-b').value.trim(),
-                    optionC: document.getElementById('q-opt-c').value.trim(),
-                    optionD: document.getElementById('q-opt-d').value.trim(),
-                    correctAnswer: document.getElementById('q-correct').value,
-                    createdAt: new Date().toISOString()
-                });
-                alert("Question added successfully!");
-                document.getElementById('add-question-form').reset();
-                loadQuestions();
-            } catch (err) { alert("Failed to add question."); }
-        });
-
-        // 2. LOAD QUESTIONS
-        async function loadQuestions() {
-            const container = document.getElementById('questions-list');
-            container.innerHTML = "";
-            const snap = await getDocs(collection(db, "questions"));
-            if (snap.empty) { container.innerHTML = "<p class='text-muted'>No questions added yet.</p>"; return; }
-            let idx = 1;
-            snap.forEach((docSnap) => {
-                const q = docSnap.data();
-                container.innerHTML += `
-                    <div class="border-bottom pb-3 mb-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h6 class="fw-bold mb-1">Q${idx++}. ${q.questionText}</h6>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteQuestion('${docSnap.id}')">🗑️ Delete</button>
+        <div class="max-w-6xl mx-auto p-6 space-y-6">
+            <!-- Add Question Form -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Add New Question to Question Bank</h2>
+                <form id="add-question-form" onsubmit="addQuestion(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Subject</label>
+                            <input type="text" id="q-subject" required placeholder="e.g. Physics / Science" class="w-full p-2 border rounded">
                         </div>
-                        <small class="text-muted">A) ${q.optionA} | B) ${q.optionB} | C) ${q.optionC} | D) ${q.optionD} — <b class="text-success">Correct: ${q.correctAnswer}</b></small>
-                    </div>`;
-            });
-        }
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Chapter / Topic</label>
+                            <input type="text" id="q-chapter" required placeholder="e.g. Motion / Light" class="w-full p-2 border rounded">
+                        </div>
+                    </div>
 
-        window.deleteQuestion = async (id) => {
-            if (confirm("Delete this question?")) {
-                await deleteDoc(doc(db, "questions", id));
-                loadQuestions();
-            }
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Question Statement</label>
+                        <textarea id="q-text" rows="3" required placeholder="Enter the question here..." class="w-full p-2 border rounded"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="q-optA" required placeholder="Option A" class="p-2 border rounded">
+                        <input type="text" id="q-optB" required placeholder="Option B" class="p-2 border rounded">
+                        <input type="text" id="q-optC" required placeholder="Option C" class="p-2 border rounded">
+                        <input type="text" id="q-optD" required placeholder="Option D" class="p-2 border rounded">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Correct Answer</label>
+                        <select id="q-correct" required class="w-full p-2 border rounded">
+                            <option value="A">Option A</option>
+                            <option value="B">Option B</option>
+                            <option value="C">Option C</option>
+                            <option value="D">Option D</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded">
+                        Save Question
+                    </button>
+                </form>
+            </div>
+
+            <!-- Question Bank List -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Question Bank</h2>
+                <div id="questions-list" class="space-y-4">
+                    <p class="text-gray-500 text-sm">Loading questions...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // 1. Aapki Complete Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
+            authDomain: "myexamportal-abf3f.firebaseapp.com",
+            projectId: "myexamportal-abf3f",
+            storageBucket: "myexamportal-abf3f.firebasestorage.app",
+            messagingSenderId: "8464475917",
+            appId: "1:8464475917:web:dd31ca0bba84a56ae17244",
+            measurementId: "G-G0VRMX7EQT"
         };
 
-        // 3. LOAD RESULTS
-        async function loadResults() {
-            const tbody = document.getElementById('results-table-body');
-            tbody.innerHTML = "";
-            const snap = await getDocs(collection(db, "exam_results"));
-            if (snap.empty) { tbody.innerHTML = "<tr><td colspan='5' class='text-center text-muted'>No exam submissions found.</td></tr>"; return; }
-            snap.forEach((docSnap) => {
-                const r = docSnap.data();
-                tbody.innerHTML += `
-                    <tr>
-                        <td><b>${r.studentRoll}</b></td>
-                        <td>${r.studentName}</td>
-                        <td>${r.examTitle}</td>
-                        <td><span class="badge bg-success">${r.score} / ${r.totalQuestions}</span></td>
-                        <td><small>${new Date(r.submittedAt).toLocaleString()}</small></td>
-                    </tr>`;
-            });
+        // Firebase Initialize
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        // 2. Login Handling
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Teacher Login Credentials
+            if (email === "teacher@dav.com" && password === "teacher123") {
+                document.getElementById('login-container').classList.add('hidden');
+                document.getElementById('dashboard-container').classList.remove('hidden');
+                loadQuestions();
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
         }
 
-        loadQuestions();
-        loadResults();
+        // 3. Logout Handling
+        function handleLogout() {
+            document.getElementById('dashboard-container').classList.add('hidden');
+            document.getElementById('login-container').classList.remove('hidden');
+            document.getElementById('login-form').reset();
+            document.getElementById('login-error').classList.add('hidden');
+        }
+
+        // 4. Add Question to Firestore
+        function addQuestion(e) {
+            e.preventDefault();
+            const questionData = {
+                subject: document.getElementById('q-subject').value,
+                chapter: document.getElementById('q-chapter').value,
+                question: document.getElementById('q-text').value,
+                options: {
+                    A: document.getElementById('q-optA').value,
+                    B: document.getElementById('q-optB').value,
+                    C: document.getElementById('q-optC').value,
+                    D: document.getElementById('q-optD').value
+                },
+                correctAnswer: document.getElementById('q-correct').value,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            db.collection("question_bank").add(questionData)
+                .then(() => {
+                    alert("Question added successfully!");
+                    document.getElementById('add-question-form').reset();
+                    loadQuestions();
+                })
+                .catch((error) => {
+                    alert("Error adding question: " + error.message);
+                });
+        }
+
+        // 5. Load Questions from Firestore
+        function loadQuestions() {
+            const listContainer = document.getElementById('questions-list');
+            db.collection("question_bank").orderBy("createdAt", "desc").get()
+                .then((querySnapshot) => {
+                    listContainer.innerHTML = "";
+                    if (querySnapshot.empty) {
+                        listContainer.innerHTML = "<p class='text-gray-500'>No questions added yet.</p>";
+                        return;
+                    }
+
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const qCard = `
+                            <div class="p-4 border rounded-lg bg-gray-50 relative">
+                                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">${data.subject || 'General'}</span>
+                                <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded ml-2">${data.chapter || 'Topic'}</span>
+                                <p class="font-semibold text-gray-800 mt-2">Q. ${data.question}</p>
+                                <div class="grid grid-cols-2 gap-2 mt-2 text-sm text-gray-600">
+                                    <p>A) ${data.options?.A || ''}</p>
+                                    <p>B) ${data.options?.B || ''}</p>
+                                    <p>C) ${data.options?.C || ''}</p>
+                                    <p>D) ${data.options?.D || ''}</p>
+                                </div>
+                                <p class="text-xs text-green-600 font-bold mt-2">Correct Answer: Option ${data.correctAnswer}</p>
+                            </div>
+                        `;
+                        listContainer.innerHTML += qCard;
+                    });
+                })
+                .catch((err) => {
+                    listContainer.innerHTML = "<p class='text-red-500'>Error loading questions.</p>";
+                });
+        }
     </script>
 </body>
 </html>
