@@ -156,7 +156,7 @@
                 
                 <form id="teacher-form" onsubmit="saveTeacher(event)" class="space-y-4 mb-6 bg-gray-50 p-4 rounded border">
                     <input type="hidden" id="teacher-doc-id">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Teacher Name</label>
                             <input type="text" id="tea-name" required placeholder="e.g. Mr. Rajesh Sharma" class="w-full p-2 border rounded text-sm">
@@ -164,6 +164,10 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Email Address</label>
                             <input type="email" id="tea-email" required placeholder="teacher@dav.com" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Login Password</label>
+                            <input type="text" id="tea-pass" required placeholder="Set Password" class="w-full p-2 border rounded text-sm">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Subject Assigned</label>
@@ -186,12 +190,13 @@
                             <tr class="bg-gray-100">
                                 <th class="p-2 border">Teacher Name</th>
                                 <th class="p-2 border">Email</th>
+                                <th class="p-2 border">Password</th>
                                 <th class="p-2 border">Subject</th>
                                 <th class="p-2 border text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody id="admin-teachers-list">
-                            <tr><td colspan="4" class="p-4 text-center text-gray-500">Loading teachers...</td></tr>
+                            <tr><td colspan="5" class="p-4 text-center text-gray-500">Loading teachers...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -388,6 +393,7 @@
             const data = {
                 name: document.getElementById('tea-name').value,
                 email: document.getElementById('tea-email').value,
+                password: document.getElementById('tea-pass').value,
                 subject: document.getElementById('tea-subject').value
             };
 
@@ -412,7 +418,7 @@
                 const tbody = document.getElementById('admin-teachers-list');
                 tbody.innerHTML = "";
                 if (snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-gray-500">No teachers added yet.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-gray-500">No teachers added yet.</td></tr>`;
                     return;
                 }
                 snapshot.forEach(doc => {
@@ -421,9 +427,10 @@
                         <tr class="hover:bg-gray-50">
                             <td class="p-2 border font-medium">${t.name || '-'}</td>
                             <td class="p-2 border">${t.email || '-'}</td>
+                            <td class="p-2 border font-mono text-purple-600">${t.password || 'teacher123'}</td>
                             <td class="p-2 border">${t.subject || '-'}</td>
                             <td class="p-2 border text-center">
-                                <button onclick="editTeacher('${doc.id}', '${t.name || ''}', '${t.email || ''}', '${t.subject || ''}')" class="bg-amber-500 text-white text-xs px-2 py-1 rounded mr-1">Edit</button>
+                                <button onclick="editTeacher('${doc.id}', '${t.name || ''}', '${t.email || ''}', '${t.password || ''}', '${t.subject || ''}')" class="bg-amber-500 text-white text-xs px-2 py-1 rounded mr-1">Edit</button>
                                 <button onclick="deleteDoc('teachers', '${doc.id}', loadTeachers)" class="bg-red-500 text-white text-xs px-2 py-1 rounded">Delete</button>
                             </td>
                         </tr>
@@ -432,10 +439,11 @@
             });
         }
 
-        function editTeacher(id, name, email, subject) {
+        function editTeacher(id, name, email, pass, subject) {
             document.getElementById('teacher-doc-id').value = id;
             document.getElementById('tea-name').value = name;
             document.getElementById('tea-email').value = email;
+            document.getElementById('tea-pass').value = pass;
             document.getElementById('tea-subject').value = subject;
             document.getElementById('tea-btn').innerText = "Update Teacher";
         }
