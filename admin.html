@@ -3,392 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Admin Portal - DAV Public School</title>
+    <title>Admin Portal - DAV Public School</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-slate-100 font-sans min-h-screen p-4 md:p-6">
+<body class="bg-slate-100 font-sans min-h-screen p-3 md:p-6 select-none">
 
-    <div class="max-w-7xl mx-auto space-y-6">
+    <div class="max-w-6xl mx-auto space-y-4">
 
-        <div class="flex flex-wrap justify-between items-center bg-white p-4 rounded-xl shadow border border-gray-200">
-            <div>
-                <h1 class="text-2xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
-                <p class="text-xs text-gray-500 font-semibold">Central Admin Management Portal (Classes 8th to 12th)</p>
+        <!-- 1. LOGIN SECTION -->
+        <div id="login-section" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-200 max-w-md mx-auto space-y-4 my-10">
+            <div class="text-center">
+                <h1 class="text-xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
+                <p class="text-xs text-gray-500 font-bold">Admin Central Control Panel</p>
             </div>
-            <div>
-                <span class="bg-purple-100 text-purple-800 text-xs px-3 py-1.5 rounded-full font-bold border border-purple-200">
-                    👑 Role: Super Admin
-                </span>
-            </div>
-        </div>
-
-        <!-- Section 1: Live Exam Control Settings -->
-        <div class="bg-amber-50 border border-amber-200 p-6 rounded-xl shadow-sm">
-            <h2 class="text-md font-bold text-amber-900 mb-4 flex items-center gap-2">⚙️ Master Exam Control & Timing Panel</h2>
-            <form onsubmit="handleExamControl(event)" class="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
+            <form onsubmit="handleAdminLogin(event)" class="space-y-3 text-xs">
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Target Class</label>
-                    <select id="exam-class-target" required class="w-full p-2 border rounded text-xs font-bold text-blue-900 bg-white focus:ring-2 focus:ring-amber-500">
-                        <option value="Class 8">Class 8th</option>
-                        <option value="Class 9">Class 9th</option>
-                        <option value="Class 10" selected>Class 10th</option>
-                        <option value="Class 11">Class 11th</option>
-                        <option value="Class 12">Class 12th</option>
-                    </select>
+                    <label class="block font-bold text-gray-700 mb-1">Admin ID</label>
+                    <input type="text" id="a-user" placeholder="Enter Admin Username" required class="w-full p-2.5 border rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-semibold">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Exam Title / Batch</label>
-                    <input type="text" id="exam-title" required value="DAV Term Assessment" class="w-full p-2 border rounded text-xs focus:ring-2 focus:ring-amber-500 bg-white">
+                    <label class="block font-bold text-gray-700 mb-1">Password</label>
+                    <input type="password" id="a-pass" placeholder="Enter Password" required class="w-full p-2.5 border rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Exam Status</label>
-                    <select id="exam-status" class="w-full p-2 border rounded text-xs bg-white focus:ring-2 focus:ring-amber-500">
-                        <option value="true">🟢 ACTIVE (Live)</option>
-                        <option value="false">🔴 INACTIVE (Hidden)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Duration (Mins)</label>
-                    <input type="number" id="exam-duration" value="30" min="1" class="w-full p-2 border rounded text-xs bg-white focus:ring-2 focus:ring-amber-500">
-                </div>
-                <div class="md:col-span-2">
-                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 px-4 rounded text-xs shadow transition">
-                        💾 Save Exam Settings for Class
-                    </button>
-                </div>
+                <button type="submit" class="w-full bg-blue-900 hover:bg-black text-white font-bold py-2.5 rounded-lg shadow transition">
+                    🔐 Admin Login
+                </button>
             </form>
         </div>
 
-        <!-- Section 2: Result Analysis & Excel Export Panel -->
-        <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
-            <div class="flex flex-wrap justify-between items-center border-b pb-3 gap-2">
+        <!-- 2. MAIN ADMIN DASHBOARD -->
+        <div id="dashboard-section" class="hidden space-y-4">
+
+            <!-- Top Header Bar with Logout -->
+            <div class="bg-white p-4 rounded-xl shadow border flex justify-between items-center">
                 <div>
-                    <h3 class="font-bold text-gray-800 text-sm">📊 Student Result Analysis & Reports</h3>
-                    <p class="text-[11px] text-gray-400">View real-time student test attempts, performance metrics, and question-wise analysis</p>
+                    <h2 class="text-lg font-black text-blue-900">DAV Admin Console</h2>
+                    <p class="text-xs text-gray-500 font-semibold">Exam Timing, Activation & Master Controls</p>
                 </div>
-                <button onclick="exportResultsToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-4 rounded shadow transition flex items-center gap-1.5">
-                    📥 Export Full Detailed Analysis to CSV (Excel)
+                <!-- 🚪 LOGOUT BUTTON -->
+                <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-4 py-2 rounded-lg shadow transition flex items-center gap-1.5">
+                    🚪 Logout
                 </button>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-center">
-                    <p class="text-[10px] font-bold text-blue-800 uppercase">Total Attempts</p>
-                    <p class="text-xl font-black text-blue-900 mt-1" id="stat-total-attempts">0</p>
-                </div>
-                <div class="bg-green-50 border border-green-200 p-3 rounded-lg text-center">
-                    <p class="text-[10px] font-bold text-green-800 uppercase">Batch Average Score</p>
-                    <p class="text-xl font-black text-green-900 mt-1" id="stat-avg-score">0.0</p>
-                </div>
-                <div class="bg-purple-50 border border-purple-200 p-3 rounded-lg text-center">
-                    <p class="text-[10px] font-bold text-purple-800 uppercase">Highest Score</p>
-                    <p class="text-xl font-black text-purple-900 mt-1" id="stat-highest-score">0</p>
-                </div>
-                <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-center">
-                    <p class="text-[10px] font-bold text-amber-800 uppercase">Pass Percentage</p>
-                    <p class="text-xl font-black text-amber-900 mt-1" id="stat-pass-percentage">0%</p>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto max-h-[280px] border rounded-lg">
-                <table class="w-full text-left text-xs text-gray-600">
-                    <thead class="bg-slate-100 text-gray-700 uppercase font-bold sticky top-0 border-b">
-                        <tr>
-                            <th class="p-2.5">Roll No</th>
-                            <th class="p-2.5">Class</th>
-                            <th class="p-2.5">Exam Batch</th>
-                            <th class="p-2.5">Obtained Score</th>
-                            <th class="p-2.5">Total Questions</th>
-                            <th class="p-2.5">Percentage</th>
-                            <th class="p-2.5">Status</th>
-                            <th class="p-2.5">Submitted At</th>
-                            <th class="p-2.5 text-center">Detailed Analysis</th>
-                        </tr>
-                    </thead>
-                    <tbody id="results-table-body" class="divide-y">
-                        <tr><td colspan="9" class="p-4 text-center text-gray-400">Loading exam results...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Section 3: User Management -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            <!-- Student Management Box -->
-            <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
-                <div class="border-b pb-2 flex justify-between items-center">
-                    <h3 class="font-bold text-gray-800 text-sm">👨‍🎓 Student Account Management</h3>
-                    <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold" id="student-count-badge">0 Students</span>
-                </div>
-
-                <div class="bg-blue-50 p-3 rounded-lg border border-dashed border-blue-300">
-                    <p class="text-[11px] font-bold text-blue-900 mb-1">📁 Bulk Upload Students (CSV)</p>
-                    <div class="flex items-center gap-2">
-                        <input type="file" id="student-csv-input" accept=".csv" class="text-[11px] bg-white p-1 border rounded w-full">
-                        <button onclick="processStudentCSV()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-1.5 px-3 rounded whitespace-nowrap shadow">
-                            Upload CSV
-                        </button>
-                    </div>
-                </div>
+            <!-- EXAM CONTROL SETTINGS (PURANI SETTINGS INTACT) -->
+            <div class="bg-white p-5 rounded-xl shadow border space-y-4">
+                <h3 class="font-bold text-sm text-blue-900 border-b pb-2">⚙️ Exam Activation & Time Settings</h3>
                 
-                <form onsubmit="handleStudentSubmit(event)" class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-lg border">
-                    <input type="hidden" id="edit-student-id">
-                    <input type="text" id="std-roll" placeholder="Roll No / ID" required class="p-2 border rounded text-xs bg-white">
-                    <input type="text" id="std-name" placeholder="Student Name" required class="p-2 border rounded text-xs bg-white">
-                    <select id="std-class" required class="p-2 border rounded text-xs bg-white font-bold">
-                        <option value="Class 8">Class 8th</option>
-                        <option value="Class 9">Class 9th</option>
-                        <option value="Class 10" selected>Class 10th</option>
-                        <option value="Class 11">Class 11th</option>
-                        <option value="Class 12">Class 12th</option>
-                    </select>
-                    <input type="text" id="std-pass" placeholder="Password" required class="p-2 border rounded text-xs bg-white">
-                    <div class="col-span-2 flex gap-2">
-                        <button type="submit" id="std-btn-submit" class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded text-xs shadow">
-                            ➕ Add New Student
-                        </button>
-                        <button type="button" id="std-btn-cancel" onclick="resetStudentForm()" class="hidden bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded text-xs">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-
-                <div class="max-h-[170px] overflow-y-auto space-y-2 pr-1" id="student-list-container"></div>
-            </div>
-
-            <!-- Teacher Management Box -->
-            <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
-                <div class="border-b pb-2 flex justify-between items-center">
-                    <h3 class="font-bold text-gray-800 text-sm">👩‍🏫 Teacher Account Management</h3>
-                    <span class="text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded font-bold" id="teacher-count-badge">0 Teachers</span>
-                </div>
-
-                <div class="bg-purple-50 p-3 rounded-lg border border-dashed border-purple-300">
-                    <p class="text-[11px] font-bold text-purple-900 mb-1">📁 Bulk Upload Teachers (CSV)</p>
-                    <div class="flex items-center gap-2">
-                        <input type="file" id="teacher-csv-input" accept=".csv" class="text-[11px] bg-white p-1 border rounded w-full">
-                        <button onclick="processTeacherCSV()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs py-1.5 px-3 rounded whitespace-nowrap shadow">
-                            Upload CSV
-                        </button>
-                    </div>
-                </div>
-
-                <form onsubmit="handleTeacherSubmit(event)" class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-lg border">
-                    <input type="hidden" id="edit-teacher-id">
-                    <input type="text" id="t-name" placeholder="Teacher Name" required class="p-2 border rounded text-xs bg-white">
-                    <input type="text" id="t-subject" placeholder="Subject" required class="p-2 border rounded text-xs bg-white">
-                    <input type="email" id="t-email" placeholder="Email ID" required class="p-2 border rounded text-xs bg-white">
-                    <input type="text" id="t-pass" placeholder="Password" required class="p-2 border rounded text-xs bg-white">
-                    <div class="col-span-2 flex gap-2">
-                        <button type="submit" id="t-btn-submit" class="flex-grow bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded text-xs shadow">
-                            ➕ Register Teacher
-                        </button>
-                        <button type="button" id="t-btn-cancel" onclick="resetTeacherForm()" class="hidden bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded text-xs">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-
-                <div class="max-h-[170px] overflow-y-auto space-y-2 pr-1" id="teacher-list-container"></div>
-            </div>
-
-        </div>
-
-        <!-- Section 4: Master Question Bank -->
-        <div class="bg-white p-6 rounded-xl border shadow-sm space-y-6">
-            
-            <!-- ADMIN ADD SINGLE QUESTION FORM -->
-            <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-200 space-y-3">
-                <h4 class="font-bold text-blue-900 text-xs flex items-center gap-1.5 uppercase tracking-wide">
-                    ➕ Add Question Directly to Bank
-                </h4>
-                <form onsubmit="handleAdminAddQuestion(event)" class="space-y-3">
-                    <div class="grid grid-cols-3 gap-2">
-                        <div>
-                            <!-- 🎯 Admin Subject Dropdown -->
-                            <label class="block text-[11px] font-bold text-gray-700 mb-0.5">Subject</label>
-                            <select id="admin-add-subject" required class="w-full p-2 border rounded text-xs font-bold text-blue-900 bg-white">
-                                <option value="Physics" selected>Physics</option>
-                                <option value="Chemistry">Chemistry</option>
-                                <option value="Biology">Biology</option>
-                                <option value="Mathematics">Mathematics</option>
-                                <option value="Science">Science (General)</option>
-                                <option value="Social Science">Social Science</option>
-                                <option value="English">English</option>
-                                <option value="Hindi">Hindi</option>
-                                <option value="Computer Science">Computer Science</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-gray-700 mb-0.5">Class</label>
-                            <select id="admin-add-class" required class="w-full p-2 border rounded text-xs font-bold text-blue-900 bg-white">
-                                <option value="Class 8">Class 8th</option>
-                                <option value="Class 9">Class 9th</option>
-                                <option value="Class 10" selected>Class 10th</option>
-                                <option value="Class 11">Class 11th</option>
-                                <option value="Class 12">Class 12th</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-gray-700 mb-0.5">Chapter</label>
-                            <input type="text" id="admin-add-chapter" placeholder="e.g. Light" required class="w-full p-2 border rounded text-xs bg-white">
-                        </div>
-                    </div>
-
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                     <div>
-                        <label class="block text-[11px] font-bold text-gray-700 mb-0.5">Question Text</label>
-                        <textarea id="admin-add-text" rows="2" placeholder="Type question statement..." required class="w-full p-2 border rounded text-xs bg-white font-medium"></textarea>
-                    </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        <input type="text" id="admin-add-optA" placeholder="Option A" required class="p-2 border rounded text-xs bg-white">
-                        <input type="text" id="admin-add-optB" placeholder="Option B" required class="p-2 border rounded text-xs bg-white">
-                        <input type="text" id="admin-add-optC" placeholder="Option C" required class="p-2 border rounded text-xs bg-white">
-                        <input type="text" id="admin-add-optD" placeholder="Option D" required class="p-2 border rounded text-xs bg-white">
-                    </div>
-
-                    <div class="flex justify-between items-center gap-4 pt-1">
-                        <div class="w-1/3">
-                            <label class="block text-[11px] font-bold text-gray-700 mb-0.5">Correct Option</label>
-                            <select id="admin-add-correct" required class="w-full p-2 border rounded text-xs bg-white font-bold text-blue-700">
-                                <option value="A">Option A</option>
-                                <option value="B">Option B</option>
-                                <option value="C">Option C</option>
-                                <option value="D">Option D</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="w-2/3 bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-lg text-xs shadow transition mt-4">
-                            💾 Add Question to Master Bank
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Question Bank Header & Filter -->
-            <div>
-                <div class="flex flex-wrap justify-between items-center border-b pb-3 mb-4 gap-2">
-                    <div>
-                        <h3 class="font-bold text-gray-800 text-sm">📚 Master Question Bank</h3>
-                        <p class="text-[11px] text-gray-400">Select questions to activate for live exam or perform bulk actions</p>
-                    </div>
-                    
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs font-bold text-gray-700">Filter Class:</span>
-                        <select id="filter-qb-class" onchange="loadQuestionBank()" class="p-1.5 border rounded text-xs font-bold bg-white text-blue-900 border-blue-300">
-                            <option value="ALL">ALL CLASSES</option>
+                        <label class="block font-bold text-gray-700 mb-1">Target Class</label>
+                        <select id="ctrl-class" class="w-full p-2.5 border rounded-lg bg-slate-50 font-bold text-blue-900">
                             <option value="Class 8">Class 8th</option>
                             <option value="Class 9">Class 9th</option>
                             <option value="Class 10" selected>Class 10th</option>
                             <option value="Class 11">Class 11th</option>
                             <option value="Class 12">Class 12th</option>
                         </select>
-
-                        <div class="text-xs flex items-center gap-2 border-l pl-3">
-                            <button onclick="selectAllQuestions(true)" class="text-blue-600 hover:underline font-bold">Select All</button> |
-                            <button onclick="selectAllQuestions(false)" class="text-gray-500 hover:underline">Deselect All</button>
-                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Exam Duration (Minutes)</label>
+                        <input type="number" id="ctrl-duration" value="30" class="w-full p-2.5 border rounded-lg bg-slate-50 font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Exam Status</label>
+                        <select id="ctrl-status" class="w-full p-2.5 border rounded-lg bg-slate-50 font-bold">
+                            <option value="true">🟢 Active (Students Can Login)</option>
+                            <option value="false">🔴 Inactive (Exam Closed)</option>
+                        </select>
                     </div>
                 </div>
 
-                <div class="space-y-3 max-h-[380px] overflow-y-auto pr-1" id="question-bank-container"></div>
+                <button onclick="saveExamSettings()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 px-6 rounded-lg shadow transition">
+                    💾 Save Exam Settings for Class
+                </button>
             </div>
 
-            <!-- Bottom Action Bar -->
-            <div class="border-t pt-3 mt-4 flex flex-wrap justify-between items-center bg-gray-50 p-3 rounded-lg border gap-2">
-                <span class="text-xs font-bold text-gray-700" id="selected-count-label">Selected: 0 Questions</span>
-                
-                <div class="flex gap-2">
-                    <button onclick="deleteSelectedQuestions()" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2 px-3.5 rounded shadow transition flex items-center gap-1">
-                        🗑️ Delete Selected
-                    </button>
-                    
-                    <button onclick="saveActiveExamQuestions()" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-2 px-4 rounded shadow transition">
-                        ✅ Deploy Selected Questions to Live Exam
-                    </button>
-                </div>
-            </div>
         </div>
 
     </div>
 
-    <!-- ✏️ EDIT QUESTION MODAL -->
-    <div id="edit-q-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="bg-blue-900 text-white p-4 flex justify-between items-center">
-                <h3 class="font-black text-sm md:text-base">✏️ Edit Question Details</h3>
-                <button onclick="closeEditQuestionModal()" class="text-white hover:bg-blue-800 text-xl font-bold px-3 py-1 rounded">✕</button>
-            </div>
-
-            <form onsubmit="handleUpdateQuestion(event)" class="p-6 overflow-y-auto space-y-4 bg-slate-50">
-                <input type="hidden" id="edit-q-id">
-                <div class="grid grid-cols-3 gap-2">
-                    <!-- 🎯 Edit Modal Subject Dropdown -->
-                    <select id="edit-q-subject" required class="p-2 border rounded text-xs bg-white font-bold text-blue-900">
-                        <option value="Physics">Physics</option>
-                        <option value="Chemistry">Chemistry</option>
-                        <option value="Biology">Biology</option>
-                        <option value="Mathematics">Mathematics</option>
-                        <option value="Science">Science (General)</option>
-                        <option value="Social Science">Social Science</option>
-                        <option value="English">English</option>
-                        <option value="Hindi">Hindi</option>
-                        <option value="Computer Science">Computer Science</option>
-                    </select>
-                    <select id="edit-q-class" required class="p-2 border rounded text-xs bg-white font-bold">
-                        <option value="Class 8">Class 8th</option>
-                        <option value="Class 9">Class 9th</option>
-                        <option value="Class 10">Class 10th</option>
-                        <option value="Class 11">Class 11th</option>
-                        <option value="Class 12">Class 12th</option>
-                    </select>
-                    <input type="text" id="edit-q-chapter" required placeholder="Chapter" class="p-2 border rounded text-xs bg-white">
-                </div>
-                <textarea id="edit-q-text" rows="3" required placeholder="Question text..." class="w-full p-2 border rounded text-xs bg-white font-medium"></textarea>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="edit-q-optA" required placeholder="Option A" class="p-2 border rounded text-xs bg-white">
-                    <input type="text" id="edit-q-optB" required placeholder="Option B" class="p-2 border rounded text-xs bg-white">
-                    <input type="text" id="edit-q-optC" required placeholder="Option C" class="p-2 border rounded text-xs bg-white">
-                    <input type="text" id="edit-q-optD" required placeholder="Option D" class="p-2 border rounded text-xs bg-white">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Correct Option</label>
-                    <select id="edit-q-correct" required class="w-full p-2 border rounded text-xs bg-white font-bold text-blue-700">
-                        <option value="A">Option A</option>
-                        <option value="B">Option B</option>
-                        <option value="C">Option C</option>
-                        <option value="D">Option D</option>
-                    </select>
-                </div>
-                <div class="pt-3 border-t flex justify-end gap-2">
-                    <button type="button" onclick="closeEditQuestionModal()" class="bg-gray-400 text-white font-bold text-xs py-2 px-4 rounded">Cancel</button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 px-5 rounded shadow">💾 Save Changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 🔍 QUESTION-WISE ANALYSIS POPUP MODAL -->
-    <div id="analysis-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="bg-blue-900 text-white p-4 flex justify-between items-center">
-                <div>
-                    <h3 class="font-black text-sm md:text-base">📋 Question-wise Performance Analysis</h3>
-                    <p class="text-xs text-blue-200">Roll No: <span id="modal-student-roll" class="font-bold text-white"></span></p>
-                </div>
-                <button onclick="closeAnalysisModal()" class="text-white hover:bg-blue-800 text-xl font-bold px-3 py-1 rounded">✕</button>
-            </div>
-            <div class="p-4 overflow-y-auto space-y-4 flex-grow bg-slate-50" id="modal-questions-list"></div>
-            <div class="p-3 bg-white border-t flex justify-between items-center">
-                <span class="text-xs font-bold text-gray-700" id="modal-score-summary">Score: 0/0</span>
-                <button onclick="closeAnalysisModal()" class="bg-gray-600 hover:bg-gray-700 text-white text-xs font-bold py-2 px-4 rounded">Close Analysis</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Firebase Script Logic -->
+    <!-- Firebase Logic -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
@@ -402,603 +101,40 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        let fetchedResultsData = [];
-        let masterQuestionsMap = {};
-        let activeQuestionsList = [];
-
-        window.onload = function() {
-            cacheQuestionBank().then(() => loadResultsAndAnalysis());
-            loadStudents();
-            loadTeachers();
-            loadQuestionBank();
-        };
-
-        function extractCorrectOption(qDetails) {
-            if(!qDetails) return "";
-            let rawCorrect = qDetails.correctOption || qDetails.correctAnswer || qDetails.correct || qDetails.answer || qDetails.ans || "";
-            let dbCorrect = rawCorrect.toString().trim().toUpperCase();
-            if (dbCorrect.startsWith("OPTION")) {
-                dbCorrect = dbCorrect.replace("OPTION", "").trim();
-            }
-            return dbCorrect;
-        }
-
-        async function cacheQuestionBank() {
-            const snapshot = await db.collection("question_bank").get();
-            masterQuestionsMap = {};
-            activeQuestionsList = [];
-            snapshot.forEach(doc => { 
-                const qData = doc.data();
-                qData.id = doc.id;
-                masterQuestionsMap[doc.id] = qData; 
-                if(qData.selectedForExam) {
-                    activeQuestionsList.push(qData);
-                }
-            });
-        }
-
-        function loadResultsAndAnalysis() {
-            db.collection("exam_attempts").get().then(snapshot => {
-                const tbody = document.getElementById('results-table-body');
-                tbody.innerHTML = "";
-                fetchedResultsData = [];
-
-                if(snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-gray-400">No student exam submissions recorded yet.</td></tr>`;
-                    updateAnalysisCards(0, 0, 0, 0);
-                    return;
-                }
-
-                let totalAttempts = snapshot.size;
-                let totalScoreSum = 0;
-                let highestScore = 0;
-                let passedCount = 0;
-
-                snapshot.forEach(doc => {
-                    const r = doc.data();
-                    r.attemptId = doc.id;
-
-                    let calculatedScore = 0;
-                    const answersMap = r.answers || {};
-
-                    for (let qId in answersMap) {
-                        const stAns = (answersMap[qId] || "").toString().trim().toUpperCase();
-                        const qDetails = masterQuestionsMap[qId];
-
-                        if (qDetails) {
-                            let dbCorrect = extractCorrectOption(qDetails);
-                            if (stAns !== "" && dbCorrect !== "" && stAns === dbCorrect) calculatedScore++;
-                        }
-                    }
-
-                    r.calculatedScore = calculatedScore;
-                    fetchedResultsData.push(r);
-
-                    const totalQs = r.totalQuestions || (activeQuestionsList.length > 0 ? activeQuestionsList.length : 30);
-                    const percentage = ((calculatedScore / totalQs) * 100).toFixed(2);
-                    const isPass = percentage >= 20;
-
-                    totalScoreSum += calculatedScore;
-                    if (calculatedScore > highestScore) highestScore = calculatedScore;
-                    if (isPass) passedCount++;
-
-                    const dateStr = r.submittedAt ? new Date(r.submittedAt.toDate()).toLocaleString() : 'Recent';
-
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-slate-50 transition">
-                            <td class="p-2.5 font-bold text-gray-800">${r.rollNo || 'N/A'}</td>
-                            <td class="p-2.5 font-bold text-purple-700">${r.class || 'N/A'}</td>
-                            <td class="p-2.5 text-gray-600">${r.examTitle || 'Test'}</td>
-                            <td class="p-2.5 font-bold text-blue-700">${calculatedScore}</td>
-                            <td class="p-2.5 text-gray-500">${totalQs}</td>
-                            <td class="p-2.5 font-bold text-purple-700">${percentage}%</td>
-                            <td class="p-2.5">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isPass ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                                    ${isPass ? 'PASS' : 'FAIL'}
-                                </span>
-                            </td>
-                            <td class="p-2.5 text-[11px] text-gray-400">${dateStr}</td>
-                            <td class="p-2.5 text-center">
-                                <button onclick="openQuestionAnalysis('${r.attemptId}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] px-3 py-1 rounded shadow">
-                                    🔍 View Details
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-
-                const avgScore = (totalScoreSum / totalAttempts).toFixed(1);
-                const passPercentage = ((passedCount / totalAttempts) * 100).toFixed(1);
-                updateAnalysisCards(totalAttempts, avgScore, highestScore, passPercentage);
-            });
-        }
-
-        function openQuestionAnalysis(attemptId) {
-            const attempt = fetchedResultsData.find(a => a.attemptId === attemptId);
-            if(!attempt) return;
-
-            document.getElementById('modal-student-roll').innerText = `${attempt.rollNo} (${attempt.class || ''})`;
-            document.getElementById('modal-score-summary').innerText = `Calculated Score: ${attempt.calculatedScore} / ${attempt.totalQuestions}`;
-
-            const listContainer = document.getElementById('modal-questions-list');
-            listContainer.innerHTML = "";
-            const studentAnswers = attempt.answers || {};
-
-            let qIndex = 1;
-            for (let qId in masterQuestionsMap) {
-                const qDetails = masterQuestionsMap[qId];
-                if (qDetails && qDetails.selectedForExam && qDetails.class === attempt.class) {
-                    const rawStudentAns = (studentAnswers[qId] || "").toString().trim().toUpperCase();
-                    let rawCorrectAns = extractCorrectOption(qDetails);
-
-                    const isCorrect = rawStudentAns !== "" && rawCorrectAns !== "" && rawStudentAns === rawCorrectAns;
-                    const isUnattempted = rawStudentAns === "";
-
-                    let statusBadge = `<span class="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded text-[10px]">🔴 Incorrect</span>`;
-                    if (isCorrect) statusBadge = `<span class="bg-green-100 text-green-800 font-bold px-2 py-0.5 rounded text-[10px]">🟢 Correct (+1)</span>`;
-                    else if (isUnattempted) statusBadge = `<span class="bg-gray-100 text-gray-700 font-bold px-2 py-0.5 rounded text-[10px]">⚪ Skipped</span>`;
-
-                    listContainer.innerHTML += `
-                        <div class="bg-white p-4 rounded-xl border shadow-sm space-y-2">
-                            <div class="flex justify-between items-center border-b pb-2">
-                                <span class="text-xs font-bold text-gray-500">Q#${qIndex} (${qDetails.subject || 'General'})</span>
-                                ${statusBadge}
-                            </div>
-                            <p class="font-bold text-gray-800 text-xs md:text-sm leading-snug">${qDetails.question}</p>
-                            <div class="grid grid-cols-2 gap-2 text-xs pt-1">
-                                <div class="p-2 rounded border ${isCorrect ? 'bg-green-50 border-green-300 text-green-900 font-bold' : (!isUnattempted ? 'bg-red-50 border-red-300 text-red-900 font-bold' : 'bg-gray-50')}">
-                                    <span>Selected Option: <b>${!isUnattempted ? rawStudentAns : 'None'}</b></span>
-                                </div>
-                                <div class="p-2 rounded border bg-emerald-50 border-emerald-300 text-emerald-900 font-bold">
-                                    <span>Correct Option: <b>${rawCorrectAns || 'N/A'}</b></span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    qIndex++;
-                }
-            }
-            document.getElementById('analysis-modal').classList.remove('hidden');
-        }
-
-        function closeAnalysisModal() { document.getElementById('analysis-modal').classList.add('hidden'); }
-
-        function updateAnalysisCards(attempts, avg, highest, passPct) {
-            document.getElementById('stat-total-attempts').innerText = attempts;
-            document.getElementById('stat-avg-score').innerText = avg;
-            document.getElementById('stat-highest-score').innerText = highest;
-            document.getElementById('stat-pass-percentage').innerText = `${passPct}%`;
-        }
-
-        function exportResultsToCSV() {
-            if(fetchedResultsData.length === 0) return alert("No result attempts available to export!");
-
-            let activeExamQuestions = activeQuestionsList.length > 0 
-                ? activeQuestionsList 
-                : Object.values(masterQuestionsMap).filter(q => q.selectedForExam);
-
-            let csvHeaders = ["Roll No", "Class", "Exam Title", "Score", "Total Questions", "Percentage", "Status", "Submission Time"];
-            
-            activeExamQuestions.forEach((q, idx) => {
-                const qNum = idx + 1;
-                csvHeaders.push(`Q${qNum}_Text`, `Q${qNum}_StudentAns`, `Q${qNum}_CorrectAns`, `Q${qNum}_Marks`);
-            });
-
-            let csvRows = [csvHeaders.join(",")];
-
-            fetchedResultsData.forEach(r => {
-                const studentAnsMap = r.answers || {};
-                let calculatedScore = 0;
-                let questionColumns = [];
-
-                activeExamQuestions.forEach(q => {
-                    const stAns = (studentAnsMap[q.id] || "").toString().trim().toUpperCase();
-                    let dbCorrect = extractCorrectOption(q);
-
-                    const isCorrect = (stAns !== "" && dbCorrect !== "" && stAns === dbCorrect);
-                    const qMarks = isCorrect ? 1 : 0;
-                    if (isCorrect) calculatedScore++;
-                    
-                    const cleanQText = `"${(q.question || '').replace(/"/g, '""')}"`;
-                    const cleanStAns = stAns ? `"${stAns}"` : '"Skipped"';
-                    const cleanCorrectAns = dbCorrect ? `"${dbCorrect}"` : '"N/A"';
-
-                    questionColumns.push(cleanQText, cleanStAns, cleanCorrectAns, qMarks);
-                });
-
-                const totalQs = activeExamQuestions.length || r.totalQuestions || 1;
-                const percentage = ((calculatedScore / totalQs) * 100).toFixed(2);
-                const isPass = percentage >= 20 ? 'PASS' : 'FAIL';
-                const dateStr = r.submittedAt ? new Date(r.submittedAt.toDate()).toLocaleString().replace(/,/g, '') : 'N/A';
-
-                let rowData = [
-                    `"${r.rollNo || ''}"`,
-                    `"${r.class || ''}"`,
-                    `"${r.examTitle || ''}"`,
-                    calculatedScore,
-                    totalQs,
-                    `"${percentage}%"`,
-                    isPass,
-                    `"${dateStr}"`,
-                    ...questionColumns
-                ];
-
-                csvRows.push(rowData.join(","));
-            });
-
-            const csvString = csvRows.join("\n");
-            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-
-            link.setAttribute("href", url);
-            link.setAttribute("download", `DAV_MultiClass_Exam_Analysis_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // USER MANAGEMENT
-        function loadStudents() {
-            db.collection("students").get().then(snapshot => {
-                const container = document.getElementById('student-list-container');
-                document.getElementById('student-count-badge').innerText = `${snapshot.size} Students`;
-                container.innerHTML = "";
-                snapshot.forEach(doc => {
-                    const s = doc.data();
-                    container.innerHTML += `
-                        <div class="flex justify-between items-center p-2 bg-gray-50 border rounded text-xs">
-                            <div>
-                                <p class="font-bold text-gray-800">${s.name} <span class="text-gray-500 font-normal">(${s.rollNo})</span></p>
-                                <p class="text-[10px] text-gray-500">${s.class} | Pass: <span class="font-mono">${s.password}</span></p>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="editStudent('${doc.id}', '${s.rollNo}', '${s.name}', '${s.class}', '${s.password}')" class="text-blue-600 hover:underline font-bold text-[11px]">✏️ Edit</button>
-                                <button onclick="deleteDoc('students', '${doc.id}', loadStudents)" class="text-red-500 hover:underline font-bold text-[11px]">🗑️ Delete</button>
-                            </div>
-                        </div>
-                    `;
-                });
-            });
-        }
-
-        function editStudent(id, rollNo, name, stdClass, password) {
-            document.getElementById('edit-student-id').value = id;
-            document.getElementById('std-roll').value = rollNo;
-            document.getElementById('std-name').value = name;
-            document.getElementById('std-class').value = stdClass;
-            document.getElementById('std-pass').value = password;
-
-            document.getElementById('std-btn-submit').innerText = "💾 Update Student";
-            document.getElementById('std-btn-submit').className = "flex-grow bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs shadow";
-            document.getElementById('std-btn-cancel').classList.remove('hidden');
-        }
-
-        function resetStudentForm() {
-            document.getElementById('edit-student-id').value = "";
-            document.getElementById('std-roll').value = "";
-            document.getElementById('std-name').value = "";
-            document.getElementById('std-pass').value = "";
-            document.getElementById('std-btn-submit').innerText = "➕ Add New Student";
-            document.getElementById('std-btn-submit').className = "flex-grow bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded text-xs shadow";
-            document.getElementById('std-btn-cancel').classList.add('hidden');
-        }
-
-        function handleStudentSubmit(e) {
+        function handleAdminLogin(e) {
             e.preventDefault();
-            const editId = document.getElementById('edit-student-id').value;
-            const data = {
-                rollNo: document.getElementById('std-roll').value,
-                name: document.getElementById('std-name').value,
-                class: document.getElementById('std-class').value,
-                password: document.getElementById('std-pass').value
-            };
+            const user = document.getElementById('a-user').value.trim();
+            const pass = document.getElementById('a-pass').value.trim();
 
-            if(editId) {
-                db.collection("students").doc(editId).update(data).then(() => {
-                    alert("✅ Student Details Updated!");
-                    resetStudentForm();
-                    loadStudents();
-                });
+            if (user === "admin" && pass === "davadmin123") {
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('dashboard-section').classList.remove('hidden');
             } else {
-                db.collection("students").add(data).then(() => {
-                    alert("✅ Student Added Successfully!");
-                    resetStudentForm();
-                    loadStudents();
-                });
+                alert("❌ Invalid Admin Credentials!");
             }
         }
 
-        function loadTeachers() {
-            db.collection("teachers").get().then(snapshot => {
-                const container = document.getElementById('teacher-list-container');
-                document.getElementById('teacher-count-badge').innerText = `${snapshot.size} Teachers`;
-                container.innerHTML = "";
-                snapshot.forEach(doc => {
-                    const t = doc.data();
-                    container.innerHTML += `
-                        <div class="flex justify-between items-center p-2 bg-gray-50 border rounded text-xs">
-                            <div>
-                                <p class="font-bold text-gray-800">${t.name} <span class="text-purple-700 font-semibold">(${t.subject})</span></p>
-                                <p class="text-[10px] text-gray-500">${t.email} | Pass: <span class="font-mono">${t.password}</span></p>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="editTeacher('${doc.id}', '${t.name}', '${t.subject}', '${t.email}', '${t.password}')" class="text-blue-600 hover:underline font-bold text-[11px]">✏️ Edit</button>
-                                <button onclick="deleteDoc('teachers', '${doc.id}', loadTeachers)" class="text-red-500 hover:underline font-bold text-[11px]">🗑️ Delete</button>
-                            </div>
-                        </div>
-                    `;
-                });
-            });
-        }
-
-        function editTeacher(id, name, subject, email, password) {
-            document.getElementById('edit-teacher-id').value = id;
-            document.getElementById('t-name').value = name;
-            document.getElementById('t-subject').value = subject;
-            document.getElementById('t-email').value = email;
-            document.getElementById('t-pass').value = password;
-
-            document.getElementById('t-btn-submit').innerText = "💾 Update Teacher";
-            document.getElementById('t-btn-submit').className = "flex-grow bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs shadow";
-            document.getElementById('t-btn-cancel').classList.remove('hidden');
-        }
-
-        function resetTeacherForm() {
-            document.getElementById('edit-teacher-id').value = "";
-            document.getElementById('t-name').value = "";
-            document.getElementById('t-subject').value = "";
-            document.getElementById('t-email').value = "";
-            document.getElementById('t-pass').value = "";
-            document.getElementById('t-btn-submit').innerText = "➕ Register Teacher";
-            document.getElementById('t-btn-submit').className = "flex-grow bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded text-xs shadow";
-            document.getElementById('t-btn-cancel').classList.add('hidden');
-        }
-
-        function handleTeacherSubmit(e) {
-            e.preventDefault();
-            const editId = document.getElementById('edit-teacher-id').value;
-            const data = {
-                name: document.getElementById('t-name').value,
-                subject: document.getElementById('t-subject').value,
-                email: document.getElementById('t-email').value,
-                password: document.getElementById('t-pass').value
-            };
-
-            if(editId) {
-                db.collection("teachers").doc(editId).update(data).then(() => {
-                    alert("✅ Teacher Details Updated!");
-                    resetTeacherForm();
-                    loadTeachers();
-                });
-            } else {
-                db.collection("teachers").add(data).then(() => {
-                    alert("✅ Teacher Registered Successfully!");
-                    resetTeacherForm();
-                    loadTeachers();
-                });
-            }
-        }
-
-        function processStudentCSV() {
-            const input = document.getElementById('student-csv-input');
-            if(!input.files.length) return alert("Select Student CSV file!");
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const lines = e.target.result.split('\n');
-                const batch = db.batch();
-                let count = 0;
-                for(let i = 1; i < lines.length; i++) {
-                    if(!lines[i].trim()) continue;
-                    const cols = lines[i].split(',').map(c => c.trim());
-                    if(cols.length >= 4) {
-                        const ref = db.collection("students").doc();
-                        batch.set(ref, { rollNo: cols[0], name: cols[1], class: cols[2], password: cols[3] });
-                        count++;
-                    }
-                }
-                batch.commit().then(() => { alert(`✅ ${count} Students Uploaded!`); loadStudents(); });
-            };
-            reader.readAsText(input.files[0]);
-        }
-
-        function processTeacherCSV() {
-            const input = document.getElementById('teacher-csv-input');
-            if(!input.files.length) return alert("Select Teacher CSV file!");
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const lines = e.target.result.split('\n');
-                const batch = db.batch();
-                let count = 0;
-                for(let i = 1; i < lines.length; i++) {
-                    if(!lines[i].trim()) continue;
-                    const cols = lines[i].split(',').map(c => c.trim());
-                    if(cols.length >= 4) {
-                        const ref = db.collection("teachers").doc();
-                        batch.set(ref, { name: cols[0], subject: cols[1], email: cols[2], password: cols[3] });
-                        count++;
-                    }
-                }
-                batch.commit().then(() => { alert(`✅ ${count} Teachers Uploaded!`); loadTeachers(); });
-            };
-            reader.readAsText(input.files[0]);
-        }
-
-        // ADMIN ADD SINGLE QUESTION DIRECTLY TO BANK
-        function handleAdminAddQuestion(e) {
-            e.preventDefault();
-            const payload = {
-                subject: document.getElementById('admin-add-subject').value,
-                class: document.getElementById('admin-add-class').value,
-                chapter: document.getElementById('admin-add-chapter').value.trim(),
-                question: document.getElementById('admin-add-text').value.trim(),
-                options: {
-                    A: document.getElementById('admin-add-optA').value.trim(),
-                    B: document.getElementById('admin-add-optB').value.trim(),
-                    C: document.getElementById('admin-add-optC').value.trim(),
-                    D: document.getElementById('admin-add-optD').value.trim()
-                },
-                correctOption: document.getElementById('admin-add-correct').value.toUpperCase(),
-                selectedForExam: false
-            };
-
-            db.collection("question_bank").add(payload).then(() => {
-                alert("✅ New Question Added Successfully to Master Question Bank!");
-                document.getElementById('admin-add-text').value = "";
-                document.getElementById('admin-add-optA').value = "";
-                document.getElementById('admin-add-optB').value = "";
-                document.getElementById('admin-add-optC').value = "";
-                document.getElementById('admin-add-optD').value = "";
-                cacheQuestionBank().then(() => loadQuestionBank());
-            });
-        }
-
-        function loadQuestionBank() {
-            const selectedClassFilter = document.getElementById('filter-qb-class').value;
-            db.collection("question_bank").get().then(snapshot => {
-                const container = document.getElementById('question-bank-container');
-                container.innerHTML = "";
-                snapshot.forEach(doc => {
-                    const q = doc.data();
-                    q.id = doc.id;
-                    masterQuestionsMap[q.id] = q;
-
-                    if (selectedClassFilter === "ALL" || q.class === selectedClassFilter) {
-                        const isChecked = q.selectedForExam ? 'checked' : '';
-                        const correctChoice = extractCorrectOption(q);
-
-                        container.innerHTML += `
-                            <div class="border rounded-lg p-3 bg-gray-50 hover:bg-blue-50/40 transition shadow-sm relative flex gap-3 items-start">
-                                <input type="checkbox" onchange="updateSelectedCount()" value="${q.id}" ${isChecked} class="q-checkbox w-4 h-4 text-blue-600 rounded mt-1 border-gray-300 cursor-pointer">
-                                <div class="flex-grow">
-                                    <div class="flex flex-wrap gap-1.5 mb-1.5 items-center">
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-600 text-white">${q.subject || 'General'}</span>
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-600 text-white">${q.class || 'Class 10'}</span>
-                                    </div>
-                                    <p class="text-xs font-bold text-gray-800 leading-snug">${q.question}</p>
-                                    <p class="text-[11px] text-green-700 font-semibold mt-1">Ans: (${correctChoice || 'N/A'})</p>
-                                </div>
-                                <div class="flex flex-col gap-1">
-                                    <button onclick="openEditQuestionModal('${q.id}')" class="text-blue-600 text-xs hover:underline font-bold">✏️ Edit</button>
-                                    <button onclick="deleteDoc('question_bank', '${q.id}', loadQuestionBank)" class="text-red-500 text-xs hover:underline font-bold">🗑️ Delete</button>
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-                updateSelectedCount();
-            });
-        }
-
-        function openEditQuestionModal(qId) {
-            const q = masterQuestionsMap[qId];
-            if(!q) return;
-            document.getElementById('edit-q-id').value = qId;
-            document.getElementById('edit-q-subject').value = q.subject || 'Physics';
-            document.getElementById('edit-q-class').value = q.class || 'Class 10';
-            document.getElementById('edit-q-chapter').value = q.chapter || '';
-            document.getElementById('edit-q-text').value = q.question || '';
-            document.getElementById('edit-q-optA').value = q.options ? q.options.A : (q.optionA || '');
-            document.getElementById('edit-q-optB').value = q.options ? q.options.B : (q.optionB || '');
-            document.getElementById('edit-q-optC').value = q.options ? q.options.C : (q.optionC || '');
-            document.getElementById('edit-q-optD').value = q.options ? q.options.D : (q.optionD || '');
-            
-            let rawCorrect = extractCorrectOption(q) || 'A';
-            document.getElementById('edit-q-correct').value = rawCorrect;
-
-            document.getElementById('edit-q-modal').classList.remove('hidden');
-        }
-
-        function closeEditQuestionModal() { document.getElementById('edit-q-modal').classList.add('hidden'); }
-
-        function handleUpdateQuestion(e) {
-            e.preventDefault();
-            const qId = document.getElementById('edit-q-id').value;
-            const updatedData = {
-                subject: document.getElementById('edit-q-subject').value,
-                class: document.getElementById('edit-q-class').value,
-                chapter: document.getElementById('edit-q-chapter').value.trim(),
-                question: document.getElementById('edit-q-text').value.trim(),
-                options: {
-                    A: document.getElementById('edit-q-optA').value.trim(),
-                    B: document.getElementById('edit-q-optB').value.trim(),
-                    C: document.getElementById('edit-q-optC').value.trim(),
-                    D: document.getElementById('edit-q-optD').value.trim()
-                },
-                correctOption: document.getElementById('edit-q-correct').value
-            };
-
-            db.collection("question_bank").doc(qId).update(updatedData).then(() => {
-                alert("✅ Question Updated Successfully!");
-                closeEditQuestionModal();
-                cacheQuestionBank().then(() => loadQuestionBank());
-            });
-        }
-
-        function updateSelectedCount() {
-            const checkboxes = document.querySelectorAll('.q-checkbox:checked');
-            document.getElementById('selected-count-label').innerText = `Selected: ${checkboxes.length} Questions`;
-        }
-
-        function selectAllQuestions(status) {
-            document.querySelectorAll('.q-checkbox').forEach(cb => cb.checked = status);
-            updateSelectedCount();
-        }
-
-        async function saveActiveExamQuestions() {
-            const checkboxes = document.querySelectorAll('.q-checkbox');
-            const batch = db.batch();
-            checkboxes.forEach(cb => {
-                const ref = db.collection("question_bank").doc(cb.value);
-                batch.update(ref, { selectedForExam: cb.checked });
-            });
-            await batch.commit();
-            alert("🎯 Selected questions successfully activated for Live Exam!");
-            cacheQuestionBank();
-        }
-
-        async function deleteSelectedQuestions() {
-            const checkboxes = document.querySelectorAll('.q-checkbox:checked');
-            if (checkboxes.length === 0) return alert("Please select at least one question to delete!");
-
-            if (confirm(`⚠️ Are you sure you want to PERMANENTLY DELETE ${checkboxes.length} selected question(s)?`)) {
-                const batch = db.batch();
-                checkboxes.forEach(cb => {
-                    const ref = db.collection("question_bank").doc(cb.value);
-                    batch.delete(ref);
-                });
-
-                try {
-                    await batch.commit();
-                    alert(`✅ Successfully deleted ${checkboxes.length} questions!`);
-                    cacheQuestionBank().then(() => loadQuestionBank());
-                } catch (err) {
-                    console.error("Error deleting questions:", err);
-                    alert("Failed to delete selected questions. Please try again.");
-                }
-            }
-        }
-
-        function deleteDoc(collectionName, id, callback) {
-            if(confirm("Are you sure you want to delete this item?")) {
-                db.collection(collectionName).doc(id).delete().then(() => callback());
-            }
-        }
-
-        function handleExamControl(e) {
-            e.preventDefault();
-            const targetClass = document.getElementById('exam-class-target').value;
-            const isActive = document.getElementById('exam-status').value === "true";
-            const duration = parseInt(document.getElementById('exam-duration').value);
-            const title = document.getElementById('exam-title').value;
+        function saveExamSettings() {
+            const targetClass = document.getElementById('ctrl-class').value;
+            const duration = parseInt(document.getElementById('ctrl-duration').value) || 30;
+            const statusVal = document.getElementById('ctrl-status').value === "true"; // Strict boolean conversion
 
             db.collection("exam_control").doc(targetClass).set({
-                targetClass: targetClass,
-                title: title,
-                isActive: isActive,
+                class: targetClass,
                 duration: duration,
+                isActive: statusVal, // Strict boolean true/false
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => alert(`✅ Master Exam Control Settings Saved for ${targetClass}!`));
+            }).then(() => {
+                alert(`✅ Settings updated for ${targetClass}!\nStatus: ${statusVal ? 'ACTIVE' : 'INACTIVE'}\nDuration: ${duration} Mins`);
+            }).catch(err => {
+                alert("Error saving settings: " + err.message);
+            });
+        }
+
+        function handleLogout() {
+            if (confirm("Are you sure you want to LOGOUT from Admin Console?")) {
+                location.reload();
+            }
         }
     </script>
 </body>
