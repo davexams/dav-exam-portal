@@ -40,41 +40,54 @@
 
     <!-- 2. ADMIN DASHBOARD -->
     <div id="dashboard-container" class="hidden">
-        <nav class="bg-red-700 text-white p-4 shadow-lg flex justify-between items-center">
-            <h1 class="text-xl font-bold">DAV Exam Portal - System Admin Dashboard</h1>
-            <button onclick="handleAdminLogout()" class="bg-gray-800 hover:bg-black text-white text-sm font-semibold py-1 px-3 rounded">
-                Logout Admin
-            </button>
+        <!-- Top Banner / Navbar -->
+        <nav class="bg-white p-4 shadow-md flex justify-between items-center px-8 border-b">
+            <div>
+                <h1 class="text-2xl font-black text-blue-600 tracking-wide">DAV PUBLIC SCHOOL</h1>
+                <p class="text-xs text-gray-500 font-medium">Teacher Admin Dashboard - Exam Results & Analysis</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="exportResultExcelCSV()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs py-2 px-4 rounded-lg shadow flex items-center gap-1.5 transition">
+                    📥 Export Option Analysis Excel (CSV)
+                </button>
+                <button onclick="loadAllAdminData()" class="bg-blue-50 border border-blue-200 text-blue-600 font-semibold text-xs py-2 px-3 rounded-lg hover:bg-blue-100 flex items-center gap-1">
+                    🔄 Refresh
+                </button>
+                <button onclick="handleAdminLogout()" class="bg-red-50 border border-red-200 text-red-600 font-semibold text-xs py-2 px-3 rounded-lg hover:bg-red-100 flex items-center gap-1">
+                    🔒 Logout
+                </button>
+            </div>
         </nav>
 
-        <div class="max-w-6xl mx-auto p-6 space-y-8">
+        <div class="max-w-7xl mx-auto p-6 space-y-8">
             
+            <!-- Quick Stats -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-blue-500">
+                <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-blue-500">
                     <h3 class="text-gray-500 text-xs font-semibold uppercase">Total Students</h3>
                     <p id="stat-students-count" class="text-2xl font-bold text-gray-800 mt-1">0</p>
                 </div>
-                <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-yellow-500">
+                <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-yellow-500">
                     <h3 class="text-gray-500 text-xs font-semibold uppercase">Total Teachers</h3>
                     <p id="stat-teachers-count" class="text-2xl font-bold text-gray-800 mt-1">0</p>
                 </div>
-                <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-green-500">
+                <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500">
                     <h3 class="text-gray-500 text-xs font-semibold uppercase">Total Questions</h3>
                     <p id="stat-questions-count" class="text-2xl font-bold text-gray-800 mt-1">0</p>
                 </div>
-                <div class="bg-white p-5 rounded-lg shadow-md border-l-4 border-purple-500">
+                <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-purple-500">
                     <h3 class="text-gray-500 text-xs font-semibold uppercase">Exams Submitted</h3>
                     <p id="stat-exams-count" class="text-2xl font-bold text-gray-800 mt-1">0</p>
                 </div>
             </div>
 
-            <!-- EXAM CONTROL PANEL -->
-            <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-amber-500">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Live Exam Control Center</h2>
+            <!-- LIVE EXAM CONTROL PANEL -->
+            <div class="bg-amber-50 p-5 rounded-xl border border-amber-200 shadow-sm">
+                <h2 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">⚙️ Live Exam Control Center</h2>
                 
-                <div class="flex flex-wrap items-center justify-between gap-4 bg-gray-50 p-4 rounded-lg border">
+                <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-lg border">
                     <div>
-                        <p class="text-sm font-semibold text-gray-700">Current Exam Status:</p>
+                        <p class="text-xs font-semibold text-gray-600">Current Exam Status:</p>
                         <span id="exam-status-badge" class="inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-700">
                             Checking status...
                         </span>
@@ -83,13 +96,13 @@
                     <div class="flex items-center gap-4">
                         <div>
                             <label class="block text-xs font-medium text-gray-600">Active Subject</label>
-                            <input type="text" id="exam-subject-input" placeholder="e.g. Science" class="p-2 border rounded text-sm w-36">
+                            <input type="text" id="exam-subject-input" placeholder="e.g. Science" class="p-2 border rounded text-xs w-36">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-600">Duration (Mins)</label>
-                            <input type="number" id="exam-duration-input" placeholder="30" class="p-2 border rounded text-sm w-24">
+                            <input type="number" id="exam-duration-input" placeholder="30" class="p-2 border rounded text-xs w-24">
                         </div>
-                        <button id="toggle-exam-btn" onclick="toggleExamState()" class="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded text-sm">
+                        <button id="toggle-exam-btn" onclick="toggleExamState()" class="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded text-xs">
                             Start Exam
                         </button>
                     </div>
@@ -97,43 +110,43 @@
             </div>
 
             <!-- STUDENT MANAGEMENT SECTION -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Student Management (Add / Edit)</h2>
+            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                <h2 class="text-sm font-bold text-gray-800 mb-4 border-b pb-2">Student Management (Add / Edit)</h2>
                 
-                <form id="student-form" onsubmit="saveStudent(event)" class="space-y-4 mb-6 bg-gray-50 p-4 rounded border">
+                <form id="student-form" onsubmit="saveStudent(event)" class="space-y-4 mb-6 bg-gray-50 p-4 rounded-lg border">
                     <input type="hidden" id="student-doc-id">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Roll Number</label>
-                            <input type="text" id="stu-roll" required placeholder="e.g. 101" class="w-full p-2 border rounded text-sm">
+                            <label class="block text-xs font-medium text-gray-700">Roll Number</label>
+                            <input type="text" id="stu-roll" required placeholder="e.g. 101" class="w-full p-2 border rounded text-xs bg-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Student Name</label>
-                            <input type="text" id="stu-name" required placeholder="e.g. Amit Kumar" class="w-full p-2 border rounded text-sm">
+                            <label class="block text-xs font-medium text-gray-700">Student Name</label>
+                            <input type="text" id="stu-name" required placeholder="e.g. Amit Kumar" class="w-full p-2 border rounded text-xs bg-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Class & Section</label>
-                            <input type="text" id="stu-class" required placeholder="e.g. 10-A" class="w-full p-2 border rounded text-sm">
+                            <label class="block text-xs font-medium text-gray-700">Class & Section</label>
+                            <input type="text" id="stu-class" required placeholder="e.g. 10-A" class="w-full p-2 border rounded text-xs bg-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Student Password</label>
-                            <input type="text" id="stu-pass" required placeholder="Set Password" class="w-full p-2 border rounded text-sm">
+                            <label class="block text-xs font-medium text-gray-700">Student Password</label>
+                            <input type="text" id="stu-pass" required placeholder="Set Password" class="w-full p-2 border rounded text-xs bg-white">
                         </div>
                     </div>
                     <div class="flex gap-2">
-                        <button type="submit" id="stu-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-5 rounded text-sm">
+                        <button type="submit" id="stu-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-5 rounded text-xs shadow">
                             Save Student
                         </button>
-                        <button type="button" onclick="resetStudentForm()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-1.5 px-4 rounded text-sm">
+                        <button type="button" onclick="resetStudentForm()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-1.5 px-4 rounded text-xs">
                             Cancel
                         </button>
                     </div>
                 </form>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse border border-gray-200 text-sm">
+                    <table class="w-full text-left border-collapse border border-gray-200 text-xs">
                         <thead>
-                            <tr class="bg-gray-100">
+                            <tr class="bg-gray-100 text-gray-700">
                                 <th class="p-2 border">Roll No</th>
                                 <th class="p-2 border">Student Name</th>
                                 <th class="p-2 border">Class</th>
@@ -149,43 +162,43 @@
             </div>
 
             <!-- TEACHER MANAGEMENT SECTION -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Teacher Management (Add / Edit)</h2>
+            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                <h2 class="text-sm font-bold text-gray-800 mb-4 border-b pb-2">Teacher Management (Add / Edit)</h2>
                 
-                <form id="teacher-form" onsubmit="saveTeacher(event)" class="space-y-4 mb-6 bg-gray-50 p-4 rounded border">
+                <form id="teacher-form" onsubmit="saveTeacher(event)" class="space-y-4 mb-6 bg-gray-50 p-4 rounded-lg border">
                     <input type="hidden" id="teacher-doc-id">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Teacher Name</label>
-                            <input type="text" id="tea-name" required placeholder="e.g. Mr. Rajesh Sharma" class="w-full p-2 border rounded text-sm">
+                            <label class="block text-xs font-medium text-gray-700">Teacher Name</label>
+                            <input type="text" id="tea-name" required placeholder="e.g. Mr. Rajesh Sharma" class="w-full p-2 border rounded text-xs bg-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Email Address</label>
-                            <input type="email" id="tea-email" required placeholder="teacher@dav.com" class="w-full p-2 border rounded text-sm">
+                            <label class="block text-xs font-medium text-gray-700">Email Address</label>
+                            <input type="email" id="tea-email" required placeholder="teacher@dav.com" class="w-full p-2 border rounded text-xs bg-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Login Password</label>
-                            <input type="text" id="tea-pass" required placeholder="Set Password" class="w-full p-2 border rounded text-sm">
+                            <label class="block text-xs font-medium text-gray-700">Login Password</label>
+                            <input type="text" id="tea-pass" required placeholder="Set Password" class="w-full p-2 border rounded text-xs bg-white">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Subject Assigned</label>
-                            <input type="text" id="tea-subject" required placeholder="e.g. Physics / Mathematics" class="w-full p-2 border rounded text-sm">
+                            <label class="block text-xs font-medium text-gray-700">Subject Assigned</label>
+                            <input type="text" id="tea-subject" required placeholder="e.g. Physics / Mathematics" class="w-full p-2 border rounded text-xs bg-white">
                         </div>
                     </div>
                     <div class="flex gap-2">
-                        <button type="submit" id="tea-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-5 rounded text-sm">
+                        <button type="submit" id="tea-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-5 rounded text-xs shadow">
                             Save Teacher
                         </button>
-                        <button type="button" onclick="resetTeacherForm()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-1.5 px-4 rounded text-sm">
+                        <button type="button" onclick="resetTeacherForm()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-1.5 px-4 rounded text-xs">
                             Cancel
                         </button>
                     </div>
                 </form>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse border border-gray-200 text-sm">
+                    <table class="w-full text-left border-collapse border border-gray-200 text-xs">
                         <thead>
-                            <tr class="bg-gray-100">
+                            <tr class="bg-gray-100 text-gray-700">
                                 <th class="p-2 border">Teacher Name</th>
                                 <th class="p-2 border">Email</th>
                                 <th class="p-2 border">Password</th>
@@ -201,12 +214,17 @@
             </div>
 
             <!-- EXAM RESULTS LOGS -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Submitted Exam Results</h2>
+            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h2 class="text-sm font-bold text-gray-800">Submitted Exam Results</h2>
+                    <button onclick="exportResultExcelCSV()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-1.5 px-3 rounded shadow">
+                        📥 Export Excel (CSV)
+                    </button>
+                </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse border border-gray-200 text-sm">
+                    <table class="w-full text-left border-collapse border border-gray-200 text-xs">
                         <thead>
-                            <tr class="bg-gray-100">
+                            <tr class="bg-gray-100 text-gray-700">
                                 <th class="p-2 border">Roll No</th>
                                 <th class="p-2 border">Student Name</th>
                                 <th class="p-2 border">Subject</th>
@@ -283,15 +301,15 @@
             const badge = document.getElementById('exam-status-badge');
             const btn = document.getElementById('toggle-exam-btn');
             if (isExamActive) {
-                badge.innerText = "ACTIVE / STARTED";
+                badge.innerText = "🟢 ACTIVE (Live)";
                 badge.className = "inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800";
                 btn.innerText = "Stop Exam";
-                btn.className = "mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded text-sm";
+                btn.className = "mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded text-xs";
             } else {
-                badge.innerText = "INACTIVE / STOPPED";
+                badge.innerText = "🔴 INACTIVE (Stopped)";
                 badge.className = "inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800";
                 btn.innerText = "Start Exam";
-                btn.className = "mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded text-sm";
+                btn.className = "mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded text-xs";
             }
         }
 
@@ -475,6 +493,84 @@
                     `;
                 });
             });
+        }
+
+        // QUESTION-WISE OPTION ANALYSIS EXCEL EXPORT ENGINE
+        async function exportResultExcelCSV() {
+            try {
+                // Fetch Question Bank for Correct Answers
+                const qSnap = await db.collection("question_bank").get();
+                const questionsMap = {};
+                const questionIds = [];
+
+                qSnap.forEach(doc => {
+                    questionsMap[doc.id] = doc.data();
+                    questionIds.push(doc.id);
+                });
+
+                // Fetch Exam Results
+                const rSnap = await db.collection("exam_results").get();
+                if (rSnap.empty) {
+                    alert("No exam results available to download!");
+                    return;
+                }
+
+                // Prepare CSV Headers
+                let csvRows = [];
+                let headers = ["Roll No", "Student Name", "Subject", "Total Correct", "Total Questions", "Percentage (%)"];
+                
+                questionIds.forEach((qId, idx) => {
+                    headers.push(`Q${idx + 1} Selected Option`, `Q${idx + 1} Status`);
+                });
+                
+                csvRows.push(headers.join(","));
+
+                // Build Student Data Rows
+                rSnap.forEach(doc => {
+                    const res = doc.data();
+                    const answers = res.answers || {};
+                    let score = 0;
+                    let rowData = [
+                        `"${res.rollNo || ''}"`,
+                        `"${res.studentName || ''}"`,
+                        `"${res.subject || ''}"`
+                    ];
+
+                    let questionAnalysisCols = [];
+
+                    questionIds.forEach(qId => {
+                        const correctAns = questionsMap[qId]?.correctAnswer || '';
+                        const studentAns = answers[qId] || 'Unanswered';
+
+                        if (correctAns && studentAns === correctAns) {
+                            score++;
+                            questionAnalysisCols.push(`"${studentAns}"`, `"Correct"`);
+                        } else {
+                            questionAnalysisCols.push(`"${studentAns}"`, `"Incorrect"`);
+                        }
+                    });
+
+                    const totalQs = questionIds.length;
+                    const percent = totalQs > 0 ? ((score / totalQs) * 100).toFixed(2) : 0;
+
+                    rowData.push(score, totalQs, `"${percent}%"`, ...questionAnalysisCols);
+                    csvRows.push(rowData.join(","));
+                });
+
+                // Trigger Browser Download
+                const csvString = csvRows.join("\n");
+                const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `DAV_Exam_Option_Analysis_${new Date().toISOString().slice(0,10)}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+            } catch (err) {
+                alert("Error exporting CSV: " + err.message);
+            }
         }
 
         function deleteDoc(collection, id, callback) {
