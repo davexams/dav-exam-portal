@@ -91,7 +91,7 @@
                         </div>
                     </div>
 
-                    <!-- Bottom Action Bar (Save & Next, Review, Clear, Skip) -->
+                    <!-- Bottom Action Bar -->
                     <div class="border-t pt-4 mt-6 flex flex-wrap justify-between items-center gap-2">
                         <div class="flex gap-2">
                             <button onclick="markForReview()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs py-2 px-3 rounded shadow transition">
@@ -159,7 +159,7 @@
         let loggedInStudent = null;
         let examQuestionsList = [];
         let studentAnswersMap = {};
-        let questionStatusMap = {}; // 'answered', 'review', 'answered-review', 'visited'
+        let questionStatusMap = {};
         let currentIndex = 0;
         let activeSubjectFilter = "ALL";
         let timerInterval = null;
@@ -259,10 +259,14 @@
             `;
 
             const subjectsSet = new Set();
-            examQuestionsList.forEach(q => { if (q.subject) subjectsSet.add(q.subject.trim()); });
+            examQuestionsList.forEach(q => { 
+                if (q.subject && q.subject.trim()) {
+                    subjectsSet.add(q.subject.trim()); 
+                }
+            });
 
             subjectsSet.forEach(subj => {
-                const count = examQuestionsList.filter(q => q.subject === subj).length;
+                const count = examQuestionsList.filter(q => (q.subject || '').trim().toLowerCase() === subj.toLowerCase()).length;
                 tabsContainer.innerHTML += `
                     <button onclick="filterBySubject('${subj}')" id="tab-${subj.replace(/\s+/g, '')}" class="subj-tab bg-slate-200 hover:bg-blue-100 text-gray-700 font-bold text-xs px-3 py-1 rounded-lg transition">
                         ${subj} (${count})
@@ -271,8 +275,10 @@
             });
         }
 
+        // 🎯 STRICT SUBJECT FILTER LOGIC
         function filterBySubject(subjName) {
             activeSubjectFilter = subjName;
+
             document.querySelectorAll('.subj-tab').forEach(btn => {
                 btn.className = "subj-tab bg-slate-200 hover:bg-blue-100 text-gray-700 font-bold text-xs px-3 py-1 rounded-lg transition";
             });
@@ -280,12 +286,13 @@
             const activeBtn = document.getElementById(`tab-${subjName.replace(/\s+/g, '')}`);
             if (activeBtn) activeBtn.className = "subj-tab bg-blue-600 text-white font-bold text-xs px-3 py-1 rounded-lg shadow transition";
 
-            // Find first question matching selected subject
             if (subjName === "ALL") {
                 currentIndex = 0;
             } else {
-                const firstIdx = examQuestionsList.findIndex(q => q.subject === subjName);
-                if (firstIdx !== -1) currentIndex = firstIdx;
+                const firstIdx = examQuestionsList.findIndex(q => (q.subject || '').trim().toLowerCase() === subjName.trim().toLowerCase());
+                if (firstIdx !== -1) {
+                    currentIndex = firstIdx;
+                }
             }
 
             loadActiveQuestion();
@@ -335,7 +342,7 @@
             } else {
                 questionStatusMap[qId] = 'visited';
             }
-            nextQuestion();
+            goToNextInSubject();
         }
 
         function markForReview() {
@@ -345,7 +352,7 @@
             } else {
                 questionStatusMap[qId] = 'review';
             }
-            nextQuestion();
+            goToNextInSubject();
         }
 
         function clearResponse() {
@@ -356,12 +363,29 @@
         }
 
         function nextQuestion() {
-            if (currentIndex < examQuestionsList.length - 1) {
-                currentIndex++;
-                loadActiveQuestion();
+            goToNextInSubject();
+        }
+
+        // Helper to navigate sequentially or within current filtered subject
+        function goToNextInSubject() {
+            if (activeSubjectFilter === "ALL") {
+                if (currentIndex < examQuestionsList.length - 1) {
+                    currentIndex++;
+                    loadActiveQuestion();
+                } else {
+                    alert("You have reached the last question of the exam.");
+                    renderPaletteGrid();
+                }
             } else {
-                alert("You have reached the last question. Review your palette or click Submit Test.");
-                renderPaletteGrid();
+                // Find next question in current subject
+                const nextIdx = examQuestionsList.findIndex((q, i) => i > currentIndex && (q.subject || '').trim().toLowerCase() === activeSubjectFilter.trim().toLowerCase());
+                if (nextIdx !== -1) {
+                    currentIndex = nextIdx;
+                    loadActiveQuestion();
+                } else {
+                    alert(`You have reached the end of ${activeSubjectFilter} section.`);
+                    renderPaletteGrid();
+                }
             }
         }
 
@@ -370,15 +394,24 @@
             loadActiveQuestion();
         }
 
+        // 🎯 PALETTE GRID ACCORDING TO SUBJECT FILTER
         function renderPaletteGrid() {
             const grid = document.getElementById('question-palette-grid');
             grid.innerHTML = "";
 
             examQuestionsList.forEach((q, idx) => {
+                const qSubj = (q.subject || '').trim().toLowerCase();
+                const selSubj = activeSubjectFilter.trim().toLowerCase();
+
+                // Skip non-matching subjects if a specific section is selected
+                if (activeSubjectFilter !== "ALL" && qSubj !== selSubj) {
+                    return;
+                }
+
                 const status = questionStatusMap[q.id] || 'not-visited';
                 const isCurrent = (idx === currentIndex);
 
-                let btnClass = "bg-gray-200 text-gray-700 border-gray-300"; // default
+                let btnClass = "bg-gray-200 text-gray-700 border-gray-300";
 
                 if (status === 'answered') btnClass = "bg-emerald-600 text-white font-bold";
                 else if (status === 'review') btnClass = "bg-purple-600 text-white font-bold";
