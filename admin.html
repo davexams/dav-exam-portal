@@ -46,7 +46,6 @@
                     <span class="bg-purple-100 text-purple-800 text-xs px-3 py-1.5 rounded-full font-bold border border-purple-200">
                         👑 Role: Super Admin
                     </span>
-                    <!-- 🚪 LOGOUT BUTTON -->
                     <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-4 py-2 rounded-lg shadow transition flex items-center gap-1.5">
                         🚪 Logout
                     </button>
@@ -229,10 +228,35 @@
             <!-- Section 4: Master Question Bank -->
             <div class="bg-white p-6 rounded-xl border shadow-sm space-y-6">
                 
+                <!-- 🚀 BULK UPLOAD FULL QUESTION PAPER (CSV / EXCEL) & SAMPLE FILE DOWNLOAD -->
+                <div class="bg-purple-50/80 p-5 rounded-xl border border-purple-200 space-y-3">
+                    <div class="flex flex-wrap justify-between items-center border-b border-purple-200 pb-2.5 gap-2">
+                        <div>
+                            <h4 class="font-black text-purple-900 text-xs flex items-center gap-1.5 uppercase tracking-wide">
+                                📑 Bulk Upload Full Question Paper (CSV / Excel)
+                            </h4>
+                            <p class="text-[11px] text-purple-700">Upload 50-100 questions in one click via formatted CSV sheet.</p>
+                        </div>
+                        <!-- 📥 SAMPLE EXCEL TEMPLATE DOWNLOAD BUTTON -->
+                        <button onclick="downloadSampleQuestionCSV()" class="bg-purple-800 hover:bg-purple-900 text-white font-bold text-xs py-2 px-3.5 rounded-lg shadow transition flex items-center gap-1.5">
+                            📥 Download Sample CSV Template
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
+                        <div class="md:col-span-3">
+                            <input type="file" id="admin-csv-file-input" accept=".csv" class="block w-full text-xs text-gray-700 bg-white p-2 border border-purple-300 rounded-lg shadow-sm">
+                        </div>
+                        <button onclick="processFullPaperCSV()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-4 rounded-lg text-xs shadow transition flex items-center justify-center gap-1">
+                            🚀 Process & Upload Question Paper
+                        </button>
+                    </div>
+                </div>
+
                 <!-- ADMIN ADD SINGLE QUESTION FORM -->
                 <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-200 space-y-3">
                     <h4 class="font-bold text-blue-900 text-xs flex items-center gap-1.5 uppercase tracking-wide">
-                        ➕ Add Question Directly to Bank
+                        ➕ Add Single Question Directly to Bank
                     </h4>
                     <form onsubmit="handleAdminAddQuestion(event)" class="space-y-3">
                         <div class="grid grid-cols-3 gap-2">
@@ -458,7 +482,6 @@
             loadQuestionBank();
         }
 
-        // 🚪 LOGOUT LOGIC (Hides dashboard and opens Login)
         function handleLogout() {
             if (confirm("Are you sure you want to LOGOUT from Admin Portal?")) {
                 sessionStorage.removeItem("adminLoggedIn");
@@ -469,7 +492,6 @@
             }
         }
 
-        // Check Login Session on Load
         window.onload = function() {
             if (sessionStorage.getItem("adminLoggedIn") === "true") {
                 showDashboard();
@@ -890,6 +912,80 @@
             reader.readAsText(input.files[0]);
         }
 
+        // 📥 1. DOWNLOAD SAMPLE CSV TEMPLATE FOR QUESTIONS
+        function downloadSampleQuestionCSV() {
+            const headers = "Question,OptionA,OptionB,OptionC,OptionD,CorrectOption,Subject,Class,Chapter";
+            const sampleRow1 = '"What is the S.I. unit of Electric Current?","Volt","Ampere","Ohm","Watt","B","Physics","Class 10","Electricity"';
+            const sampleRow2 = '"Which gas is released during photosynthesis?","Nitrogen","Carbon Dioxide","Oxygen","Hydrogen","C","Biology","Class 10","Life Processes"';
+            
+            const csvContent = `${headers}\n${sampleRow1}\n${sampleRow2}`;
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", "sample_question_paper_dav.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 🚀 2. PROCESS & BULK UPLOAD FULL QUESTION PAPER CSV
+        function processFullPaperCSV() {
+            const fileInput = document.getElementById('admin-csv-file-input');
+            if (!fileInput.files.length) return alert("Please select a Question Paper CSV file to upload!");
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split(/\r\n|\n/);
+                const batch = db.batch();
+                let count = 0;
+
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+
+                    // Parse CSV handling quotes
+                    const cols = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
+                    const cleanCols = cols.map(c => c.trim().replace(/^"|"$/g, ''));
+
+                    if (cleanCols.length >= 6) {
+                        const ref = db.collection("question_bank").doc();
+                        batch.set(ref, {
+                            question: cleanCols[0] || '',
+                            options: { 
+                                A: cleanCols[1] || '', 
+                                B: cleanCols[2] || '', 
+                                C: cleanCols[3] || '', 
+                                D: cleanCols[4] || '' 
+                            },
+                            correctOption: (cleanCols[5] || 'A').toUpperCase(),
+                            subject: cleanCols[6] || 'Physics',
+                            class: cleanCols[7] || 'Class 10',
+                            chapter: cleanCols[8] || 'General',
+                            teacherEmail: "admin",
+                            selectedForExam: false
+                        });
+                        count++;
+                    }
+                }
+
+                if (count === 0) {
+                    return alert("❌ No valid questions found in CSV file. Please check the CSV format!");
+                }
+
+                batch.commit().then(() => {
+                    alert(`🎉 Success! ${count} Questions uploaded to Master Question Bank!`);
+                    fileInput.value = "";
+                    cacheQuestionBank().then(() => loadQuestionBank());
+                }).catch(err => {
+                    console.error("Bulk upload error:", err);
+                    alert("Failed to upload question paper: " + err.message);
+                });
+            };
+            reader.readAsText(fileInput.files[0]);
+        }
+
         // ADMIN ADD SINGLE QUESTION DIRECTLY TO BANK
         function handleAdminAddQuestion(e) {
             e.preventDefault();
@@ -905,6 +1001,7 @@
                     D: document.getElementById('admin-add-optD').value.trim()
                 },
                 correctOption: document.getElementById('admin-add-correct').value.toUpperCase(),
+                teacherEmail: "admin",
                 selectedForExam: false
             };
 
