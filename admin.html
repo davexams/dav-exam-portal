@@ -62,7 +62,7 @@
                     <p class="text-[11px] text-gray-400">View real-time student test attempts, performance metrics, and question-wise analysis</p>
                 </div>
                 <button onclick="exportResultsToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-4 rounded shadow transition flex items-center gap-1.5">
-                    📥 Export Results to CSV (Excel)
+                    📥 Export Full Detailed Analysis to CSV (Excel)
                 </button>
             </div>
 
@@ -282,6 +282,7 @@
 
         let fetchedResultsData = [];
         let masterQuestionsMap = {};
+        let activeQuestionsList = []; // Ordered array for consistent CSV generation
 
         window.onload = function() {
             cacheQuestionBank().then(() => loadResultsAndAnalysis());
@@ -293,7 +294,15 @@
         async function cacheQuestionBank() {
             const snapshot = await db.collection("question_bank").get();
             masterQuestionsMap = {};
-            snapshot.forEach(doc => { masterQuestionsMap[doc.id] = doc.data(); });
+            activeQuestionsList = [];
+            snapshot.forEach(doc => { 
+                const qData = doc.data();
+                qData.id = doc.id;
+                masterQuestionsMap[doc.id] = qData; 
+                if(qData.selectedForExam) {
+                    activeQuestionsList.push(qData);
+                }
+            });
         }
 
         function loadResultsAndAnalysis() {
@@ -335,7 +344,7 @@
                     r.calculatedScore = calculatedScore;
                     fetchedResultsData.push(r);
 
-                    const totalQs = r.totalQuestions || 30;
+                    const totalQs = r.totalQuestions || (activeQuestionsList.length > 0 ? activeQuestionsList.length : 30);
                     const percentage = ((calculatedScore / totalQs) * 100).toFixed(2);
                     const isPass = percentage >= 33;
 
@@ -431,23 +440,72 @@
             document.getElementById('stat-pass-percentage').innerText = `${passPct}%`;
         }
 
+        // 🎯 FULL DETAILED EXCEL/CSV EXPORT WITH QUESTION-WISE ANALYSIS
         function exportResultsToCSV() {
-            if(fetchedResultsData.length === 0) return alert("No results available!");
-            let csvContent = "data:text/csv;charset=utf-8,Roll No,Exam Title,Score,Total Questions,Percentage,Status,Date Time\n";
+            if(fetchedResultsData.length === 0) return alert("No result attempts available to export!");
+
+            // Determine active exam question columns dynamically
+            let activeExamQuestions = activeQuestionsList.length > 0 
+                ? activeQuestionsList 
+                : Object.values(masterQuestionsMap).filter(q => q.selectedForExam);
+
+            // CSV Base Headers
+            let csvHeaders = ["Roll No", "Exam Title", "Score", "Total Questions", "Percentage", "Status", "Submission Time"];
+            
+            // Add Question Breakdown Columns
+            activeExamQuestions.forEach((q, idx) => {
+                const qNum = idx + 1;
+                csvHeaders.push(`Q${qNum}_Text`, `Q${qNum}_StudentAns`, `Q${qNum}_CorrectAns`, `Q${qNum}_Marks`);
+            });
+
+            let csvRows = [csvHeaders.join(",")];
 
             fetchedResultsData.forEach(r => {
                 const score = r.calculatedScore || 0;
-                const totalQs = r.totalQuestions || 30;
+                const totalQs = r.totalQuestions || activeExamQuestions.length || 1;
                 const percentage = ((score / totalQs) * 100).toFixed(2);
                 const isPass = percentage >= 33 ? 'PASS' : 'FAIL';
-                const dateStr = r.submittedAt ? new Date(r.submittedAt.toDate()).toLocaleString().replace(',', '') : 'N/A';
-                csvContent += `${r.rollNo},"${r.examTitle}",${score},${totalQs},${percentage}%,${isPass},"${dateStr}"\n`;
+                const dateStr = r.submittedAt ? new Date(r.submittedAt.toDate()).toLocaleString().replace(/,/g, '') : 'N/A';
+
+                let rowData = [
+                    `"${r.rollNo || ''}"`,
+                    `"${r.examTitle || ''}"`,
+                    score,
+                    totalQs,
+                    `"${percentage}%"`,
+                    isPass,
+                    `"${dateStr}"`
+                ];
+
+                const studentAnsMap = r.answers || {};
+
+                // Question wise detailed column values for each student row
+                activeExamQuestions.forEach(q => {
+                    const stAns = (studentAnsMap[q.id] || "").toString().trim().toUpperCase();
+                    let dbCorrect = (q.correctOption || "").toString().trim().toUpperCase();
+                    if (dbCorrect.startsWith("OPTION")) dbCorrect = dbCorrect.replace("OPTION", "").trim();
+
+                    const isCorrect = (stAns !== "" && stAns === dbCorrect);
+                    const qMarks = isCorrect ? 1 : 0;
+                    
+                    // Sanitize question text for CSV commas and quotes
+                    const cleanQText = `"${(q.question || '').replace(/"/g, '""')}"`;
+                    const cleanStAns = stAns ? `"${stAns}"` : '"Skipped"';
+                    const cleanCorrectAns = `"${dbCorrect}"`;
+
+                    rowData.push(cleanQText, cleanStAns, cleanCorrectAns, qMarks);
+                });
+
+                csvRows.push(rowData.join(","));
             });
 
-            const encodedUri = encodeURI(csvContent);
+            const csvString = csvRows.join("\n");
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `DAV_Exam_Results_${new Date().toISOString().slice(0,10)}.csv`);
+            const url = URL.createObjectURL(blob);
+
+            link.setAttribute("href", url);
+            link.setAttribute("download", `DAV_Detailed_Exam_Analysis_${new Date().toISOString().slice(0,10)}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -738,6 +796,7 @@
             });
             await batch.commit();
             alert("🎯 Selected questions successfully activated for Live Exam!");
+            cacheQuestionBank();
         }
 
         function deleteDoc(collectionName, id, callback) {
