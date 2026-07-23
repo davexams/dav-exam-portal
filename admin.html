@@ -7,6 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- 🧮 MathJax Engine Config & Library -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body class="bg-slate-100 font-sans min-h-screen p-4 md:p-6 select-none">
 
@@ -228,7 +240,7 @@
             <!-- Section 4: Master Question Bank -->
             <div class="bg-white p-6 rounded-xl border shadow-sm space-y-6">
                 
-                <!-- 🚀 BULK UPLOAD FULL QUESTION PAPER (CSV / EXCEL) & SAMPLE FILE DOWNLOAD -->
+                <!-- BULK UPLOAD FULL QUESTION PAPER (CSV / EXCEL) -->
                 <div class="bg-purple-50/80 p-5 rounded-xl border border-purple-200 space-y-3">
                     <div class="flex flex-wrap justify-between items-center border-b border-purple-200 pb-2.5 gap-2">
                         <div>
@@ -237,7 +249,6 @@
                             </h4>
                             <p class="text-[11px] text-purple-700">Upload 50-100 questions in one click via formatted CSV sheet.</p>
                         </div>
-                        <!-- 📥 SAMPLE EXCEL TEMPLATE DOWNLOAD BUTTON -->
                         <button onclick="downloadSampleQuestionCSV()" class="bg-purple-800 hover:bg-purple-900 text-white font-bold text-xs py-2 px-3.5 rounded-lg shadow transition flex items-center gap-1.5">
                             📥 Download Sample CSV Template
                         </button>
@@ -253,11 +264,13 @@
                     </div>
                 </div>
 
-                <!-- ADMIN ADD SINGLE QUESTION FORM -->
+                <!-- ADMIN ADD SINGLE QUESTION FORM WITH EQUATION TOOLBAR & LIVE PREVIEW -->
                 <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-200 space-y-3">
-                    <h4 class="font-bold text-blue-900 text-xs flex items-center gap-1.5 uppercase tracking-wide">
-                        ➕ Add Single Question Directly to Bank
+                    <h4 class="font-bold text-blue-900 text-xs flex items-center justify-between uppercase tracking-wide">
+                        <span>➕ Add Single Question Directly to Bank</span>
+                        <span class="text-[10px] bg-purple-100 text-purple-900 font-black px-2 py-0.5 rounded border border-purple-200">🧪 Math & Chem Enabled</span>
                     </h4>
+
                     <form onsubmit="handleAdminAddQuestion(event)" class="space-y-3">
                         <div class="grid grid-cols-3 gap-2">
                             <div>
@@ -290,9 +303,70 @@
                             </div>
                         </div>
 
+                        <!-- 🧮 CATEGORISED EQUATION TOOLBAR -->
+                        <div class="bg-white border rounded-lg p-2.5 space-y-2">
+                            <div class="flex gap-1 border-b pb-1 overflow-x-auto text-[11px] font-bold">
+                                <button type="button" onclick="switchAdminEqTab('add', 'algebra')" id="admin-add-tab-btn-algebra" class="admin-add-eq-tab-btn bg-blue-900 text-white px-2.5 py-1 rounded">Algebra</button>
+                                <button type="button" onclick="switchAdminEqTab('add', 'calculus')" id="admin-add-tab-btn-calculus" class="admin-add-eq-tab-btn bg-white text-gray-700 border px-2.5 py-1 rounded">Calculus & Trig</button>
+                                <button type="button" onclick="switchAdminEqTab('add', 'chemistry')" id="admin-add-tab-btn-chemistry" class="admin-add-eq-tab-btn bg-white text-gray-700 border px-2.5 py-1 rounded">Chemistry</button>
+                                <button type="button" onclick="switchAdminEqTab('add', 'symbols')" id="admin-add-tab-btn-symbols" class="admin-add-eq-tab-btn bg-white text-gray-700 border px-2.5 py-1 rounded">Symbols</button>
+                            </div>
+
+                            <div id="admin-add-eq-tab-algebra" class="admin-add-eq-panel flex flex-wrap gap-1">
+                                <button type="button" onclick="insertSymbol('admin-add-text', 'x^2', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">x²</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', 'x^n', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">xⁿ</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\frac{a}{b}', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">a/b</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\sqrt{x}', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">√x</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\sqrt[n]{x}', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">ⁿ√x</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\begin{vmatrix} a & b \\\\ c & d \\end{vmatrix}', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">Matrix 2x2</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\begin{vmatrix} 1 & 1 & 1 \\\\ 1 & 2 & 3 \\\\ 1 & 3 & 6 \\end{vmatrix}', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">Matrix 3x3</button>
+                            </div>
+
+                            <div id="admin-add-eq-tab-calculus" class="admin-add-eq-panel hidden flex flex-wrap gap-1">
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\int_{a}^{b} x dx', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">∫ Definite</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\int x dx', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">∫ Indefinite</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\frac{dy}{dx}', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">dy/dx</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\sin\\theta', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">sin θ</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\cos\\theta', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">cos θ</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\tan^{-1}(x)', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">tan⁻¹(x)</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\lim_{x \\to 0}', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">lim x→0</button>
+                            </div>
+
+                            <div id="admin-add-eq-tab-chemistry" class="admin-add-eq-panel hidden flex flex-wrap gap-1">
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\text{H}_2\\text{O}', 'admin-add-preview')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">H₂O</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\text{CO}_2', 'admin-add-preview')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">CO₂</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\text{H}_2\\text{SO}_4', 'admin-add-preview')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">H₂SO₄</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\rightarrow', 'admin-add-preview')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">→</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\rightleftharpoons', 'admin-add-preview')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">⇌ Equilibrium</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '^+', 'admin-add-preview')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">⁺ Cation</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '^-', 'admin-add-preview')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">⁻ Anion</button>
+                            </div>
+
+                            <div id="admin-add-eq-tab-symbols" class="admin-add-eq-panel hidden flex flex-wrap gap-1">
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\alpha', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">α</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\beta', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">β</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\gamma', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">γ</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\theta', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">θ</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\pi', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">π</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\infty', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">∞</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\pm', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">±</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\neq', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">≠</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\leq', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">≤</button>
+                                <button type="button" onclick="insertSymbol('admin-add-text', '\\geq', 'admin-add-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">≥</button>
+                            </div>
+                        </div>
+
                         <div>
                             <label class="block text-[11px] font-bold text-gray-700 mb-0.5">Question Text</label>
-                            <textarea id="admin-add-text" rows="2" placeholder="Type question statement..." required class="w-full p-2 border rounded text-xs bg-white font-medium"></textarea>
+                            <textarea id="admin-add-text" rows="2" oninput="updateAdminLivePreview('admin-add-text', 'admin-add-preview')" placeholder="Type question statement..." required class="w-full p-2 border rounded text-xs bg-white font-medium"></textarea>
+                        </div>
+
+                        <!-- LIVE PREVIEW BOX -->
+                        <div class="p-2 bg-blue-100/70 border border-blue-300 rounded-lg space-y-1">
+                            <span class="text-[10px] font-black text-blue-900 uppercase tracking-wider">👁️ Live Student View Preview:</span>
+                            <div id="admin-add-preview" class="text-xs font-bold text-gray-800 min-h-[26px] bg-white p-2 rounded border border-blue-200 flex items-center">
+                                Preview will appear here as you type...
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -399,7 +473,55 @@
                     </select>
                     <input type="text" id="edit-q-chapter" required placeholder="Chapter" class="p-2 border rounded text-xs bg-white">
                 </div>
-                <textarea id="edit-q-text" rows="3" required placeholder="Question text..." class="w-full p-2 border rounded text-xs bg-white font-medium"></textarea>
+
+                <!-- 🧮 EDIT MODAL EQUATION TOOLBAR -->
+                <div class="bg-white border rounded-lg p-2.5 space-y-2">
+                    <div class="flex gap-1 border-b pb-1 overflow-x-auto text-[11px] font-bold">
+                        <button type="button" onclick="switchAdminEqTab('edit', 'algebra')" id="admin-edit-tab-btn-algebra" class="admin-edit-eq-tab-btn bg-blue-900 text-white px-2.5 py-1 rounded">Algebra</button>
+                        <button type="button" onclick="switchAdminEqTab('edit', 'calculus')" id="admin-edit-tab-btn-calculus" class="admin-edit-eq-tab-btn bg-white text-gray-700 border px-2.5 py-1 rounded">Calculus & Trig</button>
+                        <button type="button" onclick="switchAdminEqTab('edit', 'chemistry')" id="admin-edit-tab-btn-chemistry" class="admin-edit-eq-tab-btn bg-white text-gray-700 border px-2.5 py-1 rounded">Chemistry</button>
+                        <button type="button" onclick="switchAdminEqTab('edit', 'symbols')" id="admin-edit-tab-btn-symbols" class="admin-edit-eq-tab-btn bg-white text-gray-700 border px-2.5 py-1 rounded">Symbols</button>
+                    </div>
+
+                    <div id="admin-edit-eq-tab-algebra" class="admin-edit-eq-panel flex flex-wrap gap-1">
+                        <button type="button" onclick="insertSymbol('edit-q-text', 'x^2', 'admin-edit-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">x²</button>
+                        <button type="button" onclick="insertSymbol('edit-q-text', 'x^n', 'admin-edit-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">xⁿ</button>
+                        <button type="button" onclick="insertSymbol('edit-q-text', '\\frac{a}{b}', 'admin-edit-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">a/b</button>
+                        <button type="button" onclick="insertSymbol('edit-q-text', '\\sqrt{x}', 'admin-edit-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">√x</button>
+                        <button type="button" onclick="insertSymbol('edit-q-text', '\\sqrt[n]{x}', 'admin-edit-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">ⁿ√x</button>
+                        <button type="button" onclick="insertSymbol('edit-q-text', '\\begin{vmatrix} a & b \\\\ c & d \\end{vmatrix}', 'admin-edit-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">Matrix 2x2</button>
+                    </div>
+
+                    <div id="admin-edit-eq-tab-calculus" class="admin-edit-eq-panel hidden flex flex-wrap gap-1">
+                        <button type="button" onclick="insertSymbol('edit-q-text', '\\int_{a}^{b} x dx', 'admin-edit-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">∫ Definite</button>
+                        <button type="button" onclick="insertSymbol('edit-q-text', '\\frac{dy}{dx}', 'admin-edit-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">dy/dx</button>
+                        <button type="button" onclick="insertSymbol('edit-q-text', '\\sin\\theta', 'admin-edit-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">sin θ</button>
+                        <button type="button" onclick="insertSymbol('edit-q-text', '\\tan^{-1}(x)', 'admin-edit-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">tan⁻¹(x)</button>
+                    </div>
+
+                    <div id="admin-edit-eq-tab-chemistry" class="admin-edit-eq-panel hidden flex flex-wrap gap-1">
+                        <button type="button" onclick="insertSymbol('edit-q-text', '\\text{H}_2\\text{O}', 'admin-edit-preview')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">H₂O</button>
+                        <button type="button" onclick="insertSymbol('edit-q-text', '\\text{CO}_2', 'admin-edit-preview')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">CO₂</button>
+                        <button type="button" onclick="insertSymbol('edit-q-text', '\\rightarrow', 'admin-edit-preview')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">→</button>
+                    </div>
+
+                    <div id="admin-edit-eq-tab-symbols" class="admin-edit-eq-panel hidden flex flex-wrap gap-1">
+                        <button type="button" onclick="insertSymbol('edit-q-text', '\\alpha', 'admin-edit-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">α</button>
+                        <button type="button" onclick="insertSymbol('edit-q-text', '\\theta', 'admin-edit-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">θ</button>
+                        <button type="button" onclick="insertSymbol('edit-q-text', '\\pi', 'admin-edit-preview')" class="px-2 py-1 bg-slate-50 border rounded text-xs font-bold hover:bg-blue-50">π</button>
+                    </div>
+                </div>
+
+                <textarea id="edit-q-text" rows="3" oninput="updateAdminLivePreview('edit-q-text', 'admin-edit-preview')" required placeholder="Question text..." class="w-full p-2 border rounded text-xs bg-white font-medium"></textarea>
+                
+                <!-- EDIT LIVE PREVIEW BOX -->
+                <div class="p-2 bg-blue-100/70 border border-blue-300 rounded-lg space-y-1">
+                    <span class="text-[10px] font-black text-blue-900 uppercase tracking-wider">👁️ Live Student View Preview:</span>
+                    <div id="admin-edit-preview" class="text-xs font-bold text-gray-800 min-h-[26px] bg-white p-2 rounded border border-blue-200 flex items-center">
+                        Preview will appear here...
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-2">
                     <input type="text" id="edit-q-optA" required placeholder="Option A" class="p-2 border rounded text-xs bg-white">
                     <input type="text" id="edit-q-optB" required placeholder="Option B" class="p-2 border rounded text-xs bg-white">
@@ -458,6 +580,67 @@
         let fetchedResultsData = [];
         let masterQuestionsMap = {};
         let activeQuestionsList = [];
+
+        // 🔘 TOOLBAR TAB SWITCHER FOR ADMIN
+        function switchAdminEqTab(mode, tabName) {
+            document.querySelectorAll(`.admin-${mode}-eq-tab-btn`).forEach(btn => {
+                btn.className = `admin-${mode}-eq-tab-btn bg-white text-gray-700 border px-2.5 py-1 rounded`;
+            });
+            document.querySelectorAll(`.admin-${mode}-eq-panel`).forEach(p => p.classList.add('hidden'));
+
+            document.getElementById(`admin-${mode}-tab-btn-${tabName}`).className = `admin-${mode}-eq-tab-btn bg-blue-900 text-white px-2.5 py-1 rounded`;
+            document.getElementById(`admin-${mode}-eq-tab-${tabName}`).classList.remove('hidden');
+        }
+
+        // 🛠️ TOOLBAR SYMBOL INSERTION
+        function insertSymbol(elementId, symbol, previewId) {
+            const input = document.getElementById(elementId);
+            const start = input.selectionStart || 0;
+            const end = input.selectionEnd || 0;
+            const text = input.value;
+            
+            input.value = text.substring(0, start) + symbol + text.substring(end);
+            input.focus();
+            input.selectionStart = input.selectionEnd = start + symbol.length;
+            
+            updateAdminLivePreview(elementId, previewId);
+        }
+
+        // 👁️ REAL-TIME LIVE PREVIEW UPDATER (WITH BUG FIX)
+        function updateAdminLivePreview(inputId, previewId) {
+            const text = document.getElementById(inputId).value;
+            const previewBox = document.getElementById(previewId);
+            
+            if (!text.trim()) {
+                previewBox.innerText = "Preview will appear here...";
+                return;
+            }
+
+            let formatted = text;
+
+            // Auto convert determinant notation |1 1| |2 2| if typed
+            const detRegex = /\|\s*([\d\w\s]+)\s*\|\s*\|\s*([\d\w\s]+)\s*\|\s*\|\s*([\d\w\s]+)\s*\|/g;
+            formatted = formatted.replace(detRegex, (match, r1, r2, r3) => {
+                let row1 = r1.trim().split(/\s+/).join(' & ');
+                let row2 = r2.trim().split(/\s+/).join(' & ');
+                let row3 = r3.trim().split(/\s+/).join(' & ');
+                return `$ \\begin{vmatrix} ${row1} \\\\ ${row2} \\\\ ${row3} \\end{vmatrix} $`;
+            });
+
+            // Wrap un-escaped powers like x^2 -> x^{2} (BUG FIX: using $1 instead of $$1)
+            formatted = formatted.replace(/([a-zA-Z0-9\)\>]+)\^\s*(-?\d+|[a-zA-Z])/g, '$1^{$2}');
+
+            // Wrap in inline latex math $ ... $ if no $ exists
+            if (!formatted.includes('$')) {
+                formatted = `$${formatted}$`;
+            }
+
+            previewBox.innerText = formatted;
+
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise([previewBox]);
+            }
+        }
 
         // 🔐 LOGIN LOGIC
         function handleAdminLogin(e) {
@@ -646,6 +829,11 @@
                     qIndex++;
                 }
             }
+
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise([listContainer]);
+            }
+
             document.getElementById('analysis-modal').classList.remove('hidden');
         }
 
@@ -912,7 +1100,6 @@
             reader.readAsText(input.files[0]);
         }
 
-        // 📥 1. DOWNLOAD SAMPLE CSV TEMPLATE FOR QUESTIONS
         function downloadSampleQuestionCSV() {
             const headers = "Question,OptionA,OptionB,OptionC,OptionD,CorrectOption,Subject,Class,Chapter";
             const sampleRow1 = '"What is the S.I. unit of Electric Current?","Volt","Ampere","Ohm","Watt","B","Physics","Class 10","Electricity"';
@@ -930,7 +1117,6 @@
             document.body.removeChild(link);
         }
 
-        // 🚀 2. PROCESS & BULK UPLOAD FULL QUESTION PAPER CSV
         function processFullPaperCSV() {
             const fileInput = document.getElementById('admin-csv-file-input');
             if (!fileInput.files.length) return alert("Please select a Question Paper CSV file to upload!");
@@ -945,7 +1131,6 @@
                 for (let i = 1; i < lines.length; i++) {
                     if (!lines[i].trim()) continue;
 
-                    // Parse CSV handling quotes
                     const cols = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
                     const cleanCols = cols.map(c => c.trim().replace(/^"|"$/g, ''));
 
@@ -986,7 +1171,6 @@
             reader.readAsText(fileInput.files[0]);
         }
 
-        // ADMIN ADD SINGLE QUESTION DIRECTLY TO BANK
         function handleAdminAddQuestion(e) {
             e.preventDefault();
             const payload = {
@@ -1012,6 +1196,7 @@
                 document.getElementById('admin-add-optB').value = "";
                 document.getElementById('admin-add-optC').value = "";
                 document.getElementById('admin-add-optD').value = "";
+                updateAdminLivePreview('admin-add-text', 'admin-add-preview');
                 cacheQuestionBank().then(() => loadQuestionBank());
             });
         }
@@ -1049,6 +1234,11 @@
                         `;
                     }
                 });
+
+                if (window.MathJax && MathJax.typesetPromise) {
+                    MathJax.typesetPromise([container]);
+                }
+
                 updateSelectedCount();
             });
         }
@@ -1069,6 +1259,7 @@
             let rawCorrect = extractCorrectOption(q) || 'A';
             document.getElementById('edit-q-correct').value = rawCorrect;
 
+            updateAdminLivePreview('edit-q-text', 'admin-edit-preview');
             document.getElementById('edit-q-modal').classList.remove('hidden');
         }
 
