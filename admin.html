@@ -56,7 +56,62 @@
             </form>
         </div>
 
-        <!-- Section 2: User Management (Add/Edit & BULK CSV UPLOAD) -->
+        <!-- Section 2: Result Analysis & Excel Export Panel -->
+        <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
+            <div class="flex flex-wrap justify-between items-center border-b pb-3 gap-2">
+                <div>
+                    <h3 class="font-bold text-gray-800 text-sm">📊 Student Result Analysis & Reports</h3>
+                    <p class="text-[11px] text-gray-400">View real-time student test attempts, performance metrics, and export data</p>
+                </div>
+                <button onclick="exportResultsToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-4 rounded shadow transition flex items-center gap-1.5">
+                    📥 Export Results to CSV (Excel)
+                </button>
+            </div>
+
+            <!-- Analysis Cards Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg text-center">
+                    <p class="text-[10px] font-bold text-blue-800 uppercase">Total Attempts</p>
+                    <p class="text-xl font-black text-blue-900 mt-1" id="stat-total-attempts">0</p>
+                </div>
+                <div class="bg-green-50 border border-green-200 p-3 rounded-lg text-center">
+                    <p class="text-[10px] font-bold text-green-800 uppercase">Batch Average Score</p>
+                    <p class="text-xl font-black text-green-900 mt-1" id="stat-avg-score">0.0</p>
+                </div>
+                <div class="bg-purple-50 border border-purple-200 p-3 rounded-lg text-center">
+                    <p class="text-[10px] font-bold text-purple-800 uppercase">Highest Score</p>
+                    <p class="text-xl font-black text-purple-900 mt-1" id="stat-highest-score">0</p>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 p-3 rounded-lg text-center">
+                    <p class="text-[10px] font-bold text-amber-800 uppercase">Pass Percentage</p>
+                    <p class="text-xl font-black text-amber-900 mt-1" id="stat-pass-percentage">0%</p>
+                </div>
+            </div>
+
+            <!-- Student Results Table -->
+            <div class="overflow-x-auto max-h-[250px] border rounded-lg">
+                <table class="w-full text-left text-xs text-gray-600">
+                    <thead class="bg-slate-100 text-gray-700 uppercase font-bold sticky top-0 border-b">
+                        <tr>
+                            <th class="p-2.5">Roll No</th>
+                            <th class="p-2.5">Exam Batch</th>
+                            <th class="p-2.5">Obtained Score</th>
+                            <th class="p-2.5">Total Questions</th>
+                            <th class="p-2.5">Percentage</th>
+                            <th class="p-2.5">Status</th>
+                            <th class="p-2.5">Submitted At</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-table-body" class="divide-y">
+                        <tr>
+                            <td colspan="7" class="p-4 text-center text-gray-400">Loading exam results...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section 3: User Management (Add/Edit & BULK CSV UPLOAD) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             <!-- Student Management Box -->
@@ -145,7 +200,7 @@
 
         </div>
 
-        <!-- Section 3: Master Question Bank & Live Question Activation -->
+        <!-- Section 4: Master Question Bank & Live Question Activation -->
         <div class="bg-white p-6 rounded-xl border shadow-sm flex flex-col justify-between">
             <div>
                 <div class="flex justify-between items-center border-b pb-3 mb-4">
@@ -159,13 +214,11 @@
                     </div>
                 </div>
 
-                <!-- Scrollable Question List -->
                 <div class="space-y-3 max-h-[380px] overflow-y-auto pr-1" id="question-bank-container">
                     <p class="text-xs text-gray-400 text-center py-8">Loading question bank...</p>
                 </div>
             </div>
 
-            <!-- Deploy Action Bar -->
             <div class="border-t pt-3 mt-4 flex justify-between items-center bg-gray-50 p-3 rounded-lg border">
                 <span class="text-xs font-bold text-gray-700" id="selected-count-label">Selected: 0 Questions</span>
                 <button onclick="saveActiveExamQuestions()" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-2 px-4 rounded shadow transition flex items-center gap-1">
@@ -190,13 +243,107 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        let fetchedResultsData = []; // Store result data for CSV export
+
         window.onload = function() {
+            loadResultsAndAnalysis();
             loadStudents();
             loadTeachers();
             loadQuestionBank();
         };
 
-        // --- BULK STUDENT CSV UPLOAD ---
+        // --- RESULT ANALYSIS & EXPORT LOGIC ---
+        function loadResultsAndAnalysis() {
+            db.collection("exam_attempts").get().then(snapshot => {
+                const tbody = document.getElementById('results-table-body');
+                tbody.innerHTML = "";
+                fetchedResultsData = [];
+
+                if(snapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-400">No student exam submissions recorded yet.</td></tr>`;
+                    updateAnalysisCards(0, 0, 0, 0);
+                    return;
+                }
+
+                let totalAttempts = snapshot.size;
+                let totalScoreSum = 0;
+                let highestScore = 0;
+                let passedCount = 0;
+
+                snapshot.forEach(doc => {
+                    const r = doc.data();
+                    fetchedResultsData.push(r);
+
+                    const score = r.score || 0;
+                    const totalQs = r.totalQuestions || 1;
+                    const percentage = ((score / totalQs) * 100).toFixed(2);
+                    const isPass = percentage >= 33;
+
+                    totalScoreSum += score;
+                    if (score > highestScore) highestScore = score;
+                    if (isPass) passedCount++;
+
+                    const dateStr = r.submittedAt ? new Date(r.submittedAt.toDate()).toLocaleString() : 'Recent';
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-2.5 font-bold text-gray-800">${r.rollNo || 'N/A'}</td>
+                            <td class="p-2.5 text-gray-600">${r.examTitle || 'Test'}</td>
+                            <td class="p-2.5 font-bold text-blue-700">${score}</td>
+                            <td class="p-2.5 text-gray-500">${totalQs}</td>
+                            <td class="p-2.5 font-bold text-purple-700">${percentage}%</td>
+                            <td class="p-2.5">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isPass ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                    ${isPass ? 'PASS' : 'FAIL'}
+                                </span>
+                            </td>
+                            <td class="p-2.5 text-[11px] text-gray-400">${dateStr}</td>
+                        </tr>
+                    `;
+                });
+
+                const avgScore = (totalScoreSum / totalAttempts).toFixed(1);
+                const passPercentage = ((passedCount / totalAttempts) * 100).toFixed(1);
+
+                updateAnalysisCards(totalAttempts, avgScore, highestScore, passPercentage);
+            });
+        }
+
+        function updateAnalysisCards(attempts, avg, highest, passPct) {
+            document.getElementById('stat-total-attempts').innerText = attempts;
+            document.getElementById('stat-avg-score').innerText = avg;
+            document.getElementById('stat-highest-score').innerText = highest;
+            document.getElementById('stat-pass-percentage').innerText = `${passPct}%`;
+        }
+
+        function exportResultsToCSV() {
+            if(fetchedResultsData.length === 0) {
+                alert("No results available to export!");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,Roll No,Exam Title,Score,Total Questions,Percentage,Status,Date Time\n";
+
+            fetchedResultsData.forEach(r => {
+                const score = r.score || 0;
+                const totalQs = r.totalQuestions || 1;
+                const percentage = ((score / totalQs) * 100).toFixed(2);
+                const isPass = percentage >= 33 ? 'PASS' : 'FAIL';
+                const dateStr = r.submittedAt ? new Date(r.submittedAt.toDate()).toLocaleString().replace(',', '') : 'N/A';
+
+                csvContent += `${r.rollNo},"${r.examTitle}",${score},${totalQs},${percentage}%,${isPass},"${dateStr}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `DAV_Exam_Results_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // --- BULK STUDENT & TEACHER CSV UPLOADS ---
         function processStudentCSV() {
             const input = document.getElementById('student-csv-input');
             if(!input.files.length) return alert("Select a Student CSV file first!");
@@ -212,12 +359,7 @@
                     const cols = lines[i].split(',').map(c => c.trim());
                     if(cols.length >= 4) {
                         const ref = db.collection("students").doc();
-                        batch.set(ref, {
-                            rollNo: cols[0],
-                            name: cols[1],
-                            class: cols[2],
-                            password: cols[3]
-                        });
+                        batch.set(ref, { rollNo: cols[0], name: cols[1], class: cols[2], password: cols[3] });
                         count++;
                     }
                 }
@@ -229,7 +371,6 @@
             reader.readAsText(input.files[0]);
         }
 
-        // --- BULK TEACHER CSV UPLOAD ---
         function processTeacherCSV() {
             const input = document.getElementById('teacher-csv-input');
             if(!input.files.length) return alert("Select a Teacher CSV file first!");
@@ -245,12 +386,7 @@
                     const cols = lines[i].split(',').map(c => c.trim());
                     if(cols.length >= 4) {
                         const ref = db.collection("teachers").doc();
-                        batch.set(ref, {
-                            name: cols[0],
-                            subject: cols[1],
-                            email: cols[2],
-                            password: cols[3]
-                        });
+                        batch.set(ref, { name: cols[0], subject: cols[1], email: cols[2], password: cols[3] });
                         count++;
                     }
                 }
