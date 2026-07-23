@@ -261,36 +261,41 @@
         let activeSubjectFilter = "ALL";
         let timerInterval = null;
 
-        // 🧮 FOOLPROOF AUTOMATIC MATH & DETERMINANT PARSER
+        // 🧮 FOOLPROOF MATH PARSER (Prevents double $$ wrapping inside matrices)
         function formatMathText(text) {
             if (!text) return "";
 
-            let formatted = text;
+            // Divide text into pre-existing $...$ math blocks vs plain text
+            const parts = text.split(/(\$\$.*?\$\$|\$.*?\$)/gs);
 
-            // 1. Detect 3-Row Determinants e.g., | 1 1 1 | | 1 2 3 | | 1 3 6 | and convert to LaTeX Matrix
-            const detRegex = /\|\s*([\d\w\s]+)\s*\|\s*\|\s*([\d\w\s]+)\s*\|\s*\|\s*([\d\w\s]+)\s*\|/g;
-            formatted = formatted.replace(detRegex, (match, r1, r2, r3) => {
-                let row1 = r1.trim().split(/\s+/).join(' & ');
-                let row2 = r2.trim().split(/\s+/).join(' & ');
-                let row3 = r3.trim().split(/\s+/).join(' & ');
-                return `$ \\begin{vmatrix} ${row1} \\\\ ${row2} \\\\ ${row3} \\end{vmatrix} $`;
-            });
+            return parts.map(part => {
+                if (part.startsWith('$')) {
+                    return part;
+                }
 
-            // 2. Wrap LaTeX Backslash Commands (\sqrt{x}, \frac{a}{b}, \int) in $...$ if un-wrapped
-            formatted = formatted.replace(/(\\[a-zA-Z]+(?:\{.*?\})*)/g, (match) => {
-                if (match.includes('$')) return match;
-                return `$${match}$`;
-            });
+                let formatted = part;
 
-            // 3. FOOLPROOF POWER CONVERTER: x^2 -> $x^{2}$ (Fixes 1^2 bug via Function Callback)
-            formatted = formatted.replace(/([a-zA-Z0-9\)\>]+)\^\s*(-?\d+|[a-zA-Z]+)/g, (match, varName, power) => {
-                return `$${varName}^{${power}}$`;
-            });
+                // 1. Detect 3-Row Determinants: |1 1 1| |1 2 3| |1 3 6|
+                const detRegex = /\|\s*([\d\w\s]+)\s*\|\s*\|\s*([\d\w\s]+)\s*\|\s*\|\s*([\d\w\s]+)\s*\|/g;
+                formatted = formatted.replace(detRegex, (match, r1, r2, r3) => {
+                    let row1 = r1.trim().split(/\s+/).join(' & ');
+                    let row2 = r2.trim().split(/\s+/).join(' & ');
+                    let row3 = r3.trim().split(/\s+/).join(' & ');
+                    return `$ \\begin{vmatrix} ${row1} \\\\ ${row2} \\\\ ${row3} \\end{vmatrix} $`;
+                });
 
-            // 4. Clean double $$ if any
-            formatted = formatted.replace(/\$\$/g, '$');
+                // 2. Wrap LaTeX commands (\sqrt{x}, \frac{a}{b}, \int)
+                formatted = formatted.replace(/(\\[a-zA-Z]+(?:\{.*?\})*)/g, (match) => {
+                    return `$${match}$`;
+                });
 
-            return formatted;
+                // 3. Convert power notation: x^2 -> $x^{2}$
+                formatted = formatted.replace(/([a-zA-Z0-9\)\>]+)\^\s*(-?\d+|[a-zA-Z]+)/g, (match, varName, power) => {
+                    return `$${varName}^{${power}}$`;
+                });
+
+                return formatted;
+            }).join('');
         }
 
         function handleStudentLogin(e) {
@@ -514,7 +519,6 @@
             loadActiveQuestion();
         }
 
-        // 🎯 RENDER NTA PALETTE GRID WITH SUBJECT FILTER
         function renderPaletteGrid() {
             const grid = document.getElementById('question-palette-grid');
             grid.innerHTML = "";
