@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher & Admin Portal - DAV Public School</title>
+    <title>Teacher Portal - DAV Public School</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase SDKs -->
@@ -14,20 +14,29 @@
 
     <div class="max-w-7xl mx-auto space-y-6">
 
-        <!-- Top Banner Header -->
-        <div class="flex flex-wrap justify-between items-center bg-white p-4 rounded-xl shadow border border-gray-200">
+        <!-- Header Banner & Subject Selector -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-4 rounded-xl shadow border border-gray-200 gap-3">
             <div>
                 <h1 class="text-2xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
-                <p class="text-xs text-gray-500 font-semibold">Teacher & Admin Management Portal</p>
+                <p class="text-xs text-gray-500 font-semibold">Teacher Content & Exam Control Panel</p>
             </div>
-            <div class="flex items-center gap-3 mt-2 sm:mt-0">
-                <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1.5 rounded-full font-bold border border-blue-200" id="teacher-profile-badge">
-                    👤 Logged in as: Vikram Sir
+            <div class="flex items-center gap-3">
+                <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1.5 rounded-full font-bold border border-blue-200">
+                    👤 Teacher: Vikram Sir
                 </span>
+                <!-- Subject Filter Dropdown -->
+                <div class="flex items-center gap-1.5 bg-gray-100 p-1 rounded-lg border">
+                    <label class="text-xs font-bold text-gray-600 pl-1">Active Subject:</label>
+                    <select id="active-subject-filter" onchange="loadQuestionBank()" class="bg-white text-xs font-bold text-blue-900 p-1.5 rounded border focus:outline-none">
+                        <option value="Physics">Physics</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Science">Science</option>
+                    </select>
+                </div>
             </div>
         </div>
 
-        <!-- Section 1: Live Exam Control & Timing Panel -->
+        <!-- Section 1: Exam Control & Timing Panel -->
         <div class="bg-amber-50 border border-amber-200 p-6 rounded-xl shadow-sm">
             <h2 class="text-md font-bold text-amber-900 mb-4 flex items-center gap-2">
                 ⚙️ Live Exam Batch & Timing Control
@@ -35,7 +44,7 @@
             <form onsubmit="handleExamControl(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                 <div>
                     <label class="block text-xs font-bold text-gray-700 mb-1">Exam Title / Batch</label>
-                    <input type="text" id="exam-title" required value="Class 10 Physics & Maths Test" class="w-full p-2 border rounded text-xs focus:ring-2 focus:ring-amber-500 bg-white">
+                    <input type="text" id="exam-title" required value="Class 10 Physics & Math Test" class="w-full p-2 border rounded text-xs focus:ring-2 focus:ring-amber-500 bg-white">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-700 mb-1">Exam Status</label>
@@ -50,7 +59,7 @@
                 </div>
                 <div class="md:col-span-2">
                     <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 px-4 rounded text-xs shadow transition">
-                        💾 Save & Activate Exam
+                        💾 Save & Activate Exam Settings
                     </button>
                 </div>
             </form>
@@ -72,7 +81,7 @@
             </div>
         </div>
 
-        <!-- Section 3: Add Single Question & Interactive Question Bank -->
+        <!-- Section 3: Add Single Question & Filtered Question Bank -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             <!-- Left Box: Add Single Question -->
@@ -90,7 +99,7 @@
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-gray-500 uppercase">Chapter</label>
-                            <input type="text" id="q-chapter" value="Light" required class="w-full p-2 border rounded text-xs mt-0.5">
+                            <input type="text" id="q-chapter" value="Electricity" required class="w-full p-2 border rounded text-xs mt-0.5">
                         </div>
                     </div>
                     <div>
@@ -104,7 +113,7 @@
                         <input type="text" id="opt-d" placeholder="Option D" required class="p-2 border rounded text-xs">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Correct Answer</label>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Correct Option</label>
                         <select id="opt-correct" class="w-full p-2 border rounded text-xs bg-white mt-0.5">
                             <option value="A">Option A</option>
                             <option value="B">Option B</option>
@@ -113,18 +122,18 @@
                         </select>
                     </div>
                     <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded text-xs shadow transition">
-                        💾 Add Question to Bank
+                        💾 Save Question to Bank
                     </button>
                 </form>
             </div>
 
-            <!-- Right Box: Question Bank with Teacher Metadata & Checkbox Selection -->
+            <!-- Right Box: Subject Filtered Question Bank with Checkboxes -->
             <div class="bg-white p-6 rounded-xl border shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex justify-between items-center border-b pb-3 mb-4">
                         <div>
-                            <h3 class="font-bold text-gray-800 text-sm">📚 Question Bank Panel</h3>
-                            <p class="text-[11px] text-gray-400">Select questions to include in live exam</p>
+                            <h3 class="font-bold text-gray-800 text-sm">📚 <span id="bank-subject-heading">Physics</span> Questions Bank</h3>
+                            <p class="text-[11px] text-gray-400">Only showing questions for selected subject</p>
                         </div>
                         <div class="flex items-center gap-2">
                             <button onclick="selectAllQuestions(true)" class="text-xs text-blue-600 hover:underline font-bold">Select All</button> |
@@ -134,15 +143,15 @@
 
                     <!-- Scrollable Question Cards List -->
                     <div class="space-y-3 max-h-[430px] overflow-y-auto pr-1" id="question-bank-container">
-                        <p class="text-xs text-gray-400 text-center py-8">Loading questions from central bank...</p>
+                        <p class="text-xs text-gray-400 text-center py-8">Loading subject questions...</p>
                     </div>
                 </div>
 
-                <!-- Bottom Status & Save Action Bar -->
+                <!-- Bottom Action Bar -->
                 <div class="border-t pt-3 mt-4 flex justify-between items-center bg-gray-50 p-3 rounded-lg border">
                     <span class="text-xs font-bold text-gray-700" id="selected-count-label">Selected: 0 Questions</span>
                     <button onclick="saveActiveExamQuestions()" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-2 px-4 rounded shadow transition flex items-center gap-1">
-                        ✅ Activate Selected Questions for Live Exam
+                        ✅ Activate Selected for Live Exam
                     </button>
                 </div>
             </div>
@@ -165,20 +174,33 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        const CURRENT_TEACHER_NAME = "Vikram Sir"; // Current Active Teacher Name
+        const CURRENT_TEACHER_NAME = "Vikram Sir";
 
         window.onload = function() {
             loadQuestionBank();
         };
 
-        // Load Question Bank and render with Checkboxes and Metadata
+        // Filtered Load Function: Only fetches questions for the Selected Subject
         function loadQuestionBank() {
-            db.collection("question_bank").get().then(snapshot => {
-                const container = document.getElementById('question-bank-container');
+            const activeSubject = document.getElementById('active-subject-filter').value;
+            document.getElementById('bank-subject-heading').innerText = activeSubject;
+            
+            // Auto-fill selected subject in Single Add Question form
+            document.getElementById('q-subject').value = activeSubject;
+
+            const container = document.getElementById('question-bank-container');
+            container.innerHTML = `<p class="text-xs text-gray-400 text-center py-8">Loading ${activeSubject} questions...</p>`;
+
+            // Firestore Query with Subject Filter
+            db.collection("question_bank")
+              .where("subject", "==", activeSubject)
+              .get()
+              .then(snapshot => {
                 container.innerHTML = "";
 
                 if(snapshot.empty) {
-                    container.innerHTML = `<p class="text-xs text-gray-400 text-center py-8">No questions uploaded yet.</p>`;
+                    container.innerHTML = `<p class="text-xs text-gray-400 text-center py-8">No questions found for <b>${activeSubject}</b>.</p>`;
+                    updateSelectedCount();
                     return;
                 }
 
@@ -202,7 +224,6 @@
                                 <p class="text-xs font-bold text-gray-800 leading-snug">${q.question}</p>
                                 <p class="text-[11px] text-green-700 font-semibold mt-1">Ans: (${q.correctOption}) ${q.options ? q.options[q.correctOption] || '' : ''}</p>
                                 
-                                <!-- Metadata Row: Uploaded By & Date -->
                                 <div class="mt-2 pt-2 border-t border-gray-200 flex justify-between text-[10px] text-gray-500 font-medium">
                                     <span>👤 <b>Uploaded By:</b> ${uploadedBy}</span>
                                     <span>📅 <b>Date:</b> ${uploadedDate}</span>
@@ -214,12 +235,14 @@
                 });
 
                 updateSelectedCount();
+            }).catch(error => {
+                console.error("Error loading questions: ", error);
             });
         }
 
         function updateSelectedCount() {
             const checkboxes = document.querySelectorAll('.q-checkbox:checked');
-            document.getElementById('selected-count-label').innerText = `Selected: ${checkboxes.length} Questions for Live Exam`;
+            document.getElementById('selected-count-label').innerText = `Selected: ${checkboxes.length} Questions for Exam`;
         }
 
         function selectAllQuestions(status) {
@@ -228,7 +251,6 @@
             updateSelectedCount();
         }
 
-        // Save selected questions for Student Exam Engine
         async function saveActiveExamQuestions() {
             const checkboxes = document.querySelectorAll('.q-checkbox');
             const batch = db.batch();
@@ -239,10 +261,9 @@
             });
 
             await batch.commit();
-            alert("🎯 Selected questions successfully assigned to the Live Exam!");
+            alert("🎯 Subject questions updated for Live Exam!");
         }
 
-        // CSV Upload Handler with Metadata
         function processCSVUpload() {
             const fileInput = document.getElementById('csv-file-input');
             if (!fileInput.files.length) {
@@ -281,7 +302,7 @@
                 }
 
                 batch.commit().then(() => {
-                    alert(`✅ ${count} Questions Uploaded & Auto-Selected successfully by ${CURRENT_TEACHER_NAME}!`);
+                    alert(`✅ ${count} Questions Uploaded by ${CURRENT_TEACHER_NAME}!`);
                     loadQuestionBank();
                 });
             };
@@ -289,7 +310,6 @@
             reader.readAsText(file);
         }
 
-        // Add Single Question Handler
         function handleSingleQuestion(e) {
             e.preventDefault();
             const todayStr = new Date().toLocaleDateString('en-IN');
@@ -337,7 +357,7 @@
                 isActive: isActive,
                 duration: duration,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => alert("✅ Exam Control Settings Saved Successfully!"));
+            }).then(() => alert("✅ Exam Control Settings Saved!"));
         }
     </script>
 </body>
