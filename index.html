@@ -260,6 +260,7 @@
         let currentIndex = 0; 
         let activeSubjectFilter = "ALL";
         let timerInterval = null;
+        let remainingSeconds = 0;
 
         // 🧮 100% PERFECT & BUG-FREE MATH PARSER
         function formatMathText(text) {
@@ -301,6 +302,36 @@
 
                 return formatted;
             }).join('');
+        }
+
+        // 💾 SAVE CURRENT SESSION TO LOCALSTORAGE
+        function saveSessionState() {
+            if (!loggedInStudent) return;
+            const state = {
+                student: loggedInStudent,
+                answers: studentAnswersMap,
+                statuses: questionStatusMap,
+                index: currentIndex,
+                activeFilter: activeSubjectFilter,
+                remainingTime: remainingSeconds
+            };
+            localStorage.setItem(`nta_exam_state_${loggedInStudent.rollNo}_${loggedInStudent.class}`, JSON.stringify(state));
+        }
+
+        function restoreSessionState(rollNo, targetClass) {
+            const raw = localStorage.getItem(`nta_exam_state_${rollNo}_${targetClass}`);
+            if (!raw) return false;
+            try {
+                const state = JSON.parse(raw);
+                studentAnswersMap = state.answers || {};
+                questionStatusMap = state.statuses || {};
+                currentIndex = state.index || 0;
+                activeSubjectFilter = state.activeFilter || "ALL";
+                remainingSeconds = state.remainingTime || 0;
+                return true;
+            } catch (e) {
+                return false;
+            }
         }
 
         function handleStudentLogin(e) {
@@ -347,7 +378,8 @@
                     .get()
                     .then(attemptSnap => {
                         if (!attemptSnap.empty) {
-                            return alert("⚠️ You have ALREADY SUBMITTED this exam! Re-attempts are not allowed.");
+                            localStorage.removeItem(`nta_exam_state_${loggedInStudent.rollNo}_${loggedInStudent.class}`);
+                            return alert("⚠️ Your exam is submitted! Re-login or re-attempts are not allowed.");
                         }
 
                         fetchExamQuestions(targetClass, examMeta);
@@ -367,8 +399,6 @@
 
                     masterQuestionsList = [];
                     subjectWiseMap = {};
-                    studentAnswersMap = {};
-                    questionStatusMap = {};
 
                     snapshot.forEach(doc => {
                         const q = doc.data();
@@ -388,8 +418,16 @@
                     document.getElementById('display-student-info').innerText = `${loggedInStudent.class} | Roll: ${loggedInStudent.rollNo}`;
 
                     buildSubjectTabs();
-                    filterBySubject('ALL');
-                    startTimer(examMeta.duration || 180);
+
+                    const isRestored = restoreSessionState(loggedInStudent.rollNo, targetClass);
+                    
+                    filterBySubject(activeSubjectFilter, isRestored);
+
+                    let initialDurationSeconds = isRestored && remainingSeconds > 0 
+                        ? remainingSeconds 
+                        : (examMeta.duration || 180) * 60;
+
+                    startTimerBySeconds(initialDurationSeconds);
                 });
         }
 
@@ -411,7 +449,7 @@
             });
         }
 
-        function filterBySubject(subjName) {
+        function filterBySubject(subjName, isRestored = false) {
             activeSubjectFilter = subjName;
 
             document.querySelectorAll('.subj-tab').forEach(btn => {
@@ -429,9 +467,13 @@
                 document.getElementById('palette-subject-header').innerText = `PALETTE (${subjName.toUpperCase()})`;
             }
 
-            currentIndex = 0;
+            if (!isRestored) {
+                currentIndex = 0;
+            }
+            
             loadActiveQuestion();
             renderPaletteGrid();
+            saveSessionState();
         }
 
         function loadActiveQuestion() {
@@ -474,6 +516,7 @@
         function selectOption(key) {
             const qId = currentSubjectList[currentIndex].id;
             studentAnswersMap[qId] = key;
+            saveSessionState();
         }
 
         function saveAndNext() {
@@ -483,6 +526,7 @@
             } else {
                 questionStatusMap[qId] = 'not-answered';
             }
+            saveSessionState();
             goToNextQuestion();
         }
 
@@ -493,12 +537,14 @@
             } else {
                 questionStatusMap[qId] = 'review';
             }
+            saveSessionState();
             goToNextQuestion();
         }
 
         function markForReview() {
             const qId = currentSubjectList[currentIndex].id;
             questionStatusMap[qId] = 'review';
+            saveSessionState();
             goToNextQuestion();
         }
 
@@ -506,6 +552,7 @@
             const qId = currentSubjectList[currentIndex].id;
             delete studentAnswersMap[qId];
             questionStatusMap[qId] = 'not-answered';
+            saveSessionState();
             loadActiveQuestion();
         }
 
@@ -517,11 +564,13 @@
                 alert(`You have reached the end of ${activeSubjectFilter} questions.`);
                 renderPaletteGrid();
             }
+            saveSessionState();
         }
 
         function jumpToQuestion(idx) {
             currentIndex = idx;
             loadActiveQuestion();
+            saveSessionState();
         }
 
         function renderPaletteGrid() {
@@ -548,23 +597,27 @@
             });
         }
 
-        function startTimer(durationMins) {
-            let totalSeconds = durationMins * 60;
+        function startTimerBySeconds(totalSecs) {
+            remainingSeconds = totalSecs;
             const timerDisplay = document.getElementById('timer-display');
 
+            if (timerInterval) clearInterval(timerInterval);
+
             timerInterval = setInterval(() => {
-                let hrs = Math.floor(totalSeconds / 3600);
-                let mins = Math.floor((totalSeconds % 3600) / 60);
-                let secs = totalSeconds % 60;
+                let hrs = Math.floor(remainingSeconds / 3600);
+                let mins = Math.floor((remainingSeconds % 3600) / 60);
+                let secs = remainingSeconds % 60;
 
                 timerDisplay.innerText = `${hrs < 10 ? '0' : ''}${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
 
-                if (totalSeconds <= 0) {
+                if (remainingSeconds % 5 === 0) saveSessionState();
+
+                if (remainingSeconds <= 0) {
                     clearInterval(timerInterval);
                     alert("⏰ Time is UP! Submitting your exam paper automatically...");
-                    submitExamPaper();
+                    autoSubmitOnTimeUp();
                 }
-                totalSeconds--;
+                remainingSeconds--;
             }, 1000);
         }
 
@@ -598,27 +651,36 @@
             document.getElementById('qp-modal').classList.add('hidden');
         }
 
+        function autoSubmitOnTimeUp() {
+            executeSubmission();
+        }
+
         function submitExamPaper() {
             if (confirm("Are you sure you want to SUBMIT your complete test paper?")) {
-                if (timerInterval) clearInterval(timerInterval);
-
-                const payload = {
-                    rollNo: loggedInStudent.rollNo,
-                    studentName: loggedInStudent.name,
-                    class: loggedInStudent.class,
-                    answers: studentAnswersMap,
-                    totalQuestions: masterQuestionsList.length,
-                    submittedAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
-
-                db.collection("exam_attempts").add(payload).then(() => {
-                    alert("🎉 Exam Submitted Successfully! Thank you.");
-                    location.reload();
-                }).catch(err => {
-                    console.error("Submission Error:", err);
-                    alert("Failed to submit exam. Please try again.");
-                });
+                executeSubmission();
             }
+        }
+
+        function executeSubmission() {
+            if (timerInterval) clearInterval(timerInterval);
+
+            const payload = {
+                rollNo: loggedInStudent.rollNo,
+                studentName: loggedInStudent.name,
+                class: loggedInStudent.class,
+                answers: studentAnswersMap,
+                totalQuestions: masterQuestionsList.length,
+                submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            db.collection("exam_attempts").add(payload).then(() => {
+                localStorage.removeItem(`nta_exam_state_${loggedInStudent.rollNo}_${loggedInStudent.class}`);
+                alert("🎉 Your exam is submitted! Re-login or re-attempts are not allowed.");
+                location.reload();
+            }).catch(err => {
+                console.error("Submission Error:", err);
+                alert("Failed to submit exam. Please try again.");
+            });
         }
     </script>
 </body>
