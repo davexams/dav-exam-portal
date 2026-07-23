@@ -10,30 +10,30 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-slate-100 font-sans min-h-screen p-4 md:p-6">
+<body class="bg-slate-100 font-sans min-h-screen p-2 md:p-4">
 
-    <div class="max-w-5xl mx-auto space-y-6">
+    <div class="max-w-7xl mx-auto space-y-4">
 
-        <!-- Top Header & Timer Banner -->
-        <div class="flex flex-wrap justify-between items-center bg-white p-4 rounded-xl shadow border border-gray-200">
+        <!-- Top Banner -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-3 md:p-4 rounded-xl shadow border border-gray-200">
             <div>
-                <h1 class="text-xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
+                <h1 class="text-lg md:text-xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
                 <p class="text-xs text-gray-500 font-semibold" id="exam-title-display">Online Examination System</p>
-                <p class="text-xs font-bold text-blue-700 mt-0.5">Student: <span id="student-roll-display">Checking...</span></p>
+                <p class="text-xs font-bold text-blue-700 mt-0.5">Student Roll No: <span id="student-roll-display">Checking...</span></p>
             </div>
             <div class="flex items-center gap-4 mt-2 sm:mt-0">
                 <div class="bg-amber-100 text-amber-900 px-3 py-1.5 rounded-lg border border-amber-300 font-bold text-xs flex items-center gap-1">
-                    ⏱️ Time Remaining: <span id="timer-display" class="font-mono text-sm text-red-600 ml-1">00:00</span>
+                    ⏱️ Time Left: <span id="timer-display" class="font-mono text-sm text-red-600 ml-1">00:00</span>
                 </div>
             </div>
         </div>
 
-        <!-- 🚫 Already Submitted Warning Screen (Hidden by Default) -->
+        <!-- 🚫 Already Submitted Screen -->
         <div id="already-submitted-screen" class="hidden bg-white p-8 rounded-xl border border-red-200 text-center shadow-sm space-y-3">
             <div class="text-4xl">⚠️</div>
             <h2 class="text-lg font-bold text-red-600">Exam Already Submitted!</h2>
             <p class="text-xs text-gray-600 max-w-md mx-auto leading-relaxed">
-                Aapne yeh exam pehle hi submit kar diya hai. One student is allowed only 1 attempt per exam. Further attempts are blocked.
+                Aapne yeh exam pehle hi submit kar diya hai. One student is allowed only 1 attempt per exam.
             </p>
             <div class="pt-2">
                 <span class="bg-red-50 text-red-700 text-xs px-3 py-1 rounded-full font-bold border border-red-200">
@@ -42,39 +42,92 @@
             </div>
         </div>
 
-        <!-- Exam Active Area -->
-        <div id="exam-screen" class="space-y-4">
+        <!-- Exam Active Interface Grid -->
+        <div id="exam-screen" class="grid grid-cols-1 lg:grid-cols-4 gap-4">
             
-            <!-- Subject Filter Tabs Area -->
-            <div class="bg-white p-3 rounded-xl border shadow-sm flex flex-wrap items-center justify-between gap-2">
-                <div class="flex flex-wrap gap-2" id="subject-tabs-container">
-                    <button onclick="filterBySubject('ALL')" class="tab-btn bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow transition">
+            <!-- LEFT MAIN PANEL: Single Question View (3 Columns) -->
+            <div class="lg:col-span-3 space-y-4">
+                
+                <!-- Subject Filter Tabs -->
+                <div class="bg-white p-3 rounded-xl border shadow-sm flex items-center gap-2 overflow-x-auto" id="subject-tabs-container">
+                    <button class="tab-btn bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap">
                         🌐 All Subjects
                     </button>
                 </div>
-                <span class="text-xs font-bold text-gray-500" id="question-count-badge">0 Questions</span>
-            </div>
 
-            <!-- Main Question Display Box -->
-            <div id="questions-container" class="space-y-4">
-                <div class="bg-white p-8 rounded-xl border text-center shadow-sm">
-                    <p class="text-gray-400 text-sm font-semibold">Checking exam status & loading questions...</p>
+                <!-- Single Question Display Card -->
+                <div class="bg-white p-5 rounded-xl border shadow-sm space-y-4 min-h-[320px] flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center border-b pb-3 mb-3">
+                            <span id="current-q-subject" class="text-xs font-black px-2.5 py-1 rounded bg-blue-100 text-blue-800 uppercase">Subject</span>
+                            <span id="current-q-number" class="text-xs font-bold text-gray-500">Question 1 of 10</span>
+                        </div>
+                        
+                        <p id="current-q-text" class="font-bold text-gray-800 text-sm md:text-base leading-relaxed mb-4">
+                            Question text will load here...
+                        </p>
+
+                        <!-- Options Radio Container -->
+                        <div id="options-container" class="space-y-2">
+                            <!-- Options will render here -->
+                        </div>
+                    </div>
+
+                    <!-- Bottom Action Controls -->
+                    <div class="border-t pt-4 flex flex-wrap gap-2 justify-between items-center">
+                        <div class="flex gap-2">
+                            <button onclick="markForReview()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs py-2 px-3 rounded shadow">
+                                🟣 Mark for Review
+                            </button>
+                            <button onclick="clearResponse()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-xs py-2 px-3 rounded">
+                                ⚪ Clear Response
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="navigateQuestion(-1)" id="btn-prev" class="bg-slate-500 hover:bg-slate-600 text-white font-bold text-xs py-2 px-3 rounded">
+                                ⬅️ Previous
+                            </button>
+                            <button onclick="saveAndNext()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 px-4 rounded shadow">
+                                💾 Save & Next ➡️
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
             </div>
 
-            <!-- Bottom Submit Button Bar -->
-            <div class="bg-white p-4 rounded-xl border shadow-sm flex justify-between items-center" id="submit-bar">
-                <span class="text-xs text-gray-500 font-medium">Please double-check all answers before submitting.</span>
-                <button onclick="submitExam()" id="btn-submit-exam" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-2.5 px-6 rounded-lg shadow transition">
-                    🚀 Submit Final Exam
-                </button>
+            <!-- RIGHT PANEL: Question Palette & Status Summary (1 Column) -->
+            <div class="bg-white p-4 rounded-xl border shadow-sm space-y-4 flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-gray-800 text-xs border-b pb-2 mb-3">📋 Question Palette</h3>
+                    
+                    <!-- Color Indicators Legend -->
+                    <div class="grid grid-cols-2 gap-2 text-[10px] text-gray-600 mb-4 bg-slate-50 p-2.5 rounded-lg border">
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-gray-200 border inline-block"></span> Not Visited</div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Not Answered</div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span> Answered</div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-purple-600 inline-block"></span> Marked Review</div>
+                    </div>
+
+                    <!-- Question Numbers Grid -->
+                    <div class="grid grid-cols-5 gap-2 max-h-[260px] overflow-y-auto pr-1" id="question-palette-grid">
+                        <!-- Numbers 1, 2, 3... will render dynamically -->
+                    </div>
+                </div>
+
+                <!-- Final Submit Exam Button -->
+                <div class="border-t pt-3">
+                    <button onclick="submitExam()" id="btn-submit-exam" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-2.5 rounded-lg shadow transition">
+                        🚀 Submit Final Exam
+                    </button>
+                </div>
             </div>
 
         </div>
 
     </div>
 
-    <!-- Firebase Script & Attempt Restriction Logic -->
+    <!-- Firebase & Logic Script -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
@@ -88,7 +141,6 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Roll No logged in student ki (Local Storage se le rahe hain ya prompt)
         let currentStudentRoll = localStorage.getItem('studentRollNo') || prompt("Enter Your Roll No / ID to Start Exam:");
         if (currentStudentRoll) {
             localStorage.setItem('studentRollNo', currentStudentRoll);
@@ -96,21 +148,24 @@
         }
 
         let currentExamTitle = "Class 10 Combined Test";
-        let allFetchedQuestions = [];
-        let currentSelectedSubject = 'ALL';
-        let studentAnswers = {};
+        let allQuestions = [];
+        let filteredQuestions = [];
+        let currentIndex = 0;
+        let selectedSubjectFilter = 'ALL';
+        
+        // Tracking Status: { qId: { answer: 'A', status: 'answered' | 'not_answered' | 'review' } }
+        let questionState = {}; 
         let timerInterval;
 
         window.onload = function() {
             if(!currentStudentRoll) {
-                alert("Roll No is required to attempt the exam!");
+                alert("Roll No is required!");
                 window.location.reload();
                 return;
             }
             checkExamControlAndAttempts();
         };
 
-        // 1. Check Exam Active Status & Verification if Student already attempted
         function checkExamControlAndAttempts() {
             db.collection("exam_control").doc("current_exam").get().then(doc => {
                 if(doc.exists) {
@@ -118,143 +173,179 @@
                     currentExamTitle = data.title || "Class 10 Combined Test";
                     document.getElementById('exam-title-display').innerText = `${currentExamTitle} | Duration: ${data.duration || 30} Mins`;
                     
-                    // CHECK IF ALREADY SUBMITTED
                     verifyPreviousAttempt(data.duration || 30);
                 }
             });
         }
 
         function verifyPreviousAttempt(durationMins) {
-            // Document ID = RollNo + ExamTitle (Strict One-Time Attempt)
             const attemptDocId = `${currentStudentRoll.trim()}_${currentExamTitle.trim()}`;
-
             db.collection("exam_attempts").doc(attemptDocId).get().then(doc => {
                 if(doc.exists) {
-                    // Block Student - Show Already Submitted Screen
                     document.getElementById('exam-screen').classList.add('hidden');
                     document.getElementById('already-submitted-screen').classList.remove('hidden');
                     document.getElementById('timer-display').innerText = "00:00";
                 } else {
-                    // Safe to Start - Load Questions & Start Timer
-                    loadActiveExamQuestions();
+                    loadActiveQuestions();
                     startTimer(durationMins * 60);
                 }
             });
         }
 
-        // 2. Load Questions
-        function loadActiveExamQuestions() {
+        function loadActiveQuestions() {
             db.collection("question_bank")
               .where("selectedForExam", "==", true)
               .get()
               .then(snapshot => {
-                  allFetchedQuestions = [];
+                  allQuestions = [];
                   let subjectSet = new Set();
 
                   snapshot.forEach(doc => {
                       const q = doc.data();
                       q.id = doc.id;
-                      allFetchedQuestions.push(q);
+                      allQuestions.push(q);
                       if (q.subject) subjectSet.add(q.subject);
+
+                      // Initial State: Unvisited
+                      questionState[q.id] = { answer: '', status: 'unvisited' };
                   });
 
                   renderSubjectTabs(Array.from(subjectSet));
-                  filterBySubject('ALL');
+                  filterSubject('ALL');
               });
         }
 
-        // 3. Render Subject Tabs
         function renderSubjectTabs(subjects) {
             const tabsContainer = document.getElementById('subject-tabs-container');
             tabsContainer.innerHTML = `
-                <button onclick="filterBySubject('ALL')" id="tab-btn-ALL" class="tab-btn bg-blue-600 text-white px-3 me-1 py-1.5 rounded-lg text-xs font-bold shadow transition">
+                <button onclick="filterSubject('ALL')" id="tab-btn-ALL" class="tab-btn bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shadow">
                     🌐 All Subjects
                 </button>
             `;
 
             subjects.forEach(sub => {
                 tabsContainer.innerHTML += `
-                    <button onclick="filterBySubject('${sub}')" id="tab-btn-${sub}" class="tab-btn bg-gray-200 text-gray-700 hover:bg-blue-100 px-3 me-1 py-1.5 rounded-lg text-xs font-bold transition">
+                    <button onclick="filterSubject('${sub}')" id="tab-btn-${sub}" class="tab-btn bg-gray-200 text-gray-700 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap">
                         📖 ${sub}
                     </button>
                 `;
             });
         }
 
-        // 4. Filter Questions by Subject
-        function filterBySubject(subjectName) {
-            currentSelectedSubject = subjectName;
+        function filterSubject(sub) {
+            selectedSubjectFilter = sub;
 
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.className = "tab-btn bg-gray-200 text-gray-700 hover:bg-blue-100 px-3 me-1 py-1.5 rounded-lg text-xs font-bold transition";
+                btn.className = "tab-btn bg-gray-200 text-gray-700 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap";
             });
-            const activeBtn = document.getElementById(`tab-btn-${subjectName}`);
-            if (activeBtn) {
-                activeBtn.className = "tab-btn bg-blue-600 text-white px-3 me-1 py-1.5 rounded-lg text-xs font-bold shadow transition";
-            }
+            const activeBtn = document.getElementById(`tab-btn-${sub}`);
+            if(activeBtn) activeBtn.className = "tab-btn bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shadow";
 
-            let filteredList = [];
-            if (subjectName === 'ALL') {
-                filteredList = allFetchedQuestions;
+            if(sub === 'ALL') {
+                filteredQuestions = allQuestions;
             } else {
-                filteredList = allFetchedQuestions.filter(q => 
-                    q.subject && q.subject.trim().toLowerCase() === subjectName.trim().toLowerCase()
-                );
+                filteredQuestions = allQuestions.filter(q => q.subject && q.subject.trim().toLowerCase() === sub.trim().toLowerCase());
             }
 
-            document.getElementById('question-count-badge').innerText = `${filteredList.length} Questions (${subjectName})`;
-            renderQuestionsList(filteredList);
+            currentIndex = 0;
+            renderSingleQuestion();
+            renderPalette();
         }
 
-        // 5. Render Questions Card
-        function renderQuestionsList(questions) {
-            const container = document.getElementById('questions-container');
-            container.innerHTML = "";
+        function renderSingleQuestion() {
+            if(filteredQuestions.length === 0) return;
 
-            if (questions.length === 0) {
-                container.innerHTML = `
-                    <div class="bg-white p-8 rounded-xl border text-center shadow-sm">
-                        <p class="text-gray-400 text-xs font-semibold">No questions available for ${currentSelectedSubject}.</p>
-                    </div>
-                `;
-                return;
+            const q = filteredQuestions[currentIndex];
+
+            // Update Visited Status if unvisited
+            if(questionState[q.id].status === 'unvisited') {
+                questionState[q.id].status = 'not_answered';
             }
 
-            questions.forEach((q, index) => {
-                const selectedOpt = studentAnswers[q.id] || "";
+            document.getElementById('current-q-subject').innerText = q.subject || 'General';
+            document.getElementById('current-q-number').innerText = `Question ${currentIndex + 1} of ${filteredQuestions.length}`;
+            document.getElementById('current-q-text').innerText = q.question;
 
-                container.innerHTML += `
-                    <div class="bg-white p-5 rounded-xl border shadow-sm space-y-3">
-                        <div class="flex justify-between items-center border-b pb-2">
-                            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase">${q.subject || 'General'}</span>
-                            <span class="text-xs font-bold text-gray-400">Question #${index + 1}</span>
-                        </div>
-                        <p class="font-bold text-gray-800 text-sm leading-relaxed">${q.question}</p>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
-                            ${renderOption('A', q.options ? q.options.A : q.optionA, q.id, selectedOpt)}
-                            ${renderOption('B', q.options ? q.options.B : q.optionB, q.id, selectedOpt)}
-                            ${renderOption('C', q.options ? q.options.C : q.optionC, q.id, selectedOpt)}
-                            ${renderOption('D', q.options ? q.options.D : q.optionD, q.id, selectedOpt)}
-                        </div>
-                    </div>
+            // Render Options
+            const optsContainer = document.getElementById('options-container');
+            optsContainer.innerHTML = "";
+
+            ['A', 'B', 'C', 'D'].forEach(key => {
+                const optText = q.options ? q.options[key] : q[`option${key}`];
+                if(optText) {
+                    const isChecked = questionState[q.id].answer === key ? 'checked' : '';
+                    optsContainer.innerHTML += `
+                        <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-blue-50/50 transition text-xs md:text-sm font-medium text-gray-700 bg-gray-50/50">
+                            <input type="radio" name="opt_choice" value="${key}" ${isChecked} onchange="selectOption('${q.id}', '${key}')" class="w-4 h-4 text-blue-600">
+                            <span><b>(${key})</b> ${optText}</span>
+                        </label>
+                    `;
+                }
+            });
+
+            document.getElementById('btn-prev').disabled = currentIndex === 0;
+            renderPalette();
+        }
+
+        function selectOption(qId, key) {
+            questionState[qId].answer = key;
+        }
+
+        function saveAndNext() {
+            const q = filteredQuestions[currentIndex];
+            if(questionState[q.id].answer !== '') {
+                questionState[q.id].status = 'answered';
+            }
+            navigateQuestion(1);
+        }
+
+        function markForReview() {
+            const q = filteredQuestions[currentIndex];
+            questionState[q.id].status = 'review';
+            navigateQuestion(1);
+        }
+
+        function clearResponse() {
+            const q = filteredQuestions[currentIndex];
+            questionState[q.id].answer = '';
+            questionState[q.id].status = 'not_answered';
+            renderSingleQuestion();
+        }
+
+        function navigateQuestion(step) {
+            const newIndex = currentIndex + step;
+            if(newIndex >= 0 && newIndex < filteredQuestions.length) {
+                currentIndex = newIndex;
+                renderSingleQuestion();
+            }
+        }
+
+        function jumpToQuestion(idx) {
+            currentIndex = idx;
+            renderSingleQuestion();
+        }
+
+        // Render Right Side Number Palette Grid
+        function renderPalette() {
+            const palette = document.getElementById('question-palette-grid');
+            palette.innerHTML = "";
+
+            filteredQuestions.forEach((q, idx) => {
+                const state = questionState[q.id] || { status: 'unvisited' };
+                let bgClass = "bg-gray-200 text-gray-700 border-gray-300"; // unvisited
+
+                if(state.status === 'not_answered') bgClass = "bg-red-500 text-white font-bold";
+                if(state.status === 'answered') bgClass = "bg-green-500 text-white font-bold";
+                if(state.status === 'review') bgClass = "bg-purple-600 text-white font-bold";
+
+                const isCurrent = idx === currentIndex ? 'ring-2 ring-blue-600 ring-offset-1 font-black scale-105' : '';
+
+                palette.innerHTML += `
+                    <button onclick="jumpToQuestion(${idx})" class="w-8 h-8 text-xs rounded-lg flex items-center justify-center transition ${bgClass} ${isCurrent}">
+                        ${idx + 1}
+                    </button>
                 `;
             });
-        }
-
-        function renderOption(key, text, qId, selectedOpt) {
-            if(!text) return '';
-            const isChecked = selectedOpt === key ? 'checked' : '';
-            return `
-                <label class="flex items-center gap-2 p-2.5 border rounded-lg cursor-pointer hover:bg-blue-50/50 transition text-xs font-medium text-gray-700 bg-gray-50/50">
-                    <input type="radio" name="q_${qId}" value="${key}" ${isChecked} onchange="saveAnswer('${qId}', '${key}')" class="w-4 h-4 text-blue-600">
-                    <span><b>(${key})</b> ${text}</span>
-                </label>
-            `;
-        }
-
-        function saveAnswer(qId, selectedKey) {
-            studentAnswers[qId] = selectedKey;
         }
 
         function startTimer(durationInSeconds) {
@@ -277,32 +368,36 @@
             }, 1000);
         }
 
-        // 6. Submit Logic with Lock in Firestore
         function submitExam() {
+            if(!confirm("Are you sure you want to submit your final exam?")) return;
+
             document.getElementById('btn-submit-exam').disabled = true;
             document.getElementById('btn-submit-exam').innerText = "Submitting...";
 
             let score = 0;
-            allFetchedQuestions.forEach(q => {
-                if (studentAnswers[q.id] === q.correctOption) {
+            let formattedAnswers = {};
+
+            allQuestions.forEach(q => {
+                const st = questionState[q.id];
+                formattedAnswers[q.id] = st ? st.answer : '';
+                if (st && st.answer === q.correctOption) {
                     score++;
                 }
             });
 
             const attemptDocId = `${currentStudentRoll.trim()}_${currentExamTitle.trim()}`;
 
-            // Save attempt to Database to Lock Multiple Entries
             db.collection("exam_attempts").doc(attemptDocId).set({
                 rollNo: currentStudentRoll,
                 examTitle: currentExamTitle,
                 score: score,
-                totalQuestions: allFetchedQuestions.length,
+                totalQuestions: allQuestions.length,
                 submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                answers: studentAnswers
+                answers: formattedAnswers
             }).then(() => {
                 clearInterval(timerInterval);
-                alert(`🎉 Exam Submitted Successfully!\nYour Score: ${score} / ${allFetchedQuestions.length}`);
-                window.location.reload(); // Reload to activate lock screen
+                alert(`🎉 Exam Submitted Successfully!\nYour Score: ${score} / ${allQuestions.length}`);
+                window.location.reload();
             }).catch(err => {
                 alert("Submission Error: " + err.message);
                 document.getElementById('btn-submit-exam').disabled = false;
