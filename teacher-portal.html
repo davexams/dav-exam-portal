@@ -73,7 +73,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                <!-- Box 1: Add Single Question with Formula Assistant -->
+                <!-- Box 1: Add Single Question with MS Word Style Categorised Formula Toolbar -->
                 <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
                     <h3 class="font-bold text-gray-800 text-sm flex items-center justify-between border-b pb-2">
                         <span class="flex items-center gap-1.5">➕ Add Single Question</span>
@@ -85,7 +85,6 @@
 
                         <div class="grid grid-cols-3 gap-2">
                             <div>
-                                <!-- 🎯 Subject Dropdown -->
                                 <label class="block text-[11px] font-bold text-gray-700 mb-1">Subject</label>
                                 <select id="q-subject" required class="w-full p-2 border rounded text-xs bg-slate-50 font-bold text-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-500">
                                     <option value="Physics" selected>Physics</option>
@@ -100,7 +99,6 @@
                                 </select>
                             </div>
                             <div>
-                                <!-- Class Dropdown -->
                                 <label class="block text-[11px] font-bold text-gray-700 mb-1">Class</label>
                                 <select id="q-class" required class="w-full p-2 border rounded text-xs bg-slate-50 font-bold text-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-500">
                                     <option value="Class 8">Class 8th</option>
@@ -112,41 +110,77 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold text-gray-700 mb-1">Chapter</label>
-                                <input type="text" id="q-chapter" placeholder="e.g. Light" required class="w-full p-2 border rounded text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
+                                <input type="text" id="q-chapter" placeholder="e.g. Calculus" required class="w-full p-2 border rounded text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
                             </div>
                         </div>
 
-                        <!-- 🧮 MATH & CHEMISTRY EQUATION TOOLBAR ASSISTANT -->
-                        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-[10px] font-black text-slate-700 uppercase tracking-wider">⚡ Quick Equation Toolbar:</span>
-                                <span class="text-[9px] text-gray-500 font-semibold">Click to Insert</span>
+                        <!-- 🧮 CATEGORISED EQUATION TOOLBAR ASSISTANT -->
+                        <div class="bg-slate-50 border rounded-lg p-2.5 space-y-2">
+                            <!-- Category Tabs -->
+                            <div class="flex gap-1 border-b pb-1 overflow-x-auto text-[11px] font-bold">
+                                <button type="button" onclick="switchEqTab('algebra')" id="tab-btn-algebra" class="eq-tab-btn bg-blue-900 text-white px-2.5 py-1 rounded">Algebra</button>
+                                <button type="button" onclick="switchEqTab('calculus')" id="tab-btn-calculus" class="eq-tab-btn bg-white text-gray-700 border px-2.5 py-1 rounded">Calculus & Trig</button>
+                                <button type="button" onclick="switchEqTab('chemistry')" id="tab-btn-chemistry" class="eq-tab-btn bg-white text-gray-700 border px-2.5 py-1 rounded">Chemistry</button>
+                                <button type="button" onclick="switchEqTab('symbols')" id="tab-btn-symbols" class="eq-tab-btn bg-white text-gray-700 border px-2.5 py-1 rounded">Symbols</button>
                             </div>
-                            <div class="flex flex-wrap gap-1">
-                                <!-- Math Operators -->
-                                <button type="button" onclick="insertSymbol('q-text', 'x^2')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50 text-blue-900 shadow-sm">x²</button>
-                                <button type="button" onclick="insertSymbol('q-text', '\\sqrt{x}')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50 text-blue-900 shadow-sm">√x</button>
-                                <button type="button" onclick="insertSymbol('q-text', '\\frac{a}{b}')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50 text-blue-900 shadow-sm">a/b</button>
-                                <button type="button" onclick="insertSymbol('q-text', '\\int')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50 text-blue-900 shadow-sm">∫</button>
-                                <button type="button" onclick="insertSymbol('q-text', '\\theta')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50 text-blue-900 shadow-sm">θ</button>
-                                <button type="button" onclick="insertSymbol('q-text', '\\tan^{-1}(x)')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50 text-blue-900 shadow-sm">tan⁻¹</button>
 
-                                <!-- Chemistry Subscripts -->
-                                <button type="button" onclick="insertSymbol('q-text', 'H_2O')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100 shadow-sm">H₂O</button>
-                                <button type="button" onclick="insertSymbol('q-text', 'CO_2')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100 shadow-sm">CO₂</button>
-                                <button type="button" onclick="insertSymbol('q-text', '\\rightarrow')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100 shadow-sm">→</button>
+                            <!-- Algebra Panel -->
+                            <div id="eq-tab-algebra" class="eq-panel flex flex-wrap gap-1">
+                                <button type="button" onclick="insertSymbol('q-text', 'x^2')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">x²</button>
+                                <button type="button" onclick="insertSymbol('q-text', 'x^n')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">xⁿ</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\frac{a}{b}')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">a/b</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\sqrt{x}')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">√x</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\sqrt[n]{x}')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">ⁿ√x</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\begin{vmatrix} a & b \\\\ c & d \\end{vmatrix}')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">Matrix 2x2</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\begin{vmatrix} 1 & 1 & 1 \\\\ 1 & 2 & 3 \\\\ 1 & 3 & 6 \\end{vmatrix}')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">Matrix 3x3</button>
+                            </div>
+
+                            <!-- Calculus & Trig Panel -->
+                            <div id="eq-tab-calculus" class="eq-panel hidden flex flex-wrap gap-1">
+                                <button type="button" onclick="insertSymbol('q-text', '\\int_{a}^{b} x dx')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">∫ Definite</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\int x dx')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">∫ Indefinite</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\frac{dy}{dx}')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">dy/dx</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\sin\\theta')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">sin θ</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\cos\\theta')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">cos θ</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\tan^{-1}(x)')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">tan⁻¹(x)</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\lim_{x \\to 0}')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">lim x→0</button>
+                            </div>
+
+                            <!-- Chemistry Panel -->
+                            <div id="eq-tab-chemistry" class="eq-panel hidden flex flex-wrap gap-1">
+                                <button type="button" onclick="insertSymbol('q-text', '\\text{H}_2\\text{O}')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">H₂O</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\text{CO}_2')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">CO₂</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\text{H}_2\\text{SO}_4')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">H₂SO₄</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\rightarrow')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">→</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\rightleftharpoons')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">⇌ Equilibrium</button>
+                                <button type="button" onclick="insertSymbol('q-text', '^+')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">⁺ Cation</button>
+                                <button type="button" onclick="insertSymbol('q-text', '^-')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100">⁻ Anion</button>
+                            </div>
+
+                            <!-- Symbols Panel -->
+                            <div id="eq-tab-symbols" class="eq-panel hidden flex flex-wrap gap-1">
+                                <button type="button" onclick="insertSymbol('q-text', '\\alpha')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">α</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\beta')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">β</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\gamma')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">γ</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\theta')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">θ</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\pi')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">π</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\infty')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">∞</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\pm')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">±</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\neq')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">≠</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\leq')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">≤</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\geq')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50">≥</button>
                             </div>
                         </div>
 
                         <div>
                             <label class="block text-[11px] font-bold text-gray-700 mb-1">Question Text</label>
-                            <textarea id="q-text" rows="3" oninput="updateLivePreview()" placeholder="Enter question here or click symbols above..." required class="w-full p-2 border rounded text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-medium"></textarea>
+                            <textarea id="q-text" rows="3" oninput="updateLivePreview()" placeholder="Type question or insert formula from toolbar above..." required class="w-full p-2 border rounded text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-medium"></textarea>
                         </div>
 
                         <!-- 👁️ LIVE REAL-TIME PREVIEW BOX -->
                         <div class="p-2.5 bg-blue-50/70 border border-blue-200 rounded-lg space-y-1">
                             <span class="text-[10px] font-black text-blue-900 uppercase tracking-wider">👁️ Live Student View Preview:</span>
-                            <div id="live-math-preview" class="text-xs font-bold text-gray-800 min-h-[26px] bg-white p-2 rounded border border-blue-100">
+                            <div id="live-math-preview" class="text-xs font-bold text-gray-800 min-h-[30px] bg-white p-2 rounded border border-blue-100 flex items-center">
                                 Preview will appear here as you type...
                             </div>
                         </div>
@@ -248,6 +282,17 @@
         let myQuestionsMap = {};
         let currentTeacherEmail = "";
 
+        // 🔘 TOOLBAR CATEGORY SWITCHER
+        function switchEqTab(tabName) {
+            document.querySelectorAll('.eq-tab-btn').forEach(btn => {
+                btn.className = "eq-tab-btn bg-white text-gray-700 border px-2.5 py-1 rounded";
+            });
+            document.querySelectorAll('.eq-panel').forEach(p => p.classList.add('hidden'));
+
+            document.getElementById(`tab-btn-${tabName}`).className = "eq-tab-btn bg-blue-900 text-white px-2.5 py-1 rounded";
+            document.getElementById(`eq-tab-${tabName}`).classList.remove('hidden');
+        }
+
         // 🛠️ TOOLBAR SYMBOL INSERTION LOGIC
         function insertSymbol(elementId, symbol) {
             const input = document.getElementById(elementId);
@@ -255,14 +300,14 @@
             const end = input.selectionEnd || 0;
             const text = input.value;
             
-            input.value = text.substring(0, start) + " " + symbol + " " + text.substring(end);
+            input.value = text.substring(0, start) + symbol + text.substring(end);
             input.focus();
-            input.selectionStart = input.selectionEnd = start + symbol.length + 2;
+            input.selectionStart = input.selectionEnd = start + symbol.length;
             
             updateLivePreview();
         }
 
-        // 👁️ REAL-TIME LIVE PREVIEW UPDATER
+        // 👁️ FIXED REAL-TIME LIVE PREVIEW ENGINE
         function updateLivePreview() {
             const text = document.getElementById('q-text').value;
             const previewBox = document.getElementById('live-math-preview');
@@ -274,10 +319,21 @@
 
             let formatted = text;
 
-            // Auto wrap common symbols for preview rendering if not in LaTeX format
+            // 1. Auto convert determinant notation |1 1| |2 2| if typed
+            const detRegex = /\|\s*([\d\w\s]+)\s*\|\s*\|\s*([\d\w\s]+)\s*\|\s*\|\s*([\d\w\s]+)\s*\|/g;
+            formatted = formatted.replace(detRegex, (match, r1, r2, r3) => {
+                let row1 = r1.trim().split(/\s+/).join(' & ');
+                let row2 = r2.trim().split(/\s+/).join(' & ');
+                let row3 = r3.trim().split(/\s+/).join(' & ');
+                return `$ \\begin{vmatrix} ${row1} \\\\ ${row2} \\\\ ${row3} \\end{vmatrix} $`;
+            });
+
+            // 2. Wrap un-escaped powers like x^2 -> $x^{2}$ (BUG FIX: using $1 instead of $$1)
+            formatted = formatted.replace(/([a-zA-Z0-9\)\>]+)\^\s*(-?\d+|[a-zA-Z])/g, '$1^{$2}');
+
+            // 3. Wrap in inline latex math $ ... $ if no $ exists
             if (!formatted.includes('$')) {
-                formatted = formatted.replace(/\b(H_2O|CO_2)\b/g, '$\\text{$1}$');
-                formatted = formatted.replace(/([a-zA-Z0-9\(\)]+)\^\s*(-?\d+|[a-zA-Z])/g, '$$1^{$2}$');
+                formatted = `$${formatted}$`;
             }
 
             previewBox.innerText = formatted;
