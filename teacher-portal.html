@@ -191,8 +191,9 @@
         const db = firebase.firestore();
 
         let myQuestionsMap = {};
+        let currentTeacherEmail = "";
 
-        // 🔐 LOGIN LOGIC (Static or Dynamic Firestore verification)
+        // 🔐 LOGIN LOGIC
         function handleTeacherLogin(e) {
             e.preventDefault();
             const user = document.getElementById('t-user').value.trim();
@@ -200,7 +201,8 @@
 
             if (user === "teacher" && pass === "dav123") {
                 sessionStorage.setItem("teacherLoggedIn", user);
-                showTeacherDashboard(user);
+                sessionStorage.setItem("teacherEmail", user);
+                showTeacherDashboard(user, user);
                 return;
             }
 
@@ -214,14 +216,16 @@
                         let tData = snapshot.docs[0].data();
                         let displayName = tData.name || user;
                         sessionStorage.setItem("teacherLoggedIn", displayName);
-                        showTeacherDashboard(displayName);
+                        sessionStorage.setItem("teacherEmail", user);
+                        showTeacherDashboard(displayName, user);
                     } else {
                         alert("❌ Invalid Teacher Username/Email or Password!");
                     }
                 });
         }
 
-        function showTeacherDashboard(teacherName) {
+        function showTeacherDashboard(teacherName, teacherEmail) {
+            currentTeacherEmail = teacherEmail || sessionStorage.getItem("teacherEmail") || "teacher";
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('dashboard-section').classList.remove('hidden');
             document.getElementById('teacher-welcome-label').innerText = `Welcome, ${teacherName} • Question Bank Management`;
@@ -229,10 +233,11 @@
             loadTeacherQuestions();
         }
 
-        // 🚪 LOGOUT LOGIC (Switches back to Teacher Login Page)
+        // 🚪 LOGOUT LOGIC
         function handleTeacherLogout() {
             if (confirm("Are you sure you want to LOGOUT from Teacher Portal?")) {
                 sessionStorage.removeItem("teacherLoggedIn");
+                sessionStorage.removeItem("teacherEmail");
                 document.getElementById('dashboard-section').classList.add('hidden');
                 document.getElementById('login-section').classList.remove('hidden');
                 document.getElementById('t-user').value = "";
@@ -243,8 +248,9 @@
         // Check Login Session on Page Load
         window.onload = function() {
             const savedTeacher = sessionStorage.getItem("teacherLoggedIn");
+            const savedEmail = sessionStorage.getItem("teacherEmail");
             if (savedTeacher) {
-                showTeacherDashboard(savedTeacher);
+                showTeacherDashboard(savedTeacher, savedEmail);
             } else {
                 document.getElementById('login-section').classList.remove('hidden');
                 document.getElementById('dashboard-section').classList.add('hidden');
@@ -259,15 +265,25 @@
             return clean || "N/A";
         }
 
+        // 🎯 LOAD ONLY CURRENT TEACHER'S QUESTIONS
         function loadTeacherQuestions() {
-            db.collection("question_bank").get().then(snapshot => {
-                const container = document.getElementById('teacher-q-list');
+            const container = document.getElementById('teacher-q-list');
+            container.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">Loading your questions...</p>`;
+            
+            let query = db.collection("question_bank");
+            
+            // Filter by teacherEmail if logged in
+            if (currentTeacherEmail) {
+                query = query.where("teacherEmail", "==", currentTeacherEmail);
+            }
+
+            query.get().then(snapshot => {
                 document.getElementById('teacher-q-count').innerText = `Total: ${snapshot.size} Questions`;
                 container.innerHTML = "";
                 myQuestionsMap = {};
 
                 if (snapshot.empty) {
-                    container.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">No questions added yet.</p>`;
+                    container.innerHTML = `<p class="text-xs text-gray-400 text-center py-4">You have not added any questions yet.</p>`;
                     return;
                 }
 
@@ -296,6 +312,9 @@
                         </div>
                     `;
                 });
+            }).catch(err => {
+                console.error("Error loading questions:", err);
+                container.innerHTML = `<p class="text-xs text-red-500 text-center py-4">Error loading questions: ${err.message}</p>`;
             });
         }
 
@@ -316,6 +335,7 @@
                 },
                 correctOption: document.getElementById('q-correct').value.toUpperCase(),
                 teacherName: document.getElementById('q-teacher-name').value.trim(),
+                teacherEmail: currentTeacherEmail || "teacher", // 👈 Saved for filtering
                 selectedForExam: false
             };
 
@@ -399,6 +419,7 @@
                             subject: cols[6] || 'Physics',
                             class: cols[7] || 'Class 10',
                             chapter: cols[8] || '',
+                            teacherEmail: currentTeacherEmail || "teacher", // 👈 Saved for filtering
                             selectedForExam: false
                         });
                         count++;
