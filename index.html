@@ -3,150 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Examination Portal - DAV Public School</title>
+    <title>NTA Style CBT Exam Portal - DAV Public School</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        body { user-select: none; -webkit-user-select: none; }
+    </style>
 </head>
-<body class="bg-slate-100 font-sans min-h-screen p-2 md:p-4 select-none">
+<body class="bg-slate-100 font-sans min-h-screen text-slate-800 antialiased flex flex-col justify-between">
 
-    <div class="max-w-7xl mx-auto space-y-4">
-
-        <!-- 🔑 SECTION 1: STUDENT LOGIN SCREEN -->
-        <div id="login-screen" class="max-w-md mx-auto my-12 bg-white p-8 rounded-2xl shadow-lg border border-gray-200 space-y-6">
-            <div class="text-center space-y-1">
-                <h1 class="text-2xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
-                <p class="text-xs text-gray-500 font-semibold">Online Examination Portal</p>
-                <p class="text-[11px] bg-blue-50 text-blue-800 font-bold py-1 px-3 rounded-full inline-block mt-2" id="login-exam-title">
-                    Loading Exam Info...
-                </p>
+    <!-- LOGIN SCREEN CONTAINER -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6 md:p-8 space-y-6">
+            
+            <div class="text-center space-y-2 border-b pb-4">
+                <div class="inline-block bg-blue-900 text-white font-black text-xl px-4 py-1.5 rounded-lg shadow-sm tracking-wider">
+                    DAV PUBLIC SCHOOL
+                </div>
+                <h1 class="text-lg font-bold text-slate-800">Online Computer Based Test (CBT)</h1>
+                <p class="text-xs text-slate-500 font-medium">NTA Pattern Secure Assessment Engine</p>
             </div>
 
             <form onsubmit="handleStudentLogin(event)" class="space-y-4">
+                <!-- Class Selection Dropdown (Classes 8th to 12th) -->
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Student Roll No / ID</label>
-                    <input type="text" id="input-roll-no" required placeholder="Enter your Roll No" class="w-full p-3 border rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-500 bg-slate-50 outline-none">
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">1. Select Your Class / Grade</label>
+                    <select id="login-class-select" required class="w-full p-3 border border-slate-300 rounded-xl text-xs font-bold text-blue-900 bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:bg-white focus:outline-none transition">
+                        <option value="" disabled selected>-- Select Class --</option>
+                        <option value="Class 8">Class 8th</option>
+                        <option value="Class 9">Class 9th</option>
+                        <option value="Class 10">Class 10th</option>
+                        <option value="Class 11">Class 11th</option>
+                        <option value="Class 12">Class 12th</option>
+                    </select>
                 </div>
+
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Password</label>
-                    <input type="password" id="input-password" required placeholder="Enter password" class="w-full p-3 border rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-500 bg-slate-50 outline-none">
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">2. Student Roll No / User ID</label>
+                    <input type="text" id="login-rollno" required placeholder="Enter your Roll Number" class="w-full p-3 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:bg-white focus:outline-none transition">
                 </div>
-                <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 rounded-xl shadow-lg transition text-sm">
-                    🔓 Start / Resume Exam
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">3. Security Password</label>
+                    <input type="password" id="login-password" required placeholder="Enter Passcode" class="w-full p-3 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:bg-white focus:outline-none transition">
+                </div>
+
+                <button type="submit" id="btn-login-submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition">
+                    🚀 Authenticate & Start Exam
                 </button>
             </form>
-            <p class="text-[11px] text-gray-400 text-center">Contact your class teacher if you face any login issues.</p>
-        </div>
 
-        <!-- 🏆 SECTION 2: TOP BANNER (Visible after Login) -->
-        <div id="top-header" class="hidden flex flex-wrap justify-between items-center bg-white p-3 md:p-4 rounded-xl shadow border border-gray-200">
-            <div>
-                <h1 class="text-lg md:text-xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
-                <p class="text-xs text-gray-500 font-semibold" id="exam-title-display">Online Examination System</p>
-                <p class="text-xs font-bold text-blue-700 mt-0.5">Student Roll No: <span id="student-roll-display">---</span></p>
-            </div>
-            <div class="flex items-center gap-3 mt-2 sm:mt-0">
-                <div class="bg-amber-100 text-amber-900 px-3 py-1.5 rounded-lg border border-amber-300 font-bold text-xs flex items-center gap-1">
-                    ⏱️ Time Left: <span id="timer-display" class="font-mono text-sm text-red-600 ml-1">00:00</span>
-                </div>
-                <button onclick="logoutStudent()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 border text-xs font-bold py-1.5 px-3 rounded-lg shadow-sm">
-                    🚪 Logout
-                </button>
+            <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 leading-snug space-y-1">
+                <p class="font-bold flex items-center gap-1">⚠️ Exam Instructions:</p>
+                <ul class="list-disc pl-4 space-y-0.5 text-[10.5px] text-amber-800">
+                    <li>Select correct class before logging in.</li>
+                    <li>Timer will start automatically upon login.</li>
+                    <li>Do not refresh or close tab during live examination.</li>
+                </ul>
             </div>
         </div>
-
-        <!-- 🚫 SECTION 3: SUBMITTED SUCCESS SCREEN (SCORE HIDDEN) -->
-        <div id="already-submitted-screen" class="hidden bg-white p-8 rounded-xl border border-green-200 text-center shadow-sm space-y-4">
-            <div class="text-5xl">✅</div>
-            <h2 class="text-xl font-bold text-green-700">Exam Submitted Successfully!</h2>
-            <p class="text-xs text-gray-600 max-w-md mx-auto leading-relaxed">
-                Thank you! Your response for Roll No <b id="blocked-roll-display"></b> has been recorded successfully. 
-                Result will be declared by school administration later.
-            </p>
-            <div>
-                <span class="bg-green-50 text-green-700 text-xs px-4 py-1.5 rounded-full font-bold border border-green-300">
-                    Status: Test Attempt Completed
-                </span>
-            </div>
-            <div class="pt-4 border-t">
-                <button onclick="logoutStudent()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 px-6 rounded-lg shadow transition">
-                    🔄 Back to Login / Exit
-                </button>
-            </div>
-        </div>
-
-        <!-- 📝 SECTION 4: EXAM ACTIVE INTERFACE GRID -->
-        <div id="exam-screen" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-4">
-            
-            <div class="lg:col-span-3 space-y-4">
-                <div class="bg-white p-3 rounded-xl border shadow-sm flex items-center gap-2 overflow-x-auto" id="subject-tabs-container">
-                    <button class="tab-btn bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap">
-                        🌐 All Subjects
-                    </button>
-                </div>
-
-                <div class="bg-white p-5 rounded-xl border shadow-sm space-y-4 min-h-[320px] flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center border-b pb-3 mb-3">
-                            <span id="current-q-subject" class="text-xs font-black px-2.5 py-1 rounded bg-blue-100 text-blue-800 uppercase">Subject</span>
-                            <span id="current-q-number" class="text-xs font-bold text-gray-500">Question 1 of 10</span>
-                        </div>
-                        
-                        <p id="current-q-text" class="font-bold text-gray-800 text-sm md:text-base leading-relaxed mb-4">
-                            Question text will load here...
-                        </p>
-
-                        <div id="options-container" class="space-y-2">
-                            <!-- Dynamic Options -->
-                        </div>
-                    </div>
-
-                    <div class="border-t pt-4 flex flex-wrap gap-2 justify-between items-center">
-                        <div class="flex gap-2">
-                            <button onclick="markForReview()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs py-2 px-3 rounded shadow">
-                                🟣 Mark for Review
-                            </button>
-                            <button onclick="clearResponse()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-xs py-2 px-3 rounded">
-                                ⚪ Clear Response
-                            </button>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="navigateQuestion(-1)" id="btn-prev" class="bg-slate-500 hover:bg-slate-600 text-white font-bold text-xs py-2 px-3 rounded">
-                                ⬅️ Previous
-                            </button>
-                            <button onclick="saveAndNext()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 px-4 rounded shadow">
-                                💾 Save & Next ➡️
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white p-4 rounded-xl border shadow-sm space-y-4 flex flex-col justify-between">
-                <div>
-                    <h3 class="font-bold text-gray-800 text-xs border-b pb-2 mb-3">📋 Question Palette</h3>
-                    <div class="grid grid-cols-2 gap-2 text-[10px] text-gray-600 mb-4 bg-slate-50 p-2.5 rounded-lg border">
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-gray-200 border inline-block"></span> Not Visited</div>
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Not Answered</div>
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span> Answered</div>
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-purple-600 inline-block"></span> Marked Review</div>
-                    </div>
-                    <div class="grid grid-cols-5 gap-2 max-h-[260px] overflow-y-auto pr-1" id="question-palette-grid"></div>
-                </div>
-
-                <div class="border-t pt-3">
-                    <button onclick="submitExam()" id="btn-submit-exam" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-2.5 rounded-lg shadow transition">
-                        🚀 Submit Final Exam
-                    </button>
-                </div>
-            </div>
-
-        </div>
-
     </div>
 
+    <!-- MAIN EXAMINATION PORTAL (Hidden initially) -->
+    <div id="exam-screen" class="hidden min-h-screen flex flex-col justify-between bg-slate-100">
+        
+        <!-- Header Panel -->
+        <header class="bg-blue-900 text-white p-3 md:p-4 shadow-md sticky top-0 z-20">
+            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white text-blue-900 font-black px-2.5 py-1 rounded text-xs">DAV</div>
+                    <div>
+                        <h2 class="font-extrabold text-xs md:text-sm tracking-wide" id="portal-exam-title">DAV CBT Assessment</h2>
+                        <p class="text-[10px] text-blue-200 font-semibold" id="portal-student-info">Candidate: Loading...</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="bg-amber-400 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-extrabold flex items-center gap-1.5 shadow-sm">
+                        <span>⏳ Remaining Time:</span>
+                        <span id="timer-display" class="font-mono text-sm">30:00</span>
+                    </div>
+                    <button onclick="confirmSubmitExam()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg shadow transition">
+                        Finish Test
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Question Body & Palette Area -->
+        <main class="max-w-7xl w-full mx-auto p-3 md:p-5 flex-grow grid grid-cols-1 lg:grid-cols-4 gap-5">
+            
+            <!-- Left Side: Single Question View Panel -->
+            <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 md:p-6 flex flex-col justify-between min-h-[420px]">
+                <div>
+                    <div class="flex justify-between items-center border-b border-slate-200 pb-3 mb-4">
+                        <span class="text-xs font-extrabold text-blue-900 uppercase tracking-wide" id="question-header-label">Question #1</span>
+                        <span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-slate-300" id="question-subject-badge">Subject: General</span>
+                    </div>
+
+                    <!-- Question Content Text -->
+                    <div class="mb-6">
+                        <p class="text-sm md:text-base font-bold text-slate-800 leading-relaxed" id="question-text-display">
+                            Loading question details...
+                        </p>
+                    </div>
+
+                    <!-- Radio Options Grid -->
+                    <div class="space-y-3" id="options-container"></div>
+                </div>
+
+                <!-- Navigation Action Buttons -->
+                <div class="border-t border-slate-200 pt-4 mt-6 flex justify-between items-center gap-2">
+                    <button onclick="navigateQuestion(-1)" id="btn-prev-q" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs py-2.5 px-4 rounded-xl transition disabled:opacity-40">
+                        ⬅️ Previous
+                    </button>
+                    <button onclick="clearCurrentChoice()" class="text-xs text-red-600 font-bold hover:underline">
+                        Clear Response
+                    </button>
+                    <button onclick="navigateQuestion(1)" id="btn-next-q" class="bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs py-2.5 px-5 rounded-xl shadow transition">
+                        Save & Next ➡️
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Side: NTA Style Question Palette -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between space-y-4">
+                <div>
+                    <h3 class="text-xs font-bold text-slate-800 border-b pb-2 mb-3">Question Palette</h3>
+                    
+                    <!-- Color Status Indicators -->
+                    <div class="grid grid-cols-2 gap-2 text-[10px] font-bold mb-4">
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 border"></span> Answered</div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-400 border"></span> Not Answered</div>
+                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-200 border"></span> Not Visited</div>
+                    </div>
+
+                    <!-- Palette Buttons Container -->
+                    <div class="grid grid-cols-5 gap-2 max-h-[260px] overflow-y-auto custom-scrollbar p-1" id="palette-container"></div>
+                </div>
+
+                <div class="pt-2 border-t">
+                    <button onclick="confirmSubmitExam()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs uppercase shadow transition">
+                        ✅ Finalize & Submit Test
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-slate-200 p-3 text-center text-[11px] text-slate-500 font-semibold">
+            DAV Public School Exam Engine • Secure NTA CBT Evaluation Portal
+        </footer>
+    </div>
+
+    <!-- Firebase Script Logic -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
@@ -160,241 +177,217 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        let currentStudentRoll = sessionStorage.getItem('activeRollNo') || null;
-        let currentExamTitle = "Class 10 Combined Test";
-        let examDurationMins = 30;
-        let allQuestions = [];
-        let filteredQuestions = [];
-        let currentIndex = 0;
-        let questionState = {}; 
-        let timerInterval;
+        let currentStudent = null;
+        let examQuestionsList = [];
+        let studentAnswersMap = {};
+        let currentQuestionIndex = 0;
+        let examTimerInterval = null;
+        let totalExamSeconds = 1800; // 30 Mins default
 
-        window.onload = function() { fetchExamInfo(); };
-
-        function fetchExamInfo() {
-            db.collection("exam_control").doc("current_exam").get().then(doc => {
-                if(doc.exists) {
-                    const data = doc.data();
-                    currentExamTitle = data.title || "Class 10 Combined Test";
-                    examDurationMins = data.duration || 30;
-                    document.getElementById('login-exam-title').innerText = `${currentExamTitle} (${examDurationMins} Mins)`;
-                    document.getElementById('exam-title-display').innerText = `${currentExamTitle} | Duration: ${examDurationMins} Mins`;
-
-                    if (currentStudentRoll) verifyStudentAttempt(currentStudentRoll);
-                }
-            });
-        }
-
-        function handleStudentLogin(e) {
+        async function handleStudentLogin(e) {
             e.preventDefault();
-            const rollInput = document.getElementById('input-roll-no').value.trim();
-            const passInput = document.getElementById('input-password').value.trim();
+            const selectedClass = document.getElementById('login-class-select').value;
+            const rollNo = document.getElementById('login-rollno').value.trim();
+            const password = document.getElementById('login-password').value.trim();
 
-            if(!rollInput || !passInput) return alert("Please enter Roll No and Password!");
+            if (!selectedClass) return alert("Please select your Class!");
 
-            db.collection("students").where("rollNo", "==", rollInput).get().then(snapshot => {
-                if (snapshot.empty) return alert("❌ Invalid Roll No!");
+            const btnSubmit = document.getElementById('btn-login-submit');
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "Authenticating...";
 
-                let isValidPass = false;
-                snapshot.forEach(doc => { if (doc.data().password === passInput) isValidPass = true; });
+            try {
+                // 1. Verify Student Credentials
+                const studentQuery = await db.collection("students")
+                    .where("rollNo", "==", rollNo)
+                    .where("password", "==", password)
+                    .get();
 
-                if (isValidPass) {
-                    currentStudentRoll = rollInput;
-                    sessionStorage.setItem('activeRollNo', currentStudentRoll);
-                    verifyStudentAttempt(currentStudentRoll);
-                } else alert("❌ Incorrect Password!");
-            });
-        }
-
-        function verifyStudentAttempt(rollNo) {
-            const attemptDocId = `${rollNo.trim()}_${currentExamTitle.trim()}`;
-            db.collection("exam_attempts").doc(attemptDocId).get().then(doc => {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('top-header').classList.remove('hidden');
-                document.getElementById('student-roll-display').innerText = rollNo;
-
-                if (doc.exists) {
-                    document.getElementById('blocked-roll-display').innerText = rollNo;
-                    document.getElementById('already-submitted-screen').classList.remove('hidden');
-                    document.getElementById('exam-screen').classList.add('hidden');
-                    document.getElementById('timer-display').innerText = "00:00";
-                } else {
-                    document.getElementById('already-submitted-screen').classList.add('hidden');
-                    document.getElementById('exam-screen').classList.remove('hidden');
-                    loadActiveQuestions();
-                    startTimer(examDurationMins * 60);
+                if (studentQuery.empty) {
+                    alert("Invalid Roll Number or Security Passcode!");
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerText = "🚀 Authenticate & Start Exam";
+                    return;
                 }
-            });
-        }
 
-        function logoutStudent() {
-            sessionStorage.removeItem('activeRollNo');
-            currentStudentRoll = null;
-            if(timerInterval) clearInterval(timerInterval);
-            document.getElementById('exam-screen').classList.add('hidden');
-            document.getElementById('already-submitted-screen').classList.add('hidden');
-            document.getElementById('top-header').classList.add('hidden');
-            document.getElementById('login-screen').classList.remove('hidden');
-        }
+                currentStudent = studentQuery.docs[0].data();
+                currentStudent.id = studentQuery.docs[0].id;
 
-        function loadActiveQuestions() {
-            db.collection("question_bank").where("selectedForExam", "==", true).get().then(snapshot => {
-                allQuestions = [];
-                let subjectSet = new Set();
-                snapshot.forEach(doc => {
-                    const q = doc.data();
-                    q.id = doc.id;
-                    allQuestions.push(q);
-                    if (q.subject) subjectSet.add(q.subject);
-                    if(!questionState[q.id]) questionState[q.id] = { answer: '', status: 'unvisited' };
+                // 2. Fetch Master Exam Control Settings
+                const controlDoc = await db.collection("exam_control").doc("current_exam").get();
+                if (controlDoc.exists) {
+                    const cData = controlDoc.data();
+                    if (cData.isActive === false) {
+                        alert("The Exam is currently INACTIVE. Please wait for administrator instruction.");
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerText = "🚀 Authenticate & Start Exam";
+                        return;
+                    }
+                    if (cData.duration) totalExamSeconds = cData.duration * 60;
+                }
+
+                // 3. Dynamic Question Fetching based on Selected Class
+                const qSnapshot = await db.collection("question_bank")
+                    .where("selectedForExam", "==", true)
+                    .where("class", "==", selectedClass)
+                    .get();
+
+                if (qSnapshot.empty) {
+                    alert(`No active questions found for ${selectedClass}. Please contact teacher or administrator.`);
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerText = "🚀 Authenticate & Start Exam";
+                    return;
+                }
+
+                examQuestionsList = [];
+                qSnapshot.forEach(doc => {
+                    let qData = doc.data();
+                    qData.id = doc.id;
+                    examQuestionsList.push(qData);
                 });
-                renderSubjectTabs(Array.from(subjectSet));
-                filterSubject('ALL');
-            });
+
+                // Initialize Exam View
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('exam-screen').classList.remove('hidden');
+
+                document.getElementById('portal-student-info').innerText = `Candidate: ${currentStudent.name} (${currentStudent.rollNo}) | ${selectedClass}`;
+                
+                startExamTimer();
+                renderQuestion(0);
+                renderPalette();
+
+            } catch (err) {
+                console.error("Login error:", err);
+                alert("Database connection error. Please try again.");
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "🚀 Authenticate & Start Exam";
+            }
         }
 
-        function renderSubjectTabs(subjects) {
-            const tabsContainer = document.getElementById('subject-tabs-container');
-            tabsContainer.innerHTML = `<button onclick="filterSubject('ALL')" id="tab-btn-ALL" class="tab-btn bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shadow">🌐 All Subjects</button>`;
-            subjects.forEach(sub => {
-                tabsContainer.innerHTML += `<button onclick="filterSubject('${sub}')" id="tab-btn-${sub}" class="tab-btn bg-gray-200 text-gray-700 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap">📖 ${sub}</button>`;
-            });
-        }
+        function renderQuestion(index) {
+            currentQuestionIndex = index;
+            const q = examQuestionsList[index];
 
-        function filterSubject(sub) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.className = "tab-btn bg-gray-200 text-gray-700 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap");
-            const activeBtn = document.getElementById(`tab-btn-${sub}`);
-            if(activeBtn) activeBtn.className = "tab-btn bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shadow";
-
-            filteredQuestions = (sub === 'ALL') ? allQuestions : allQuestions.filter(q => q.subject && q.subject.trim().toLowerCase() === sub.trim().toLowerCase());
-            currentIndex = 0;
-            renderSingleQuestion();
-            renderPalette();
-        }
-
-        function renderSingleQuestion() {
-            if(filteredQuestions.length === 0) return;
-            const q = filteredQuestions[currentIndex];
-            if(questionState[q.id].status === 'unvisited') questionState[q.id].status = 'not_answered';
-
-            document.getElementById('current-q-subject').innerText = q.subject || 'General';
-            document.getElementById('current-q-number').innerText = `Question ${currentIndex + 1} of ${filteredQuestions.length}`;
-            document.getElementById('current-q-text').innerText = q.question;
+            document.getElementById('question-header-label').innerText = `Question #${index + 1} of ${examQuestionsList.length}`;
+            document.getElementById('question-subject-badge').innerText = `Subject: ${q.subject || 'General'}`;
+            document.getElementById('question-text-display').innerText = q.question;
 
             const optsContainer = document.getElementById('options-container');
             optsContainer.innerHTML = "";
 
-            ['A', 'B', 'C', 'D'].forEach(key => {
-                let optText = q.options ? q.options[key] : q[`option${key}`];
-                if(optText) {
-                    const isChecked = questionState[q.id].answer === key ? 'checked' : '';
+            const optionsMap = q.options || { A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD };
+            const selectedOpt = studentAnswersMap[q.id] || "";
+
+            ['A', 'B', 'C', 'D'].forEach(optKey => {
+                if (optionsMap[optKey]) {
+                    const isChecked = selectedOpt === optKey;
                     optsContainer.innerHTML += `
-                        <label onclick="selectOption('${q.id}', '${key}')" class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-blue-50/70 transition text-xs md:text-sm font-medium text-gray-700 bg-gray-50/50">
-                            <input type="radio" name="opt_${q.id}" value="${key}" ${isChecked} class="w-4 h-4 text-blue-600">
-                            <span><b>(${key})</b> ${optText}</span>
+                        <label class="flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition ${isChecked ? 'bg-blue-50 border-blue-600 text-blue-900 font-bold' : 'border-slate-200 hover:bg-slate-50 text-slate-700'}">
+                            <input type="radio" name="q-option" value="${optKey}" ${isChecked ? 'checked' : ''} onchange="recordAnswer('${q.id}', '${optKey}')" class="w-4 h-4 text-blue-900 focus:ring-blue-600">
+                            <span class="text-xs font-bold text-slate-500">(${optKey})</span>
+                            <span class="text-xs font-medium">${optionsMap[optKey]}</span>
                         </label>
                     `;
                 }
             });
 
-            document.getElementById('btn-prev').disabled = currentIndex === 0;
+            document.getElementById('btn-prev-q').disabled = (index === 0);
+            document.getElementById('btn-next-q').innerText = (index === examQuestionsList.length - 1) ? "Save & Review" : "Save & Next ➡️";
+
             renderPalette();
         }
 
-        function selectOption(qId, key) { questionState[qId].answer = key; }
-
-        function saveAndNext() {
-            const q = filteredQuestions[currentIndex];
-            if(questionState[q.id].answer !== '') questionState[q.id].status = 'answered';
-            navigateQuestion(1);
+        function recordAnswer(questionId, optionKey) {
+            studentAnswersMap[questionId] = optionKey;
+            renderPalette();
         }
 
-        function markForReview() {
-            const q = filteredQuestions[currentIndex];
-            questionState[q.id].status = 'review';
-            navigateQuestion(1);
-        }
-
-        function clearResponse() {
-            const q = filteredQuestions[currentIndex];
-            questionState[q.id].answer = '';
-            questionState[q.id].status = 'not_answered';
-            renderSingleQuestion();
+        function clearCurrentChoice() {
+            const q = examQuestionsList[currentQuestionIndex];
+            delete studentAnswersMap[q.id];
+            renderQuestion(currentQuestionIndex);
         }
 
         function navigateQuestion(step) {
-            const newIndex = currentIndex + step;
-            if(newIndex >= 0 && newIndex < filteredQuestions.length) {
-                currentIndex = newIndex;
-                renderSingleQuestion();
+            let targetIndex = currentQuestionIndex + step;
+            if (targetIndex >= 0 && targetIndex < examQuestionsList.length) {
+                renderQuestion(targetIndex);
             }
         }
 
-        function jumpToQuestion(idx) { currentIndex = idx; renderSingleQuestion(); }
-
         function renderPalette() {
-            const palette = document.getElementById('question-palette-grid');
-            palette.innerHTML = "";
-            filteredQuestions.forEach((q, idx) => {
-                const state = questionState[q.id] || { status: 'unvisited' };
-                let bgClass = "bg-gray-200 text-gray-700";
-                if(state.status === 'not_answered') bgClass = "bg-red-500 text-white font-bold";
-                if(state.status === 'answered') bgClass = "bg-green-500 text-white font-bold";
-                if(state.status === 'review') bgClass = "bg-purple-600 text-white font-bold";
+            const container = document.getElementById('palette-container');
+            container.innerHTML = "";
 
-                const isCurrent = idx === currentIndex ? 'ring-2 ring-blue-600 ring-offset-1 font-black scale-105' : '';
-                palette.innerHTML += `<button onclick="jumpToQuestion(${idx})" class="w-8 h-8 text-xs rounded-lg flex items-center justify-center transition ${bgClass} ${isCurrent}">${idx + 1}</button>`;
+            examQuestionsList.forEach((q, idx) => {
+                const isAnswered = studentAnswersMap.hasOwnProperty(q.id);
+                const isCurrent = (idx === currentQuestionIndex);
+
+                let btnStyle = "bg-slate-200 text-slate-700 border-slate-300"; // Not visited
+                if (isAnswered) btnStyle = "bg-emerald-500 text-white font-bold border-emerald-600";
+                else if (isCurrent) btnStyle = "bg-amber-400 text-slate-900 font-bold border-amber-500";
+
+                container.innerHTML += `
+                    <button onclick="renderQuestion(${idx})" class="w-8 h-8 rounded-lg text-xs border shadow-sm transition flex items-center justify-center ${btnStyle}">
+                        ${idx + 1}
+                    </button>
+                `;
             });
         }
 
-        function startTimer(durationInSeconds) {
-            if(timerInterval) clearInterval(timerInterval);
-            let timer = durationInSeconds;
-            const display = document.getElementById('timer-display');
-            timerInterval = setInterval(() => {
-                let minutes = parseInt(timer / 60, 10);
-                let seconds = parseInt(timer % 60, 10);
-                display.textContent = (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
-                if (--timer < 0) {
-                    clearInterval(timerInterval);
-                    alert("⏰ Time is up! Submitting exam.");
-                    submitExam();
+        function startExamTimer() {
+            examTimerInterval = setInterval(() => {
+                totalExamSeconds--;
+                const mins = Math.floor(totalExamSeconds / 60);
+                const secs = totalExamSeconds % 60;
+
+                document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+                if (totalExamSeconds <= 0) {
+                    clearInterval(examTimerInterval);
+                    alert("⏰ Time is up! Submitting your exam automatically...");
+                    autoSubmitExam();
                 }
             }, 1000);
         }
 
-        function submitExam() {
-            if(!confirm("Are you sure you want to submit your final exam?")) return;
+        function confirmSubmitExam() {
+            const answeredCount = Object.keys(studentAnswersMap).length;
+            if (confirm(`You have answered ${answeredCount} out of ${examQuestionsList.length} questions. Are you sure you want to submit?`)) {
+                autoSubmitExam();
+            }
+        }
 
-            document.getElementById('btn-submit-exam').disabled = true;
-            let score = 0;
-            let formattedAnswers = {};
+        async function autoSubmitExam() {
+            clearInterval(examTimerInterval);
 
-            allQuestions.forEach(q => {
-                const st = questionState[q.id];
-                const studentAns = st ? (st.answer || "").toString().trim().toUpperCase() : '';
-                let dbCorrectAns = (q.correctOption || "").toString().trim().toUpperCase();
-                if (dbCorrectAns.startsWith("OPTION")) dbCorrectAns = dbCorrectAns.replace("OPTION", "").trim();
+            const submissionPayload = {
+                rollNo: currentStudent.rollNo,
+                studentName: currentStudent.name,
+                class: document.getElementById('login-class-select').value || "Class 10",
+                examTitle: document.getElementById('portal-exam-title').innerText,
+                answers: studentAnswersMap,
+                totalQuestions: examQuestionsList.length,
+                submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
 
-                formattedAnswers[q.id] = studentAns;
-                if (studentAns !== "" && studentAns === dbCorrectAns) score++;
-            });
-
-            const attemptDocId = `${currentStudentRoll.trim()}_${currentExamTitle.trim()}`;
-            db.collection("exam_attempts").doc(attemptDocId).set({
-                rollNo: currentStudentRoll,
-                examTitle: currentExamTitle,
-                score: score,
-                totalQuestions: allQuestions.length,
-                submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                answers: formattedAnswers
-            }).then(() => {
-                if(timerInterval) clearInterval(timerInterval);
-                alert("🎉 Exam Submitted Successfully!");
-                verifyStudentAttempt(currentStudentRoll);
-            });
+            try {
+                await db.collection("exam_attempts").add(submissionPayload);
+                document.body.innerHTML = `
+                    <div class="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+                        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center space-y-4">
+                            <div class="text-5xl">🎉</div>
+                            <h2 class="text-xl font-black text-blue-900">Exam Submitted Successfully!</h2>
+                            <p class="text-xs text-slate-600 font-medium">Your responses have been recorded securely in DAV Server.</p>
+                            <p class="text-[11px] text-slate-400">You may close this window now.</p>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                console.error("Submission error:", err);
+                alert("Error recording submission. Please contact invigilator immediately.");
+            }
         }
     </script>
 </body>
 </html>
-
