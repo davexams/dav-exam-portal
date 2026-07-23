@@ -10,12 +10,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-slate-100 font-sans min-h-screen p-3 md:p-6 select-none">
+<body class="bg-slate-100 font-sans min-h-screen p-2 md:p-4 select-none">
 
-    <div class="max-w-5xl mx-auto space-y-4">
+    <div class="max-w-7xl mx-auto space-y-3">
 
         <!-- 1. LOGIN SECTION -->
-        <div id="login-section" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-200 max-w-md mx-auto space-y-5">
+        <div id="login-section" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-200 max-w-md mx-auto space-y-5 my-10">
             <div class="text-center">
                 <h1 class="text-2xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
                 <p class="text-xs text-gray-500 font-semibold mt-1">Student CBT Assessment Portal</p>
@@ -46,48 +46,96 @@
             </form>
         </div>
 
-        <!-- 2. EXAM INTERFACE SECTION (Hidden by default) -->
-        <div id="exam-section" class="hidden space-y-4">
+        <!-- 2. NTA STYLE CBT EXAM INTERFACE SECTION -->
+        <div id="exam-section" class="hidden space-y-3">
 
             <!-- Top Header & Timer Bar -->
-            <div class="bg-white p-4 rounded-xl shadow border flex flex-wrap justify-between items-center gap-2">
+            <div class="bg-white p-3 rounded-xl shadow border flex flex-wrap justify-between items-center gap-2">
                 <div>
-                    <h2 class="text-lg font-black text-blue-900" id="display-student-name">Student Portal</h2>
+                    <h2 class="text-base font-black text-blue-900" id="display-student-name">Student Portal</h2>
                     <p class="text-xs text-gray-500 font-bold" id="display-student-info">Class 10 | Roll: --</p>
                 </div>
-                <div class="bg-amber-100 border border-amber-300 px-4 py-2 rounded-xl text-center">
-                    <p class="text-[10px] uppercase font-bold text-amber-800">Time Remaining</p>
-                    <p class="text-xl font-black text-amber-900 font-mono" id="timer-display">00:00</p>
+                <div class="bg-amber-100 border border-amber-300 px-4 py-1.5 rounded-xl text-center">
+                    <p class="text-[9px] uppercase font-bold text-amber-800">Time Remaining</p>
+                    <p class="text-lg font-black text-amber-900 font-mono" id="timer-display">00:00</p>
                 </div>
             </div>
 
-            <!-- 🎯 SUBJECT FILTER TABS -->
-            <div class="bg-white p-3 rounded-xl shadow border space-y-2">
-                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Choose Subject Section:</p>
-                <div class="flex flex-wrap gap-2" id="subject-tabs-container">
-                    <button onclick="filterBySubject('ALL')" class="subj-tab bg-blue-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow transition">
-                        ALL
-                    </button>
-                </div>
+            <!-- Subject Navigation Tabs -->
+            <div class="bg-white p-2.5 rounded-xl shadow border flex items-center gap-2 overflow-x-auto">
+                <span class="text-[11px] font-bold text-gray-500 uppercase whitespace-nowrap pl-1">Sections:</span>
+                <div class="flex gap-1.5" id="subject-tabs-container"></div>
             </div>
 
-            <!-- Question Paper List Container -->
-            <div class="bg-white p-5 rounded-xl shadow border space-y-4 min-h-[350px]">
-                <div class="flex justify-between items-center border-b pb-2">
-                    <span class="text-xs font-bold text-gray-600" id="showing-subject-label">Showing: All Subjects</span>
-                    <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full" id="attempted-counter">Attempted: 0 / 0</span>
+            <!-- Main Layout: Question Box + Side Palette Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-3">
+
+                <!-- Left Panel: Current Active Question Box -->
+                <div class="lg:col-span-3 bg-white p-5 rounded-xl shadow border flex flex-col justify-between min-h-[460px]">
+                    <div>
+                        <!-- Question Header -->
+                        <div class="flex justify-between items-center border-b pb-2 mb-3">
+                            <span class="text-xs font-bold text-blue-900 bg-blue-100 px-3 py-1 rounded-full" id="q-number-title">Question #1</span>
+                            <div class="flex gap-1.5">
+                                <span class="text-[10px] font-bold bg-blue-600 text-white px-2 py-0.5 rounded uppercase" id="q-subject-badge">Subject</span>
+                                <span class="text-[10px] font-bold bg-gray-200 text-gray-700 px-2 py-0.5 rounded" id="q-chapter-badge">Chapter</span>
+                            </div>
+                        </div>
+
+                        <!-- Question Text -->
+                        <div class="space-y-4">
+                            <p class="text-sm md:text-base font-bold text-gray-800 leading-relaxed" id="q-text-body">Loading question...</p>
+
+                            <!-- Options Container -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs pt-2" id="q-options-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Action Bar (Save & Next, Review, Clear, Skip) -->
+                    <div class="border-t pt-4 mt-6 flex flex-wrap justify-between items-center gap-2">
+                        <div class="flex gap-2">
+                            <button onclick="markForReview()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs py-2 px-3 rounded shadow transition">
+                                🟣 Mark for Review & Next
+                            </button>
+                            <button onclick="clearResponse()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-xs py-2 px-3 rounded transition">
+                                🧹 Clear Response
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="nextQuestion()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-2 px-3 rounded shadow transition">
+                                ⏩ Skip / Next
+                            </button>
+                            <button onclick="saveAndNext()" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-2 px-4 rounded shadow transition">
+                                💾 Save & Next
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="space-y-4 max-h-[500px] overflow-y-auto pr-1" id="questions-list-container">
-                    <p class="text-center text-xs text-gray-400 py-6">Loading exam paper...</p>
+                <!-- Right Panel: Question Palette Grid & Legend -->
+                <div class="bg-white p-4 rounded-xl shadow border space-y-4 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-xs border-b pb-2 mb-3">🎯 Question Palette</h3>
+                        
+                        <!-- Grid Palette Buttons -->
+                        <div class="grid grid-cols-5 gap-1.5 max-h-[260px] overflow-y-auto p-1" id="question-palette-grid"></div>
+                    </div>
+
+                    <!-- Legend Information -->
+                    <div class="space-y-3 border-t pt-3">
+                        <div class="grid grid-cols-2 gap-1.5 text-[10px] font-semibold text-gray-600">
+                            <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-600 inline-block"></span> Answered</div>
+                            <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-purple-600 inline-block"></span> Review</div>
+                            <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500 inline-block"></span> Ans & Review</div>
+                            <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-gray-200 inline-block"></span> Not Visited</div>
+                        </div>
+
+                        <button onclick="submitExamPaper()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-lg shadow transition">
+                            ✅ Submit Test Paper
+                        </button>
+                    </div>
                 </div>
 
-                <div class="border-t pt-4 flex justify-between items-center">
-                    <p class="text-[11px] text-gray-400">Ensure all answers are checked before submitting.</p>
-                    <button onclick="submitExamPaper()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-6 rounded-lg shadow transition">
-                        ✅ Submit Complete Exam
-                    </button>
-                </div>
             </div>
 
         </div>
@@ -111,6 +159,8 @@
         let loggedInStudent = null;
         let examQuestionsList = [];
         let studentAnswersMap = {};
+        let questionStatusMap = {}; // 'answered', 'review', 'answered-review', 'visited'
+        let currentIndex = 0;
         let activeSubjectFilter = "ALL";
         let timerInterval = null;
 
@@ -139,7 +189,6 @@
                 });
         }
 
-        // 🎯 FIX: ACTIVE STATUS CHECK LOGIC FOR BOTH BOOLEAN & STRING
         function checkExamStatusAndStart(targetClass) {
             db.collection("exam_control").doc(targetClass).get().then(doc => {
                 if (!doc.exists) {
@@ -147,15 +196,12 @@
                 }
 
                 const examMeta = doc.data();
-                
-                // Flexible check for true or "true"
                 const isExamActive = (examMeta.isActive === true || examMeta.isActive === "true");
 
                 if (!isExamActive) {
                     return alert(`🔴 Exam for ${targetClass} is currently NOT ACTIVE! Please contact your teacher.`);
                 }
 
-                // Check if already attempted
                 db.collection("exam_attempts")
                     .where("rollNo", "==", loggedInStudent.rollNo)
                     .where("class", "==", targetClass)
@@ -165,7 +211,6 @@
                             return alert("⚠️ You have ALREADY SUBMITTED this exam! Re-attempts are not allowed.");
                         }
 
-                        // Load Questions for this Class
                         fetchExamQuestions(targetClass, examMeta);
                     });
             });
@@ -183,6 +228,7 @@
 
                     examQuestionsList = [];
                     studentAnswersMap = {};
+                    questionStatusMap = {};
 
                     snapshot.forEach(doc => {
                         const q = doc.data();
@@ -190,113 +236,163 @@
                         examQuestionsList.push(q);
                     });
 
-                    // Hide Login, Show Exam Interface
                     document.getElementById('login-section').classList.add('hidden');
                     document.getElementById('exam-section').classList.remove('hidden');
 
                     document.getElementById('display-student-name').innerText = loggedInStudent.name;
                     document.getElementById('display-student-info').innerText = `${loggedInStudent.class} | Roll: ${loggedInStudent.rollNo}`;
 
+                    currentIndex = 0;
                     buildSubjectTabs();
-                    renderQuestionList();
+                    loadActiveQuestion();
+                    renderPaletteGrid();
                     startTimer(examMeta.duration || 30);
                 });
         }
 
-        // BUILD SUBJECT TABS DYNAMICALLY
         function buildSubjectTabs() {
             const tabsContainer = document.getElementById('subject-tabs-container');
             tabsContainer.innerHTML = `
-                <button onclick="filterBySubject('ALL')" id="tab-ALL" class="subj-tab bg-blue-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow transition">
+                <button onclick="filterBySubject('ALL')" id="tab-ALL" class="subj-tab bg-blue-600 text-white font-bold text-xs px-3 py-1 rounded-lg shadow transition">
                     ALL (${examQuestionsList.length})
                 </button>
             `;
 
             const subjectsSet = new Set();
-            examQuestionsList.forEach(q => {
-                if (q.subject) subjectsSet.add(q.subject.trim());
-            });
+            examQuestionsList.forEach(q => { if (q.subject) subjectsSet.add(q.subject.trim()); });
 
             subjectsSet.forEach(subj => {
                 const count = examQuestionsList.filter(q => q.subject === subj).length;
                 tabsContainer.innerHTML += `
-                    <button onclick="filterBySubject('${subj}')" id="tab-${subj.replace(/\s+/g, '')}" class="subj-tab bg-slate-200 hover:bg-blue-100 text-gray-700 font-bold text-xs px-3.5 py-1.5 rounded-lg transition">
+                    <button onclick="filterBySubject('${subj}')" id="tab-${subj.replace(/\s+/g, '')}" class="subj-tab bg-slate-200 hover:bg-blue-100 text-gray-700 font-bold text-xs px-3 py-1 rounded-lg transition">
                         ${subj} (${count})
                     </button>
                 `;
             });
         }
 
-        // FILTER QUESTIONS BY SUBJECT
         function filterBySubject(subjName) {
             activeSubjectFilter = subjName;
-            document.getElementById('showing-subject-label').innerText = `Showing: ${subjName === 'ALL' ? 'All Subjects' : subjName}`;
-
             document.querySelectorAll('.subj-tab').forEach(btn => {
-                btn.className = "subj-tab bg-slate-200 hover:bg-blue-100 text-gray-700 font-bold text-xs px-3.5 py-1.5 rounded-lg transition";
+                btn.className = "subj-tab bg-slate-200 hover:bg-blue-100 text-gray-700 font-bold text-xs px-3 py-1 rounded-lg transition";
             });
 
             const activeBtn = document.getElementById(`tab-${subjName.replace(/\s+/g, '')}`);
-            if (activeBtn) {
-                activeBtn.className = "subj-tab bg-blue-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow transition";
+            if (activeBtn) activeBtn.className = "subj-tab bg-blue-600 text-white font-bold text-xs px-3 py-1 rounded-lg shadow transition";
+
+            // Find first question matching selected subject
+            if (subjName === "ALL") {
+                currentIndex = 0;
+            } else {
+                const firstIdx = examQuestionsList.findIndex(q => q.subject === subjName);
+                if (firstIdx !== -1) currentIndex = firstIdx;
             }
 
-            renderQuestionList();
+            loadActiveQuestion();
+            renderPaletteGrid();
         }
 
-        function renderQuestionList() {
-            const container = document.getElementById('questions-list-container');
-            container.innerHTML = "";
+        function loadActiveQuestion() {
+            if (examQuestionsList.length === 0) return;
+            const q = examQuestionsList[currentIndex];
 
-            const filteredQuestions = activeSubjectFilter === "ALL" 
-                ? examQuestionsList 
-                : examQuestionsList.filter(q => q.subject === activeSubjectFilter);
-
-            if (filteredQuestions.length === 0) {
-                container.innerHTML = `<p class="text-center text-xs text-gray-400 py-6">No questions found in this section.</p>`;
-                return;
+            if (!questionStatusMap[q.id]) {
+                questionStatusMap[q.id] = 'visited';
             }
 
-            filteredQuestions.forEach((q, index) => {
-                const globalIndex = examQuestionsList.findIndex(item => item.id === q.id) + 1;
-                const opts = q.options || { A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD };
-                const selectedOpt = studentAnswersMap[q.id] || "";
+            document.getElementById('q-number-title').innerText = `Question #${currentIndex + 1} of ${examQuestionsList.length}`;
+            document.getElementById('q-subject-badge').innerText = q.subject || 'General';
+            document.getElementById('q-chapter-badge').innerText = q.chapter || 'Chapter';
+            document.getElementById('q-text-body').innerText = q.question;
 
-                container.innerHTML += `
-                    <div class="p-4 border rounded-xl bg-slate-50 hover:bg-blue-50/20 transition space-y-3">
-                        <div class="flex justify-between items-center border-b pb-2">
-                            <span class="text-xs font-bold text-blue-900 bg-blue-100 px-2.5 py-0.5 rounded">Q#${globalIndex}</span>
-                            <div class="flex gap-1.5">
-                                <span class="text-[10px] font-bold bg-blue-600 text-white px-2 py-0.5 rounded uppercase">${q.subject || 'General'}</span>
-                                <span class="text-[10px] font-bold bg-gray-200 text-gray-700 px-2 py-0.5 rounded">${q.chapter || 'Chapter'}</span>
-                            </div>
-                        </div>
+            const opts = q.options || { A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD };
+            const selectedOpt = studentAnswersMap[q.id] || "";
 
-                        <p class="text-xs md:text-sm font-bold text-gray-800 leading-relaxed">${q.question}</p>
+            const optsContainer = document.getElementById('q-options-container');
+            optsContainer.innerHTML = "";
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs pt-1">
-                            ${['A', 'B', 'C', 'D'].map(key => `
-                                <label class="flex items-center gap-2 p-2 rounded-lg border cursor-pointer bg-white hover:bg-blue-50 transition ${selectedOpt === key ? 'border-blue-600 bg-blue-50/80 font-bold text-blue-900' : 'text-gray-700'}">
-                                    <input type="radio" name="opt-${q.id}" value="${key}" ${selectedOpt === key ? 'checked' : ''} onchange="recordAnswer('${q.id}', '${key}')" class="text-blue-600 focus:ring-blue-500">
-                                    <span><b>(${key})</b> ${opts[key] || ''}</span>
-                                </label>
-                            `).join('')}
-                        </div>
-                    </div>
+            ['A', 'B', 'C', 'D'].forEach(key => {
+                optsContainer.innerHTML += `
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer bg-slate-50 hover:bg-blue-50 transition ${selectedOpt === key ? 'border-blue-600 bg-blue-50 font-bold text-blue-900 ring-2 ring-blue-400' : 'text-gray-700'}">
+                        <input type="radio" name="current-opt" value="${key}" ${selectedOpt === key ? 'checked' : ''} onchange="selectOption('${key}')" class="text-blue-600 focus:ring-blue-500 w-4 h-4">
+                        <span><b>(${key})</b> ${opts[key] || ''}</span>
+                    </label>
                 `;
             });
 
-            updateAttemptCounter();
+            renderPaletteGrid();
         }
 
-        function recordAnswer(qId, selectedKey) {
-            studentAnswersMap[qId] = selectedKey;
-            updateAttemptCounter();
+        function selectOption(key) {
+            const qId = examQuestionsList[currentIndex].id;
+            studentAnswersMap[qId] = key;
         }
 
-        function updateAttemptCounter() {
-            const count = Object.keys(studentAnswersMap).length;
-            document.getElementById('attempted-counter').innerText = `Attempted: ${count} / ${examQuestionsList.length}`;
+        function saveAndNext() {
+            const qId = examQuestionsList[currentIndex].id;
+            if (studentAnswersMap[qId]) {
+                questionStatusMap[qId] = 'answered';
+            } else {
+                questionStatusMap[qId] = 'visited';
+            }
+            nextQuestion();
+        }
+
+        function markForReview() {
+            const qId = examQuestionsList[currentIndex].id;
+            if (studentAnswersMap[qId]) {
+                questionStatusMap[qId] = 'answered-review';
+            } else {
+                questionStatusMap[qId] = 'review';
+            }
+            nextQuestion();
+        }
+
+        function clearResponse() {
+            const qId = examQuestionsList[currentIndex].id;
+            delete studentAnswersMap[qId];
+            questionStatusMap[qId] = 'visited';
+            loadActiveQuestion();
+        }
+
+        function nextQuestion() {
+            if (currentIndex < examQuestionsList.length - 1) {
+                currentIndex++;
+                loadActiveQuestion();
+            } else {
+                alert("You have reached the last question. Review your palette or click Submit Test.");
+                renderPaletteGrid();
+            }
+        }
+
+        function jumpToQuestion(idx) {
+            currentIndex = idx;
+            loadActiveQuestion();
+        }
+
+        function renderPaletteGrid() {
+            const grid = document.getElementById('question-palette-grid');
+            grid.innerHTML = "";
+
+            examQuestionsList.forEach((q, idx) => {
+                const status = questionStatusMap[q.id] || 'not-visited';
+                const isCurrent = (idx === currentIndex);
+
+                let btnClass = "bg-gray-200 text-gray-700 border-gray-300"; // default
+
+                if (status === 'answered') btnClass = "bg-emerald-600 text-white font-bold";
+                else if (status === 'review') btnClass = "bg-purple-600 text-white font-bold";
+                else if (status === 'answered-review') btnClass = "bg-amber-500 text-white font-bold";
+                else if (status === 'visited') btnClass = "bg-red-100 text-red-700 border-red-300 font-bold";
+
+                let ringClass = isCurrent ? 'ring-2 ring-blue-900 ring-offset-1 scale-105 z-10 font-black' : '';
+
+                grid.innerHTML += `
+                    <button onclick="jumpToQuestion(${idx})" class="w-8 h-8 rounded-lg text-xs flex items-center justify-center transition ${btnClass} ${ringClass}">
+                        ${idx + 1}
+                    </button>
+                `;
+            });
         }
 
         function startTimer(durationMins) {
@@ -319,24 +415,26 @@
         }
 
         function submitExamPaper() {
-            if (timerInterval) clearInterval(timerInterval);
+            if (confirm("Are you sure you want to SUBMIT your complete exam paper?")) {
+                if (timerInterval) clearInterval(timerInterval);
 
-            const payload = {
-                rollNo: loggedInStudent.rollNo,
-                studentName: loggedInStudent.name,
-                class: loggedInStudent.class,
-                answers: studentAnswersMap,
-                totalQuestions: examQuestionsList.length,
-                submittedAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
+                const payload = {
+                    rollNo: loggedInStudent.rollNo,
+                    studentName: loggedInStudent.name,
+                    class: loggedInStudent.class,
+                    answers: studentAnswersMap,
+                    totalQuestions: examQuestionsList.length,
+                    submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
 
-            db.collection("exam_attempts").add(payload).then(() => {
-                alert("🎉 Exam Submitted Successfully! Thank you.");
-                location.reload();
-            }).catch(err => {
-                console.error("Submission Error:", err);
-                alert("Failed to submit exam. Please try again.");
-            });
+                db.collection("exam_attempts").add(payload).then(() => {
+                    alert("🎉 Exam Submitted Successfully! Thank you.");
+                    location.reload();
+                }).catch(err => {
+                    console.error("Submission Error:", err);
+                    alert("Failed to submit exam. Please try again.");
+                });
+            }
         }
     </script>
 </body>
