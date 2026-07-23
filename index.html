@@ -14,36 +14,70 @@
 
     <div class="max-w-7xl mx-auto space-y-4">
 
-        <!-- Top Banner -->
-        <div class="flex flex-wrap justify-between items-center bg-white p-3 md:p-4 rounded-xl shadow border border-gray-200">
+        <!-- 🔑 SECTION 1: STUDENT LOGIN SCREEN (Default Visible) -->
+        <div id="login-screen" class="max-w-md mx-auto my-12 bg-white p-8 rounded-2xl shadow-lg border border-gray-200 space-y-6">
+            <div class="text-center space-y-1">
+                <h1 class="text-2xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
+                <p class="text-xs text-gray-500 font-semibold">Online Examination Portal</p>
+                <p class="text-[11px] bg-blue-50 text-blue-800 font-bold py-1 px-3 rounded-full inline-block mt-2" id="login-exam-title">
+                    Loading Exam Info...
+                </p>
+            </div>
+
+            <form onsubmit="handleStudentLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Student Roll No / ID</label>
+                    <input type="text" id="input-roll-no" required placeholder="Enter your Roll No" class="w-full p-3 border rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-500 bg-slate-50 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Password</label>
+                    <input type="password" id="input-password" required placeholder="Enter password" class="w-full p-3 border rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-500 bg-slate-50 outline-none">
+                </div>
+                <button type="submit" class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 rounded-xl shadow-lg transition text-sm">
+                    🔓 Start / Resume Exam
+                </button>
+            </form>
+            <p class="text-[11px] text-gray-400 text-center">Contact your class teacher if you face any login issues.</p>
+        </div>
+
+        <!-- 🏆 SECTION 2: TOP BANNER (Visible after Login) -->
+        <div id="top-header" class="hidden flex flex-wrap justify-between items-center bg-white p-3 md:p-4 rounded-xl shadow border border-gray-200">
             <div>
                 <h1 class="text-lg md:text-xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
                 <p class="text-xs text-gray-500 font-semibold" id="exam-title-display">Online Examination System</p>
-                <p class="text-xs font-bold text-blue-700 mt-0.5">Student Roll No: <span id="student-roll-display">Checking...</span></p>
+                <p class="text-xs font-bold text-blue-700 mt-0.5">Student Roll No: <span id="student-roll-display">---</span></p>
             </div>
-            <div class="flex items-center gap-4 mt-2 sm:mt-0">
+            <div class="flex items-center gap-3 mt-2 sm:mt-0">
                 <div class="bg-amber-100 text-amber-900 px-3 py-1.5 rounded-lg border border-amber-300 font-bold text-xs flex items-center gap-1">
                     ⏱️ Time Left: <span id="timer-display" class="font-mono text-sm text-red-600 ml-1">00:00</span>
                 </div>
+                <button onclick="logoutStudent()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 border text-xs font-bold py-1.5 px-3 rounded-lg shadow-sm">
+                    🚪 Logout
+                </button>
             </div>
         </div>
 
-        <!-- 🚫 Already Submitted Screen -->
-        <div id="already-submitted-screen" class="hidden bg-white p-8 rounded-xl border border-red-200 text-center shadow-sm space-y-3">
+        <!-- 🚫 SECTION 3: ALREADY SUBMITTED SCREEN -->
+        <div id="already-submitted-screen" class="hidden bg-white p-8 rounded-xl border border-red-200 text-center shadow-sm space-y-4">
             <div class="text-4xl">⚠️</div>
             <h2 class="text-lg font-bold text-red-600">Exam Already Submitted!</h2>
             <p class="text-xs text-gray-600 max-w-md mx-auto leading-relaxed">
-                Aapne yeh exam pehle hi submit kar diya hai. One student is allowed only 1 attempt per exam.
+                Roll No <b id="blocked-roll-display"></b> is already recorded for this test. One attempt allowed per student.
             </p>
-            <div class="pt-2">
+            <div>
                 <span class="bg-red-50 text-red-700 text-xs px-3 py-1 rounded-full font-bold border border-red-200">
                     Status: Attempt Completed
                 </span>
             </div>
+            <div class="pt-4 border-t">
+                <button onclick="logoutStudent()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 px-6 rounded-lg shadow transition">
+                    🔄 Switch Student / Back to Login
+                </button>
+            </div>
         </div>
 
-        <!-- Exam Active Interface Grid -->
-        <div id="exam-screen" class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <!-- 📝 SECTION 4: EXAM ACTIVE INTERFACE GRID -->
+        <div id="exam-screen" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-4">
             
             <!-- LEFT MAIN PANEL: Single Question View (3 Columns) -->
             <div class="lg:col-span-3 space-y-4">
@@ -69,7 +103,7 @@
 
                         <!-- Options Radio Container -->
                         <div id="options-container" class="space-y-2">
-                            <!-- Options will render here -->
+                            <!-- Options render dynamically -->
                         </div>
                     </div>
 
@@ -111,7 +145,7 @@
 
                     <!-- Question Numbers Grid -->
                     <div class="grid grid-cols-5 gap-2 max-h-[260px] overflow-y-auto pr-1" id="question-palette-grid">
-                        <!-- Numbers 1, 2, 3... will render dynamically -->
+                        <!-- Numbers render dynamically -->
                     </div>
                 </div>
 
@@ -141,57 +175,116 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        let currentStudentRoll = localStorage.getItem('studentRollNo') || prompt("Enter Your Roll No / ID to Start Exam:");
-        if (currentStudentRoll) {
-            localStorage.setItem('studentRollNo', currentStudentRoll);
-            document.getElementById('student-roll-display').innerText = currentStudentRoll;
-        }
-
+        let currentStudentRoll = sessionStorage.getItem('activeRollNo') || null;
         let currentExamTitle = "Class 10 Combined Test";
+        let examDurationMins = 30;
         let allQuestions = [];
         let filteredQuestions = [];
         let currentIndex = 0;
         let selectedSubjectFilter = 'ALL';
         
-        // Tracking Status: { qId: { answer: 'A', status: 'answered' | 'not_answered' | 'review' } }
         let questionState = {}; 
         let timerInterval;
 
         window.onload = function() {
-            if(!currentStudentRoll) {
-                alert("Roll No is required!");
-                window.location.reload();
-                return;
-            }
-            checkExamControlAndAttempts();
+            fetchExamInfo();
         };
 
-        function checkExamControlAndAttempts() {
+        function fetchExamInfo() {
             db.collection("exam_control").doc("current_exam").get().then(doc => {
                 if(doc.exists) {
                     const data = doc.data();
                     currentExamTitle = data.title || "Class 10 Combined Test";
-                    document.getElementById('exam-title-display').innerText = `${currentExamTitle} | Duration: ${data.duration || 30} Mins`;
+                    examDurationMins = data.duration || 30;
                     
-                    verifyPreviousAttempt(data.duration || 30);
+                    document.getElementById('login-exam-title').innerText = `${currentExamTitle} (${examDurationMins} Mins)`;
+                    document.getElementById('exam-title-display').innerText = `${currentExamTitle} | Duration: ${examDurationMins} Mins`;
+
+                    // Check if student was already logged in
+                    if (currentStudentRoll) {
+                        verifyStudentAttempt(currentStudentRoll);
+                    }
                 }
             });
         }
 
-        function verifyPreviousAttempt(durationMins) {
-            const attemptDocId = `${currentStudentRoll.trim()}_${currentExamTitle.trim()}`;
+        // 1. LOGIN HANDLER
+        function handleStudentLogin(e) {
+            e.preventDefault();
+            const rollInput = document.getElementById('input-roll-no').value.trim();
+            const passInput = document.getElementById('input-password').value.trim();
+
+            if(!rollInput || !passInput) {
+                alert("Please fill both Roll No and Password!");
+                return;
+            }
+
+            // Verify Student Credentials from Database
+            db.collection("students")
+              .where("rollNo", "==", rollInput)
+              .get()
+              .then(snapshot => {
+                  if (snapshot.empty) {
+                      alert("❌ Invalid Roll No or Student not registered!");
+                      return;
+                  }
+
+                  let isValidPass = false;
+                  snapshot.forEach(doc => {
+                      if (doc.data().password === passInput) isValidPass = true;
+                  });
+
+                  if (isValidPass) {
+                      currentStudentRoll = rollInput;
+                      sessionStorage.setItem('activeRollNo', currentStudentRoll);
+                      verifyStudentAttempt(currentStudentRoll);
+                  } else {
+                      alert("❌ Incorrect Password!");
+                  }
+              }).catch(err => alert("Login Error: " + err.message));
+        }
+
+        // 2. VERIFY IF ATTEMPT COMPLETED OR NEW CANDIDATE
+        function verifyStudentAttempt(rollNo) {
+            const attemptDocId = `${rollNo.trim()}_${currentExamTitle.trim()}`;
+
             db.collection("exam_attempts").doc(attemptDocId).get().then(doc => {
-                if(doc.exists) {
-                    document.getElementById('exam-screen').classList.add('hidden');
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('top-header').classList.remove('hidden');
+                document.getElementById('student-roll-display').innerText = rollNo;
+
+                if (doc.exists) {
+                    // 🔴 ALREADY SUBMITTED (Show Block Screen)
+                    document.getElementById('blocked-roll-display').innerText = rollNo;
                     document.getElementById('already-submitted-screen').classList.remove('hidden');
+                    document.getElementById('exam-screen').classList.add('hidden');
                     document.getElementById('timer-display').innerText = "00:00";
                 } else {
+                    // 🟢 FRESH CANDIDATE (Start Exam)
+                    document.getElementById('already-submitted-screen').classList.add('hidden');
+                    document.getElementById('exam-screen').classList.remove('hidden');
                     loadActiveQuestions();
-                    startTimer(durationMins * 60);
+                    startTimer(examDurationMins * 60);
                 }
             });
         }
 
+        // 3. LOGOUT / SWITCH STUDENT (Clears Session)
+        function logoutStudent() {
+            sessionStorage.removeItem('activeRollNo');
+            currentStudentRoll = null;
+            if(timerInterval) clearInterval(timerInterval);
+            
+            // Hide exam screens, show login
+            document.getElementById('exam-screen').classList.add('hidden');
+            document.getElementById('already-submitted-screen').classList.add('hidden');
+            document.getElementById('top-header').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('input-roll-no').value = "";
+            document.getElementById('input-password').value = "";
+        }
+
+        // 4. LOAD QUESTIONS & RENDER INTERFACE
         function loadActiveQuestions() {
             db.collection("question_bank")
               .where("selectedForExam", "==", true)
@@ -206,7 +299,6 @@
                       allQuestions.push(q);
                       if (q.subject) subjectSet.add(q.subject);
 
-                      // Initial State: Unvisited
                       questionState[q.id] = { answer: '', status: 'unvisited' };
                   });
 
@@ -257,7 +349,6 @@
 
             const q = filteredQuestions[currentIndex];
 
-            // Update Visited Status if unvisited
             if(questionState[q.id].status === 'unvisited') {
                 questionState[q.id].status = 'not_answered';
             }
@@ -266,7 +357,6 @@
             document.getElementById('current-q-number').innerText = `Question ${currentIndex + 1} of ${filteredQuestions.length}`;
             document.getElementById('current-q-text').innerText = q.question;
 
-            // Render Options
             const optsContainer = document.getElementById('options-container');
             optsContainer.innerHTML = "";
 
@@ -325,14 +415,13 @@
             renderSingleQuestion();
         }
 
-        // Render Right Side Number Palette Grid
         function renderPalette() {
             const palette = document.getElementById('question-palette-grid');
             palette.innerHTML = "";
 
             filteredQuestions.forEach((q, idx) => {
                 const state = questionState[q.id] || { status: 'unvisited' };
-                let bgClass = "bg-gray-200 text-gray-700 border-gray-300"; // unvisited
+                let bgClass = "bg-gray-200 text-gray-700 border-gray-300";
 
                 if(state.status === 'not_answered') bgClass = "bg-red-500 text-white font-bold";
                 if(state.status === 'answered') bgClass = "bg-green-500 text-white font-bold";
@@ -349,6 +438,7 @@
         }
 
         function startTimer(durationInSeconds) {
+            if(timerInterval) clearInterval(timerInterval);
             let timer = durationInSeconds;
             const display = document.getElementById('timer-display');
             timerInterval = setInterval(() => {
@@ -397,7 +487,7 @@
             }).then(() => {
                 clearInterval(timerInterval);
                 alert(`🎉 Exam Submitted Successfully!\nYour Score: ${score} / ${allQuestions.length}`);
-                window.location.reload();
+                verifyStudentAttempt(currentStudentRoll); // Reload view to lock student
             }).catch(err => {
                 alert("Submission Error: " + err.message);
                 document.getElementById('btn-submit-exam').disabled = false;
