@@ -27,18 +27,28 @@
             </div>
         </div>
 
-        <!-- Section 1: Live Exam Control Settings -->
+        <!-- Section 1: Live Exam Control Settings (With Class Dropdown) -->
         <div class="bg-amber-50 border border-amber-200 p-6 rounded-xl shadow-sm">
             <h2 class="text-md font-bold text-amber-900 mb-4 flex items-center gap-2">⚙️ Master Exam Control & Timing Panel</h2>
-            <form onsubmit="handleExamControl(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <form onsubmit="handleExamControl(event)" class="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Target Class</label>
+                    <select id="exam-class-target" required class="w-full p-2 border rounded text-xs font-bold text-blue-900 bg-white focus:ring-2 focus:ring-amber-500">
+                        <option value="Class 8">Class 8th</option>
+                        <option value="Class 9">Class 9th</option>
+                        <option value="Class 10" selected>Class 10th</option>
+                        <option value="Class 11">Class 11th</option>
+                        <option value="Class 12">Class 12th</option>
+                    </select>
+                </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-700 mb-1">Exam Title / Batch</label>
-                    <input type="text" id="exam-title" required value="DAV Combined Term Assessment" class="w-full p-2 border rounded text-xs focus:ring-2 focus:ring-amber-500 bg-white">
+                    <input type="text" id="exam-title" required value="DAV Term Assessment" class="w-full p-2 border rounded text-xs focus:ring-2 focus:ring-amber-500 bg-white">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-700 mb-1">Exam Status</label>
                     <select id="exam-status" class="w-full p-2 border rounded text-xs bg-white focus:ring-2 focus:ring-amber-500">
-                        <option value="true">🟢 ACTIVE (Live for Students)</option>
+                        <option value="true">🟢 ACTIVE (Live)</option>
                         <option value="false">🔴 INACTIVE (Hidden)</option>
                     </select>
                 </div>
@@ -48,7 +58,7 @@
                 </div>
                 <div class="md:col-span-2">
                     <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 px-4 rounded text-xs shadow transition">
-                        💾 Save Master Exam Settings
+                        💾 Save Exam Settings for Class
                     </button>
                 </div>
             </form>
@@ -90,6 +100,7 @@
                     <thead class="bg-slate-100 text-gray-700 uppercase font-bold sticky top-0 border-b">
                         <tr>
                             <th class="p-2.5">Roll No</th>
+                            <th class="p-2.5">Class</th>
                             <th class="p-2.5">Exam Batch</th>
                             <th class="p-2.5">Obtained Score</th>
                             <th class="p-2.5">Total Questions</th>
@@ -100,7 +111,7 @@
                         </tr>
                     </thead>
                     <tbody id="results-table-body" class="divide-y">
-                        <tr><td colspan="8" class="p-4 text-center text-gray-400">Loading exam results...</td></tr>
+                        <tr><td colspan="9" class="p-4 text-center text-gray-400">Loading exam results...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -192,14 +203,26 @@
         <!-- Section 4: Master Question Bank -->
         <div class="bg-white p-6 rounded-xl border shadow-sm flex flex-col justify-between">
             <div>
-                <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <div class="flex flex-wrap justify-between items-center border-b pb-3 mb-4 gap-2">
                     <div>
                         <h3 class="font-bold text-gray-800 text-sm">📚 Master Question Bank</h3>
                         <p class="text-[11px] text-gray-400">Select questions to activate for live exam</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="selectAllQuestions(true)" class="text-xs text-blue-600 hover:underline font-bold">Select All</button> |
-                        <button onclick="selectAllQuestions(false)" class="text-xs text-gray-500 hover:underline">Deselect All</button>
+                    <!-- Class Filter for Question Bank -->
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-bold text-gray-700">Filter Class:</span>
+                        <select id="filter-qb-class" onchange="loadQuestionBank()" class="p-1.5 border rounded text-xs font-bold bg-white text-blue-900 border-blue-300">
+                            <option value="ALL">ALL CLASSES</option>
+                            <option value="Class 8">Class 8th</option>
+                            <option value="Class 9">Class 9th</option>
+                            <option value="Class 10" selected>Class 10th</option>
+                            <option value="Class 11">Class 11th</option>
+                            <option value="Class 12">Class 12th</option>
+                        </select>
+                        <div class="text-xs">
+                            <button onclick="selectAllQuestions(true)" class="text-blue-600 hover:underline font-bold">Select All</button> |
+                            <button onclick="selectAllQuestions(false)" class="text-gray-500 hover:underline">Deselect All</button>
+                        </div>
                     </div>
                 </div>
 
@@ -335,7 +358,7 @@
                 fetchedResultsData = [];
 
                 if(snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-gray-400">No student exam submissions recorded yet.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-gray-400">No student exam submissions recorded yet.</td></tr>`;
                     updateAnalysisCards(0, 0, 0, 0);
                     return;
                 }
@@ -378,7 +401,8 @@
                     tbody.innerHTML += `
                         <tr class="hover:bg-slate-50 transition">
                             <td class="p-2.5 font-bold text-gray-800">${r.rollNo || 'N/A'}</td>
-                            <td class="p-2.5 text-gray-600">${r.examTitle || 'Test'} (${r.class || 'N/A'})</td>
+                            <td class="p-2.5 font-bold text-purple-700">${r.class || 'N/A'}</td>
+                            <td class="p-2.5 text-gray-600">${r.examTitle || 'Test'}</td>
                             <td class="p-2.5 font-bold text-blue-700">${calculatedScore}</td>
                             <td class="p-2.5 text-gray-500">${totalQs}</td>
                             <td class="p-2.5 font-bold text-purple-700">${percentage}%</td>
@@ -715,6 +739,7 @@
         }
 
         function loadQuestionBank() {
+            const selectedClassFilter = document.getElementById('filter-qb-class').value;
             db.collection("question_bank").get().then(snapshot => {
                 const container = document.getElementById('question-bank-container');
                 container.innerHTML = "";
@@ -723,26 +748,28 @@
                     q.id = doc.id;
                     masterQuestionsMap[q.id] = q;
 
-                    const isChecked = q.selectedForExam ? 'checked' : '';
-                    const correctChoice = extractCorrectOption(q);
+                    if (selectedClassFilter === "ALL" || q.class === selectedClassFilter) {
+                        const isChecked = q.selectedForExam ? 'checked' : '';
+                        const correctChoice = extractCorrectOption(q);
 
-                    container.innerHTML += `
-                        <div class="border rounded-lg p-3 bg-gray-50 hover:bg-blue-50/40 transition shadow-sm relative flex gap-3 items-start">
-                            <input type="checkbox" onchange="updateSelectedCount()" value="${q.id}" ${isChecked} class="q-checkbox w-4 h-4 text-blue-600 rounded mt-1 border-gray-300 cursor-pointer">
-                            <div class="flex-grow">
-                                <div class="flex flex-wrap gap-1.5 mb-1.5 items-center">
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-600 text-white">${q.subject || 'General'}</span>
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-600 text-white">${q.class || 'Class 10'}</span>
+                        container.innerHTML += `
+                            <div class="border rounded-lg p-3 bg-gray-50 hover:bg-blue-50/40 transition shadow-sm relative flex gap-3 items-start">
+                                <input type="checkbox" onchange="updateSelectedCount()" value="${q.id}" ${isChecked} class="q-checkbox w-4 h-4 text-blue-600 rounded mt-1 border-gray-300 cursor-pointer">
+                                <div class="flex-grow">
+                                    <div class="flex flex-wrap gap-1.5 mb-1.5 items-center">
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-600 text-white">${q.subject || 'General'}</span>
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-600 text-white">${q.class || 'Class 10'}</span>
+                                    </div>
+                                    <p class="text-xs font-bold text-gray-800 leading-snug">${q.question}</p>
+                                    <p class="text-[11px] text-green-700 font-semibold mt-1">Ans: (${correctChoice || 'N/A'})</p>
                                 </div>
-                                <p class="text-xs font-bold text-gray-800 leading-snug">${q.question}</p>
-                                <p class="text-[11px] text-green-700 font-semibold mt-1">Ans: (${correctChoice || 'N/A'})</p>
+                                <div class="flex flex-col gap-1">
+                                    <button onclick="openEditQuestionModal('${q.id}')" class="text-blue-600 text-xs hover:underline font-bold">✏️ Edit</button>
+                                    <button onclick="deleteDoc('question_bank', '${q.id}', loadQuestionBank)" class="text-red-500 text-xs hover:underline font-bold">🗑️ Delete</button>
+                                </div>
                             </div>
-                            <div class="flex flex-col gap-1">
-                                <button onclick="openEditQuestionModal('${q.id}')" class="text-blue-600 text-xs hover:underline font-bold">✏️ Edit</button>
-                                <button onclick="deleteDoc('question_bank', '${q.id}', loadQuestionBank)" class="text-red-500 text-xs hover:underline font-bold">🗑️ Delete</button>
-                            </div>
-                        </div>
-                    `;
+                        `;
+                    }
                 });
                 updateSelectedCount();
             });
@@ -823,16 +850,19 @@
 
         function handleExamControl(e) {
             e.preventDefault();
+            const targetClass = document.getElementById('exam-class-target').value;
             const isActive = document.getElementById('exam-status').value === "true";
             const duration = parseInt(document.getElementById('exam-duration').value);
             const title = document.getElementById('exam-title').value;
 
-            db.collection("exam_control").doc("current_exam").set({
+            // Save settings specific to class
+            db.collection("exam_control").doc(targetClass).set({
+                targetClass: targetClass,
                 title: title,
                 isActive: isActive,
                 duration: duration,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => alert("✅ Master Exam Control Settings Saved!"));
+            }).then(() => alert(`✅ Master Exam Control Settings Saved for ${targetClass}!`));
         }
     </script>
 </body>
