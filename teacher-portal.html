@@ -306,7 +306,44 @@
             updateLivePreview();
         }
 
-        // 👁️ FOOLPROOF LIVE PREVIEW ENGINE (Fixes 1^2 bug & preserves English spaces)
+        // 🧮 FOOLPROOF MATH PARSER (Prevents double $$ wrapping inside matrices/equations)
+        function formatMathText(text) {
+            if (!text) return "";
+
+            // Divide text into pre-existing $...$ math blocks vs plain text
+            const parts = text.split(/(\$\$.*?\$\$|\$.*?\$)/gs);
+
+            return parts.map(part => {
+                if (part.startsWith('$')) {
+                    return part;
+                }
+
+                let formatted = part;
+
+                // 1. Detect 3-Row Determinants: |1 1 1| |1 2 3| |1 3 6|
+                const detRegex = /\|\s*([\d\w\s]+)\s*\|\s*\|\s*([\d\w\s]+)\s*\|\s*\|\s*([\d\w\s]+)\s*\|/g;
+                formatted = formatted.replace(detRegex, (match, r1, r2, r3) => {
+                    let row1 = r1.trim().split(/\s+/).join(' & ');
+                    let row2 = r2.trim().split(/\s+/).join(' & ');
+                    let row3 = r3.trim().split(/\s+/).join(' & ');
+                    return `$ \\begin{vmatrix} ${row1} \\\\ ${row2} \\\\ ${row3} \\end{vmatrix} $`;
+                });
+
+                // 2. Wrap LaTeX commands (\sqrt{x}, \frac{a}{b}, \int)
+                formatted = formatted.replace(/(\\[a-zA-Z]+(?:\{.*?\})*)/g, (match) => {
+                    return `$${match}$`;
+                });
+
+                // 3. Convert power notation: x^2 -> $x^{2}$
+                formatted = formatted.replace(/([a-zA-Z0-9\)\>]+)\^\s*(-?\d+|[a-zA-Z]+)/g, (match, varName, power) => {
+                    return `$${varName}^{${power}}$`;
+                });
+
+                return formatted;
+            }).join('');
+        }
+
+        // 👁️ LIVE PREVIEW ENGINE USING MASTER PARSER
         function updateLivePreview() {
             const text = document.getElementById('q-text').value;
             const previewBox = document.getElementById('live-math-preview');
@@ -316,32 +353,7 @@
                 return;
             }
 
-            let formatted = text;
-
-            // 1. Auto convert 3-row Determinants: |1 1 1| |1 2 3| |1 3 6|
-            const detRegex = /\|\s*([\d\w\s]+)\s*\|\s*\|\s*([\d\w\s]+)\s*\|\s*\|\s*([\d\w\s]+)\s*\|/g;
-            formatted = formatted.replace(detRegex, (match, r1, r2, r3) => {
-                let row1 = r1.trim().split(/\s+/).join(' & ');
-                let row2 = r2.trim().split(/\s+/).join(' & ');
-                let row3 = r3.trim().split(/\s+/).join(' & ');
-                return `$ \\begin{vmatrix} ${row1} \\\\ ${row2} \\\\ ${row3} \\end{vmatrix} $`;
-            });
-
-            // 2. Safely wrap un-escaped standard math commands e.g. \sqrt{x}, \frac{a}{b}
-            formatted = formatted.replace(/(\\[a-zA-Z]+(?:\{.*?\})*)/g, (match) => {
-                if (match.includes('$')) return match;
-                return `$${match}$`;
-            });
-
-            // 3. FOOLPROOF POWER CONVERTER: x^2 -> $x^{2}$ (Fixes 1^2 bug via Function Callback)
-            formatted = formatted.replace(/([a-zA-Z0-9\)\>]+)\^\s*(-?\d+|[a-zA-Z]+)/g, (match, varName, power) => {
-                return `$${varName}^{${power}}$`;
-            });
-
-            // 4. Clean up any unintended double $$ delimiters
-            formatted = formatted.replace(/\$\$/g, '$');
-
-            previewBox.innerHTML = formatted;
+            previewBox.innerHTML = formatMathText(text);
 
             if (window.MathJax && MathJax.typesetPromise) {
                 MathJax.typesetPromise([previewBox]);
@@ -454,7 +466,7 @@
                                     <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-600 text-white">${q.class || 'Class 10'}</span>
                                     <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-700">${q.chapter || 'Chapter'}</span>
                                 </div>
-                                <p class="text-xs font-bold text-gray-800 leading-snug">${q.question}</p>
+                                <p class="text-xs font-bold text-gray-800 leading-snug">${formatMathText(q.question)}</p>
                                 <p class="text-[11px] text-emerald-700 font-bold">Correct Option: (${correctOpt})</p>
                             </div>
                             <div class="flex items-center gap-3">
