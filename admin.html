@@ -4,148 +4,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Portal - DAV Public School</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-slate-100 font-sans min-h-screen p-3 md:p-6 select-none">
 
-    <div class="max-w-7xl mx-auto space-y-4">
+    <div class="max-w-6xl mx-auto space-y-4">
 
         <!-- 1. LOGIN SECTION -->
-        <div id="login-section" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border max-w-md mx-auto space-y-4 my-10">
+        <div id="login-section" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-200 max-w-md mx-auto space-y-4 my-10">
             <div class="text-center">
-                <h1 class="text-2xl font-black text-blue-900">DAV PUBLIC SCHOOL</h1>
-                <p class="text-xs text-gray-500 font-bold">Admin Central Console</p>
+                <h1 class="text-xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
+                <p class="text-xs text-gray-500 font-bold">Admin Central Control Panel</p>
             </div>
             <form onsubmit="handleAdminLogin(event)" class="space-y-3 text-xs">
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Admin ID</label>
-                    <input type="text" id="a-user" required class="w-full p-2.5 border rounded-lg bg-slate-50">
+                    <input type="text" id="a-user" placeholder="Enter Admin Username" required class="w-full p-2.5 border rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-semibold">
                 </div>
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Password</label>
-                    <input type="password" id="a-pass" required class="w-full p-2.5 border rounded-lg bg-slate-50">
+                    <input type="password" id="a-pass" placeholder="Enter Password" required class="w-full p-2.5 border rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
                 </div>
-                <button type="submit" class="w-full bg-blue-900 hover:bg-black text-white font-bold py-2.5 rounded-lg shadow">
+                <button type="submit" class="w-full bg-blue-900 hover:bg-black text-white font-bold py-2.5 rounded-lg shadow transition">
                     🔐 Admin Login
                 </button>
             </form>
         </div>
 
         <!-- 2. MAIN ADMIN DASHBOARD -->
-        <div id="dashboard-section" class="hidden space-y-5">
+        <div id="dashboard-section" class="hidden space-y-4">
 
-            <!-- Top Header Bar with Logout -->
+            <!-- Top Header Bar with Logout (ONLY ADDITION) -->
             <div class="bg-white p-4 rounded-xl shadow border flex justify-between items-center">
                 <div>
                     <h2 class="text-lg font-black text-blue-900">DAV Admin Console</h2>
-                    <p class="text-xs text-gray-500 font-semibold">Master Controls & Result Analytics</p>
+                    <p class="text-xs text-gray-500 font-semibold">Exam Timing, Activation & Master Controls</p>
                 </div>
-                <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-1.5 transition">
+                <!-- 🚪 LOGOUT BUTTON -->
+                <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-4 py-2 rounded-lg shadow transition flex items-center gap-1.5">
                     🚪 Logout
                 </button>
             </div>
 
-            <!-- Grid Panel: Exam Control + Register Student -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                <!-- ⚙️ Exam Control Settings -->
-                <div class="bg-white p-5 rounded-xl shadow border space-y-3">
-                    <h3 class="font-bold text-sm text-blue-900 border-b pb-2">⚙️ Exam Activation & Duration</h3>
-                    <div class="space-y-3 text-xs">
-                        <div>
-                            <label class="block font-bold mb-1">Class</label>
-                            <select id="ctrl-class" class="w-full p-2 border rounded-lg bg-slate-50 font-bold text-blue-900">
-                                <option value="Class 8">Class 8th</option>
-                                <option value="Class 9">Class 9th</option>
-                                <option value="Class 10" selected>Class 10th</option>
-                                <option value="Class 11">Class 11th</option>
-                                <option value="Class 12">Class 12th</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-bold mb-1">Exam Duration (Mins)</label>
-                            <input type="number" id="ctrl-duration" value="30" class="w-full p-2 border rounded-lg bg-slate-50 font-bold">
-                        </div>
-                        <div>
-                            <label class="block font-bold mb-1">Exam Active Status</label>
-                            <select id="ctrl-status" class="w-full p-2 border rounded-lg bg-slate-50 font-bold">
-                                <option value="true">🟢 Active (Students Can Take Exam)</option>
-                                <option value="false">🔴 Inactive (Exam Blocked)</option>
-                            </select>
-                        </div>
-                        <button onclick="saveExamSettings()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow">
-                            💾 Save Class Settings
-                        </button>
+            <!-- EXAM CONTROL SETTINGS -->
+            <div class="bg-white p-5 rounded-xl shadow border space-y-4">
+                <h3 class="font-bold text-sm text-blue-900 border-b pb-2">⚙️ Exam Activation & Time Settings</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Target Class</label>
+                        <select id="ctrl-class" class="w-full p-2.5 border rounded-lg bg-slate-50 font-bold text-blue-900">
+                            <option value="Class 8">Class 8th</option>
+                            <option value="Class 9">Class 9th</option>
+                            <option value="Class 10" selected>Class 10th</option>
+                            <option value="Class 11">Class 11th</option>
+                            <option value="Class 12">Class 12th</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Exam Duration (Minutes)</label>
+                        <input type="number" id="ctrl-duration" value="30" class="w-full p-2.5 border rounded-lg bg-slate-50 font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Exam Status</label>
+                        <select id="ctrl-status" class="w-full p-2.5 border rounded-lg bg-slate-50 font-bold">
+                            <option value="true">🟢 Active (Students Can Login)</option>
+                            <option value="false">🔴 Inactive (Exam Closed)</option>
+                        </select>
                     </div>
                 </div>
 
-                <!-- 👤 Add Student Account -->
-                <div class="bg-white p-5 rounded-xl shadow border space-y-3">
-                    <h3 class="font-bold text-sm text-blue-900 border-b pb-2">👤 Register New Student</h3>
-                    <form onsubmit="handleAddStudent(event)" class="space-y-3 text-xs">
-                        <div>
-                            <label class="block font-bold mb-1">Class</label>
-                            <select id="st-class" class="w-full p-2 border rounded-lg bg-slate-50 font-bold text-blue-900">
-                                <option value="Class 10" selected>Class 10th</option>
-                                <option value="Class 8">Class 8th</option>
-                                <option value="Class 9">Class 9th</option>
-                                <option value="Class 11">Class 11th</option>
-                                <option value="Class 12">Class 12th</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-bold mb-1">Student Full Name</label>
-                            <input type="text" id="st-name" required class="w-full p-2 border rounded-lg bg-slate-50">
-                        </div>
-                        <div>
-                            <label class="block font-bold mb-1">Roll No / Student ID</label>
-                            <input type="text" id="st-roll" required class="w-full p-2 border rounded-lg bg-slate-50">
-                        </div>
-                        <div>
-                            <label class="block font-bold mb-1">Password</label>
-                            <input type="text" id="st-pass" value="123456" required class="w-full p-2 border rounded-lg bg-slate-50">
-                        </div>
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow">
-                            ➕ Register Student
-                        </button>
-                    </form>
-                </div>
-
-            </div>
-
-            <!--📊 Student Result Analytics & CSV Export -->
-            <div class="bg-white p-5 rounded-xl shadow border space-y-4">
-                <div class="flex justify-between items-center border-b pb-2">
-                    <h3 class="font-bold text-sm text-blue-900">📊 Submitted Exam Results</h3>
-                    <button onclick="exportResultsCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-1.5 px-3 rounded shadow">
-                        📥 Export CSV Report
-                    </button>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs border-collapse">
-                        <thead>
-                            <tr class="bg-slate-100 text-gray-700 uppercase font-black border-b">
-                                <th class="p-2.5">Roll No</th>
-                                <th class="p-2.5">Student Name</th>
-                                <th class="p-2.5">Class</th>
-                                <th class="p-2.5">Questions Attempted</th>
-                                <th class="p-2.5">Submission Time</th>
-                            </tr>
-                        </thead>
-                        <tbody id="results-table-body">
-                            <tr><td colspan="5" class="text-center py-4 text-gray-400">Loading exam submissions...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <button onclick="saveExamSettings()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 px-6 rounded-lg shadow transition">
+                    💾 Save Exam Settings for Class
+                </button>
             </div>
 
         </div>
 
     </div>
 
+    <!-- Firebase Logic -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
@@ -159,14 +101,14 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        let examAttemptsData = [];
-
         function handleAdminLogin(e) {
             e.preventDefault();
-            if (document.getElementById('a-user').value.trim() === "admin" && document.getElementById('a-pass').value.trim() === "davadmin123") {
+            const user = document.getElementById('a-user').value.trim();
+            const pass = document.getElementById('a-pass').value.trim();
+
+            if (user === "admin" && pass === "davadmin123") {
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('dashboard-section').classList.remove('hidden');
-                fetchExamAttempts();
             } else {
                 alert("❌ Invalid Admin Credentials!");
             }
@@ -175,7 +117,7 @@
         function saveExamSettings() {
             const targetClass = document.getElementById('ctrl-class').value;
             const duration = parseInt(document.getElementById('ctrl-duration').value) || 30;
-            const statusVal = document.getElementById('ctrl-status').value === "true"; // Saved as strict boolean
+            const statusVal = document.getElementById('ctrl-status').value === "true"; // Strict boolean
 
             db.collection("exam_control").doc(targetClass).set({
                 class: targetClass,
@@ -183,74 +125,17 @@
                 isActive: statusVal,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
-                alert(`✅ Exam Settings Saved for ${targetClass}!\nStatus: ${statusVal ? 'ACTIVE' : 'INACTIVE'}`);
+                alert(`✅ Settings updated for ${targetClass}!\nStatus: ${statusVal ? 'ACTIVE' : 'INACTIVE'}\nDuration: ${duration} Mins`);
+            }).catch(err => {
+                alert("Error saving settings: " + err.message);
             });
         }
 
-        function handleAddStudent(e) {
-            e.preventDefault();
-            const payload = {
-                class: document.getElementById('st-class').value,
-                name: document.getElementById('st-name').value.trim(),
-                rollNo: document.getElementById('st-roll').value.trim(),
-                password: document.getElementById('st-pass').value.trim()
-            };
-
-            db.collection("students").add(payload).then(() => {
-                alert("🎉 Student Registered!");
-                document.getElementById('st-name').value = "";
-                document.getElementById('st-roll').value = "";
-            });
-        }
-
-        function fetchExamAttempts() {
-            db.collection("exam_attempts").get().then(snapshot => {
-                const tbody = document.getElementById('results-table-body');
-                tbody.innerHTML = "";
-                examAttemptsData = [];
-
-                if (snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-400">No student submissions yet.</td></tr>`;
-                    return;
-                }
-
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    examAttemptsData.push(data);
-                    const attemptedCount = Object.keys(data.answers || {}).length;
-
-                    tbody.innerHTML += `
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="p-2.5 font-bold text-blue-900">${data.rollNo}</td>
-                            <td class="p-2.5 font-semibold text-gray-800">${data.studentName}</td>
-                            <td class="p-2.5">${data.class}</td>
-                            <td class="p-2.5 font-bold text-emerald-700">${attemptedCount} / ${data.totalQuestions || 0}</td>
-                            <td class="p-2.5 text-gray-500">${data.submittedAt ? new Date(data.submittedAt.seconds * 1000).toLocaleString() : 'Just now'}</td>
-                        </tr>
-                    `;
-                });
-            });
-        }
-
-        function exportResultsCSV() {
-            if (!examAttemptsData.length) return alert("No results available to export.");
-
-            let csvContent = "data:text/csv;charset=utf-8,RollNo,StudentName,Class,AttemptedQuestions,TotalQuestions\n";
-            examAttemptsData.forEach(row => {
-                const count = Object.keys(row.answers || {}).length;
-                csvContent += `${row.rollNo},${row.studentName},${row.class},${count},${row.totalQuestions || 0}\n`;
-            });
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "Exam_Results_Report.csv");
-            document.body.appendChild(link);
-            link.click();
-        }
-
+        // LOGOUT LOGIC
         function handleLogout() {
-            if (confirm("Logout from Admin Console?")) location.reload();
+            if (confirm("Are you sure you want to LOGOUT from Admin Console?")) {
+                location.reload();
+            }
         }
     </script>
 </body>
