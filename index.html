@@ -61,7 +61,7 @@
                 </div>
             </div>
 
-            <!-- 🎯 SUBJECT FILTER TABS (Student can click to filter questions) -->
+            <!-- 🎯 SUBJECT FILTER TABS -->
             <div class="bg-white p-3 rounded-xl shadow border space-y-2">
                 <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Choose Subject Section:</p>
                 <div class="flex flex-wrap gap-2" id="subject-tabs-container">
@@ -139,14 +139,22 @@
                 });
         }
 
+        // 🎯 FIX: ACTIVE STATUS CHECK LOGIC FOR BOTH BOOLEAN & STRING
         function checkExamStatusAndStart(targetClass) {
             db.collection("exam_control").doc(targetClass).get().then(doc => {
-                if (!doc.exists || !doc.data().isActive) {
-                    return alert(`🔴 Exam for ${targetClass} is currently NOT ACTIVE! Please contact your teacher.`);
+                if (!doc.exists) {
+                    return alert(`🔴 Exam settings for ${targetClass} have not been configured by Admin yet!`);
                 }
 
                 const examMeta = doc.data();
                 
+                // Flexible check for true or "true"
+                const isExamActive = (examMeta.isActive === true || examMeta.isActive === "true");
+
+                if (!isExamActive) {
+                    return alert(`🔴 Exam for ${targetClass} is currently NOT ACTIVE! Please contact your teacher.`);
+                }
+
                 // Check if already attempted
                 db.collection("exam_attempts")
                     .where("rollNo", "==", loggedInStudent.rollNo)
@@ -195,7 +203,7 @@
                 });
         }
 
-        // 🎯 BUILD SUBJECT TABS DYNAMICALLY BASED ON LOADED QUESTIONS
+        // BUILD SUBJECT TABS DYNAMICALLY
         function buildSubjectTabs() {
             const tabsContainer = document.getElementById('subject-tabs-container');
             tabsContainer.innerHTML = `
@@ -204,7 +212,6 @@
                 </button>
             `;
 
-            // Extract unique subjects
             const subjectsSet = new Set();
             examQuestionsList.forEach(q => {
                 if (q.subject) subjectsSet.add(q.subject.trim());
@@ -220,12 +227,11 @@
             });
         }
 
-        // 🎯 FILTER QUESTIONS BY SUBJECT
+        // FILTER QUESTIONS BY SUBJECT
         function filterBySubject(subjName) {
             activeSubjectFilter = subjName;
             document.getElementById('showing-subject-label').innerText = `Showing: ${subjName === 'ALL' ? 'All Subjects' : subjName}`;
 
-            // Reset tab styles
             document.querySelectorAll('.subj-tab').forEach(btn => {
                 btn.className = "subj-tab bg-slate-200 hover:bg-blue-100 text-gray-700 font-bold text-xs px-3.5 py-1.5 rounded-lg transition";
             });
