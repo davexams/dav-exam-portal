@@ -3,245 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Portal - DAV Public School</title>
+    <title>Teacher & Admin Portal - DAV Public School</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen">
+<body class="bg-slate-100 font-sans min-h-screen p-4 md:p-6">
 
-    <!-- 1. ADMIN LOGIN SCREEN -->
-    <div id="login-container" class="flex items-center justify-center min-h-screen">
-        <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md border-t-4 border-red-600">
-            <h2 class="text-2xl font-bold text-center text-red-700 mb-2">DAV Admin Control Portal</h2>
-            <p class="text-xs text-center text-gray-500 mb-6">Restricted Access - Authorized Personnel Only</p>
-            
-            <div id="login-error" class="hidden mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm text-center">
-                Invalid Admin Email or Password!
-            </div>
+    <div class="max-w-7xl mx-auto space-y-6">
 
-            <form id="login-form" onsubmit="handleAdminLogin(event)">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Admin Email</label>
-                    <input type="email" id="email" required placeholder="admin@dav.com" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
-                    <input type="password" id="password" required placeholder="••••••••" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                </div>
-                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                    Login to Admin Panel
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- 2. ADMIN DASHBOARD -->
-    <div id="dashboard-container" class="hidden">
-        <!-- Top Banner / Navbar -->
-        <nav class="bg-white p-4 shadow-md flex justify-between items-center px-8 border-b">
+        <!-- Top Banner Header -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-4 rounded-xl shadow border border-gray-200">
             <div>
-                <h1 class="text-2xl font-black text-blue-600 tracking-wide">DAV PUBLIC SCHOOL</h1>
-                <p class="text-xs text-gray-500 font-medium">Teacher Admin Dashboard - Exam Results & Analysis</p>
+                <h1 class="text-2xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
+                <p class="text-xs text-gray-500 font-semibold">Teacher & Admin Management Portal</p>
             </div>
-            <div class="flex gap-2">
-                <button onclick="exportResultExcelCSV()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs py-2 px-4 rounded-lg shadow flex items-center gap-1.5 transition">
-                    📥 Export Option Analysis Excel (CSV)
-                </button>
-                <button onclick="loadAllAdminData()" class="bg-blue-50 border border-blue-200 text-blue-600 font-semibold text-xs py-2 px-3 rounded-lg hover:bg-blue-100 flex items-center gap-1">
-                    🔄 Refresh
-                </button>
-                <button onclick="handleAdminLogout()" class="bg-red-50 border border-red-200 text-red-600 font-semibold text-xs py-2 px-3 rounded-lg hover:bg-red-100 flex items-center gap-1">
-                    🔒 Logout
-                </button>
+            <div class="flex items-center gap-3 mt-2 sm:mt-0">
+                <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1.5 rounded-full font-bold border border-blue-200" id="teacher-profile-badge">
+                    👤 Logged in as: Vikram Sir
+                </span>
             </div>
-        </nav>
+        </div>
 
-        <div class="max-w-7xl mx-auto p-6 space-y-8">
-            
-            <!-- Quick Stats -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-blue-500">
-                    <h3 class="text-gray-500 text-xs font-semibold uppercase">Total Students</h3>
-                    <p id="stat-students-count" class="text-2xl font-bold text-gray-800 mt-1">0</p>
+        <!-- Section 1: Live Exam Control & Timing Panel -->
+        <div class="bg-amber-50 border border-amber-200 p-6 rounded-xl shadow-sm">
+            <h2 class="text-md font-bold text-amber-900 mb-4 flex items-center gap-2">
+                ⚙️ Live Exam Batch & Timing Control
+            </h2>
+            <form onsubmit="handleExamControl(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Exam Title / Batch</label>
+                    <input type="text" id="exam-title" required value="Class 10 Physics & Maths Test" class="w-full p-2 border rounded text-xs focus:ring-2 focus:ring-amber-500 bg-white">
                 </div>
-                <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-yellow-500">
-                    <h3 class="text-gray-500 text-xs font-semibold uppercase">Total Teachers</h3>
-                    <p id="stat-teachers-count" class="text-2xl font-bold text-gray-800 mt-1">0</p>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Exam Status</label>
+                    <select id="exam-status" class="w-full p-2 border rounded text-xs bg-white focus:ring-2 focus:ring-amber-500">
+                        <option value="true">🟢 ACTIVE (Live for Students)</option>
+                        <option value="false">🔴 INACTIVE (Hidden)</option>
+                    </select>
                 </div>
-                <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500">
-                    <h3 class="text-gray-500 text-xs font-semibold uppercase">Total Questions</h3>
-                    <p id="stat-questions-count" class="text-2xl font-bold text-gray-800 mt-1">0</p>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Duration (Mins)</label>
+                    <input type="number" id="exam-duration" value="30" min="1" class="w-full p-2 border rounded text-xs bg-white focus:ring-2 focus:ring-amber-500">
                 </div>
-                <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-purple-500">
-                    <h3 class="text-gray-500 text-xs font-semibold uppercase">Exams Submitted</h3>
-                    <p id="stat-exams-count" class="text-2xl font-bold text-gray-800 mt-1">0</p>
-                </div>
-            </div>
-
-            <!-- LIVE EXAM CONTROL PANEL -->
-            <div class="bg-amber-50 p-5 rounded-xl border border-amber-200 shadow-sm">
-                <h2 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">⚙️ Live Exam Control Center</h2>
-                
-                <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-lg border">
-                    <div>
-                        <p class="text-xs font-semibold text-gray-600">Current Exam Status:</p>
-                        <span id="exam-status-badge" class="inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-700">
-                            Checking status...
-                        </span>
-                    </div>
-
-                    <div class="flex items-center gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-600">Active Subject</label>
-                            <input type="text" id="exam-subject-input" placeholder="e.g. Science" class="p-2 border rounded text-xs w-36">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-600">Duration (Mins)</label>
-                            <input type="number" id="exam-duration-input" placeholder="30" class="p-2 border rounded text-xs w-24">
-                        </div>
-                        <button id="toggle-exam-btn" onclick="toggleExamState()" class="mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded text-xs">
-                            Start Exam
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- STUDENT MANAGEMENT SECTION -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border">
-                <h2 class="text-sm font-bold text-gray-800 mb-4 border-b pb-2">Student Management (Add / Edit)</h2>
-                
-                <form id="student-form" onsubmit="saveStudent(event)" class="space-y-4 mb-6 bg-gray-50 p-4 rounded-lg border">
-                    <input type="hidden" id="student-doc-id">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700">Roll Number</label>
-                            <input type="text" id="stu-roll" required placeholder="e.g. 101" class="w-full p-2 border rounded text-xs bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700">Student Name</label>
-                            <input type="text" id="stu-name" required placeholder="e.g. Amit Kumar" class="w-full p-2 border rounded text-xs bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700">Class & Section</label>
-                            <input type="text" id="stu-class" required placeholder="e.g. 10-A" class="w-full p-2 border rounded text-xs bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700">Student Password</label>
-                            <input type="text" id="stu-pass" required placeholder="Set Password" class="w-full p-2 border rounded text-xs bg-white">
-                        </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="submit" id="stu-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-5 rounded text-xs shadow">
-                            Save Student
-                        </button>
-                        <button type="button" onclick="resetStudentForm()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-1.5 px-4 rounded text-xs">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse border border-gray-200 text-xs">
-                        <thead>
-                            <tr class="bg-gray-100 text-gray-700">
-                                <th class="p-2 border">Roll No</th>
-                                <th class="p-2 border">Student Name</th>
-                                <th class="p-2 border">Class</th>
-                                <th class="p-2 border">Password</th>
-                                <th class="p-2 border text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-students-list">
-                            <tr><td colspan="5" class="p-4 text-center text-gray-500">Loading students...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- TEACHER MANAGEMENT SECTION -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border">
-                <h2 class="text-sm font-bold text-gray-800 mb-4 border-b pb-2">Teacher Management (Add / Edit)</h2>
-                
-                <form id="teacher-form" onsubmit="saveTeacher(event)" class="space-y-4 mb-6 bg-gray-50 p-4 rounded-lg border">
-                    <input type="hidden" id="teacher-doc-id">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700">Teacher Name</label>
-                            <input type="text" id="tea-name" required placeholder="e.g. Mr. Rajesh Sharma" class="w-full p-2 border rounded text-xs bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700">Email Address</label>
-                            <input type="email" id="tea-email" required placeholder="teacher@dav.com" class="w-full p-2 border rounded text-xs bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700">Login Password</label>
-                            <input type="text" id="tea-pass" required placeholder="Set Password" class="w-full p-2 border rounded text-xs bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700">Subject Assigned</label>
-                            <input type="text" id="tea-subject" required placeholder="e.g. Physics / Mathematics" class="w-full p-2 border rounded text-xs bg-white">
-                        </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="submit" id="tea-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-5 rounded text-xs shadow">
-                            Save Teacher
-                        </button>
-                        <button type="button" onclick="resetTeacherForm()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-1.5 px-4 rounded text-xs">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse border border-gray-200 text-xs">
-                        <thead>
-                            <tr class="bg-gray-100 text-gray-700">
-                                <th class="p-2 border">Teacher Name</th>
-                                <th class="p-2 border">Email</th>
-                                <th class="p-2 border">Password</th>
-                                <th class="p-2 border">Subject</th>
-                                <th class="p-2 border text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-teachers-list">
-                            <tr><td colspan="5" class="p-4 text-center text-gray-500">Loading teachers...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- EXAM RESULTS LOGS -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border">
-                <div class="flex justify-between items-center mb-4 border-b pb-2">
-                    <h2 class="text-sm font-bold text-gray-800">Submitted Exam Results</h2>
-                    <button onclick="exportResultExcelCSV()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-1.5 px-3 rounded shadow">
-                        📥 Export Excel (CSV)
+                <div class="md:col-span-2">
+                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 px-4 rounded text-xs shadow transition">
+                        💾 Save & Activate Exam
                     </button>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse border border-gray-200 text-xs">
-                        <thead>
-                            <tr class="bg-gray-100 text-gray-700">
-                                <th class="p-2 border">Roll No</th>
-                                <th class="p-2 border">Student Name</th>
-                                <th class="p-2 border">Subject</th>
-                                <th class="p-2 border text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-results-list">
-                            <tr><td colspan="4" class="p-4 text-center text-gray-500">Loading exam records...</td></tr>
-                        </tbody>
-                    </table>
+            </form>
+        </div>
+
+        <!-- Section 2: CSV Bulk Question Upload Box -->
+        <div class="bg-blue-50 border border-dashed border-blue-300 p-5 rounded-xl flex flex-wrap justify-between items-center gap-4">
+            <div>
+                <h3 class="font-bold text-sm text-blue-900 flex items-center gap-2">
+                    📁 Bulk Upload Questions via Excel / CSV
+                </h3>
+                <p class="text-xs text-gray-600 mt-0.5">CSV Format: Class, Subject, Chapter, QuestionText, OptionA, OptionB, OptionC, OptionD, CorrectOption</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <input type="file" id="csv-file-input" accept=".csv" class="text-xs bg-white p-1 border rounded cursor-pointer">
+                <button onclick="processCSVUpload()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-4 rounded shadow transition flex items-center gap-1">
+                    🚀 Upload CSV
+                </button>
+            </div>
+        </div>
+
+        <!-- Section 3: Add Single Question & Interactive Question Bank -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Left Box: Add Single Question -->
+            <div class="bg-white p-6 rounded-xl border shadow-sm">
+                <h3 class="font-bold text-gray-800 text-sm mb-4 border-b pb-2">➕ Add Single Question</h3>
+                <form onsubmit="handleSingleQuestion(event)" class="space-y-3">
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Class</label>
+                            <input type="text" id="q-class" value="Class 10" required class="w-full p-2 border rounded text-xs mt-0.5">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Subject</label>
+                            <input type="text" id="q-subject" value="Physics" required class="w-full p-2 border rounded text-xs mt-0.5">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Chapter</label>
+                            <input type="text" id="q-chapter" value="Light" required class="w-full p-2 border rounded text-xs mt-0.5">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Question Text</label>
+                        <textarea id="q-text" placeholder="Enter Question Text..." required class="w-full p-2 border rounded text-xs h-20 mt-0.5"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="opt-a" placeholder="Option A" required class="p-2 border rounded text-xs">
+                        <input type="text" id="opt-b" placeholder="Option B" required class="p-2 border rounded text-xs">
+                        <input type="text" id="opt-c" placeholder="Option C" required class="p-2 border rounded text-xs">
+                        <input type="text" id="opt-d" placeholder="Option D" required class="p-2 border rounded text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Correct Answer</label>
+                        <select id="opt-correct" class="w-full p-2 border rounded text-xs bg-white mt-0.5">
+                            <option value="A">Option A</option>
+                            <option value="B">Option B</option>
+                            <option value="C">Option C</option>
+                            <option value="D">Option D</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded text-xs shadow transition">
+                        💾 Add Question to Bank
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right Box: Question Bank with Teacher Metadata & Checkbox Selection -->
+            <div class="bg-white p-6 rounded-xl border shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center border-b pb-3 mb-4">
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-sm">📚 Question Bank Panel</h3>
+                            <p class="text-[11px] text-gray-400">Select questions to include in live exam</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="selectAllQuestions(true)" class="text-xs text-blue-600 hover:underline font-bold">Select All</button> |
+                            <button onclick="selectAllQuestions(false)" class="text-xs text-gray-500 hover:underline">Deselect All</button>
+                        </div>
+                    </div>
+
+                    <!-- Scrollable Question Cards List -->
+                    <div class="space-y-3 max-h-[430px] overflow-y-auto pr-1" id="question-bank-container">
+                        <p class="text-xs text-gray-400 text-center py-8">Loading questions from central bank...</p>
+                    </div>
+                </div>
+
+                <!-- Bottom Status & Save Action Bar -->
+                <div class="border-t pt-3 mt-4 flex justify-between items-center bg-gray-50 p-3 rounded-lg border">
+                    <span class="text-xs font-bold text-gray-700" id="selected-count-label">Selected: 0 Questions</span>
+                    <button onclick="saveActiveExamQuestions()" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-2 px-4 rounded shadow transition flex items-center gap-1">
+                        ✅ Activate Selected Questions for Live Exam
+                    </button>
                 </div>
             </div>
 
         </div>
+
     </div>
 
-    <!-- JavaScript Logic -->
+    <!-- Firebase Script Logic -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
@@ -249,337 +159,185 @@
             projectId: "myexamportal-abf3f",
             storageBucket: "myexamportal-abf3f.firebasestorage.app",
             messagingSenderId: "8464475917",
-            appId: "1:8464475917:web:dd31ca0bba84a56ae17244",
-            measurementId: "G-G0VRMX7EQT"
+            appId: "1:8464475917:web:dd31ca0bba84a56ae17244"
         };
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        let isExamActive = false;
 
-        function handleAdminLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+        const CURRENT_TEACHER_NAME = "Vikram Sir"; // Current Active Teacher Name
 
-            if (email === "admin@dav.com" && password === "admin123") {
-                document.getElementById('login-container').classList.add('hidden');
-                document.getElementById('dashboard-container').classList.remove('hidden');
-                loadAllAdminData();
-            } else {
-                document.getElementById('login-error').classList.remove('hidden');
-            }
-        }
+        window.onload = function() {
+            loadQuestionBank();
+        };
 
-        function handleAdminLogout() {
-            document.getElementById('dashboard-container').classList.add('hidden');
-            document.getElementById('login-container').classList.remove('hidden');
-        }
+        // Load Question Bank and render with Checkboxes and Metadata
+        function loadQuestionBank() {
+            db.collection("question_bank").get().then(snapshot => {
+                const container = document.getElementById('question-bank-container');
+                container.innerHTML = "";
 
-        function loadAllAdminData() {
-            loadExamControlStatus();
-            loadStudents();
-            loadTeachers();
-            loadResultsAndStats();
-        }
-
-        function loadExamControlStatus() {
-            db.collection("exam_control").doc("current_exam").get().then(doc => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    isExamActive = data.isActive || false;
-                    document.getElementById('exam-subject-input').value = data.subject || '';
-                    document.getElementById('exam-duration-input').value = data.duration || 30;
-                    updateExamUI();
-                } else {
-                    updateExamUI();
+                if(snapshot.empty) {
+                    container.innerHTML = `<p class="text-xs text-gray-400 text-center py-8">No questions uploaded yet.</p>`;
+                    return;
                 }
+
+                snapshot.forEach(doc => {
+                    const q = doc.data();
+                    q.id = doc.id;
+
+                    const isChecked = q.selectedForExam ? 'checked' : '';
+                    const uploadedBy = q.uploadedBy || "System Admin";
+                    const uploadedDate = q.uploadedAt || "Earlier";
+
+                    container.innerHTML += `
+                        <div class="border rounded-lg p-3 bg-gray-50 hover:bg-blue-50/40 transition shadow-sm relative flex gap-3 items-start">
+                            <input type="checkbox" onchange="updateSelectedCount()" value="${q.id}" ${isChecked} class="q-checkbox w-4 h-4 text-blue-600 rounded mt-1 border-gray-300 cursor-pointer">
+                            <div class="flex-grow">
+                                <div class="flex flex-wrap gap-1.5 mb-1.5 items-center">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-600 text-white">${q.subject || 'General'}</span>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-700">${q.class || 'Class 10'}</span>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-800 text-white">${q.chapter || 'Chapter'}</span>
+                                </div>
+                                <p class="text-xs font-bold text-gray-800 leading-snug">${q.question}</p>
+                                <p class="text-[11px] text-green-700 font-semibold mt-1">Ans: (${q.correctOption}) ${q.options ? q.options[q.correctOption] || '' : ''}</p>
+                                
+                                <!-- Metadata Row: Uploaded By & Date -->
+                                <div class="mt-2 pt-2 border-t border-gray-200 flex justify-between text-[10px] text-gray-500 font-medium">
+                                    <span>👤 <b>Uploaded By:</b> ${uploadedBy}</span>
+                                    <span>📅 <b>Date:</b> ${uploadedDate}</span>
+                                </div>
+                            </div>
+                            <button onclick="deleteQuestion('${q.id}')" class="text-red-500 text-xs hover:underline font-semibold ml-1">Delete</button>
+                        </div>
+                    `;
+                });
+
+                updateSelectedCount();
             });
         }
 
-        function updateExamUI() {
-            const badge = document.getElementById('exam-status-badge');
-            const btn = document.getElementById('toggle-exam-btn');
-            if (isExamActive) {
-                badge.innerText = "🟢 ACTIVE (Live)";
-                badge.className = "inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800";
-                btn.innerText = "Stop Exam";
-                btn.className = "mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded text-xs";
-            } else {
-                badge.innerText = "🔴 INACTIVE (Stopped)";
-                badge.className = "inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800";
-                btn.innerText = "Start Exam";
-                btn.className = "mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded text-xs";
-            }
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('.q-checkbox:checked');
+            document.getElementById('selected-count-label').innerText = `Selected: ${checkboxes.length} Questions for Live Exam`;
         }
 
-        function toggleExamState() {
-            const subject = document.getElementById('exam-subject-input').value;
-            const duration = document.getElementById('exam-duration-input').value;
+        function selectAllQuestions(status) {
+            const checkboxes = document.querySelectorAll('.q-checkbox');
+            checkboxes.forEach(cb => cb.checked = status);
+            updateSelectedCount();
+        }
 
-            if (!isExamActive && (!subject || !duration)) {
-                alert("Please enter both Subject and Duration to start the exam!");
+        // Save selected questions for Student Exam Engine
+        async function saveActiveExamQuestions() {
+            const checkboxes = document.querySelectorAll('.q-checkbox');
+            const batch = db.batch();
+
+            checkboxes.forEach(cb => {
+                const ref = db.collection("question_bank").doc(cb.value);
+                batch.update(ref, { selectedForExam: cb.checked });
+            });
+
+            await batch.commit();
+            alert("🎯 Selected questions successfully assigned to the Live Exam!");
+        }
+
+        // CSV Upload Handler with Metadata
+        function processCSVUpload() {
+            const fileInput = document.getElementById('csv-file-input');
+            if (!fileInput.files.length) {
+                alert("Please select a CSV file first!");
                 return;
             }
 
-            isExamActive = !isExamActive;
-            db.collection("exam_control").doc("current_exam").set({
-                isActive: isExamActive,
-                subject: subject,
-                duration: Number(duration),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n');
+                const batch = db.batch();
+                const todayStr = new Date().toLocaleDateString('en-IN');
+
+                let count = 0;
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    const cols = lines[i].split(',').map(c => c.trim());
+
+                    if (cols.length >= 9) {
+                        const newRef = db.collection("question_bank").doc();
+                        batch.set(newRef, {
+                            class: cols[0],
+                            subject: cols[1],
+                            chapter: cols[2],
+                            question: cols[3],
+                            options: { A: cols[4], B: cols[5], C: cols[6], D: cols[7] },
+                            correctOption: cols[8],
+                            selectedForExam: true,
+                            uploadedBy: CURRENT_TEACHER_NAME,
+                            uploadedAt: todayStr
+                        });
+                        count++;
+                    }
+                }
+
+                batch.commit().then(() => {
+                    alert(`✅ ${count} Questions Uploaded & Auto-Selected successfully by ${CURRENT_TEACHER_NAME}!`);
+                    loadQuestionBank();
+                });
+            };
+
+            reader.readAsText(file);
+        }
+
+        // Add Single Question Handler
+        function handleSingleQuestion(e) {
+            e.preventDefault();
+            const todayStr = new Date().toLocaleDateString('en-IN');
+
+            db.collection("question_bank").add({
+                class: document.getElementById('q-class').value,
+                subject: document.getElementById('q-subject').value,
+                chapter: document.getElementById('q-chapter').value,
+                question: document.getElementById('q-text').value,
+                options: {
+                    A: document.getElementById('opt-a').value,
+                    B: document.getElementById('opt-b').value,
+                    C: document.getElementById('opt-c').value,
+                    D: document.getElementById('opt-d').value
+                },
+                correctOption: document.getElementById('opt-correct').value,
+                selectedForExam: true,
+                uploadedBy: CURRENT_TEACHER_NAME,
+                uploadedAt: todayStr
             }).then(() => {
-                updateExamUI();
-                alert(isExamActive ? "Exam Started Successfully!" : "Exam Stopped Successfully!");
+                alert("✅ Question added successfully!");
+                document.getElementById('q-text').value = "";
+                document.getElementById('opt-a').value = "";
+                document.getElementById('opt-b').value = "";
+                document.getElementById('opt-c').value = "";
+                document.getElementById('opt-d').value = "";
+                loadQuestionBank();
             });
         }
 
-        function saveStudent(e) {
+        function deleteQuestion(id) {
+            if (confirm("Are you sure you want to delete this question?")) {
+                db.collection("question_bank").doc(id).delete().then(() => loadQuestionBank());
+            }
+        }
+
+        function handleExamControl(e) {
             e.preventDefault();
-            const id = document.getElementById('student-doc-id').value;
-            const data = {
-                rollNo: document.getElementById('stu-roll').value,
-                name: document.getElementById('stu-name').value,
-                studentClass: document.getElementById('stu-class').value,
-                password: document.getElementById('stu-pass').value
-            };
+            const isActive = document.getElementById('exam-status').value === "true";
+            const duration = parseInt(document.getElementById('exam-duration').value);
+            const title = document.getElementById('exam-title').value;
 
-            if (id) {
-                db.collection("students").doc(id).update(data).then(() => {
-                    alert("Student details updated!");
-                    resetStudentForm();
-                    loadStudents();
-                });
-            } else {
-                db.collection("students").add(data).then(() => {
-                    alert("Student added!");
-                    resetStudentForm();
-                    loadStudents();
-                });
-            }
-        }
-
-        function loadStudents() {
-            db.collection("students").get().then(snapshot => {
-                document.getElementById('stat-students-count').innerText = snapshot.size;
-                const tbody = document.getElementById('admin-students-list');
-                tbody.innerHTML = "";
-                if (snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-gray-500">No students added yet.</td></tr>`;
-                    return;
-                }
-                snapshot.forEach(doc => {
-                    const s = doc.data();
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="p-2 border font-medium">${s.rollNo || '-'}</td>
-                            <td class="p-2 border">${s.name || '-'}</td>
-                            <td class="p-2 border">${s.studentClass || '-'}</td>
-                            <td class="p-2 border font-mono text-blue-600">${s.password || '123456'}</td>
-                            <td class="p-2 border text-center">
-                                <button onclick="editStudent('${doc.id}', '${s.rollNo || ''}', '${s.name || ''}', '${s.studentClass || ''}', '${s.password || ''}')" class="bg-amber-500 text-white text-xs px-2 py-1 rounded mr-1">Edit</button>
-                                <button onclick="deleteDoc('students', '${doc.id}', loadStudents)" class="bg-red-500 text-white text-xs px-2 py-1 rounded">Delete</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            });
-        }
-
-        function editStudent(id, roll, name, sClass, pass) {
-            document.getElementById('student-doc-id').value = id;
-            document.getElementById('stu-roll').value = roll;
-            document.getElementById('stu-name').value = name;
-            document.getElementById('stu-class').value = sClass;
-            document.getElementById('stu-pass').value = pass;
-            document.getElementById('stu-btn').innerText = "Update Student";
-        }
-
-        function resetStudentForm() {
-            document.getElementById('student-doc-id').value = "";
-            document.getElementById('student-form').reset();
-            document.getElementById('stu-btn').innerText = "Save Student";
-        }
-
-        function saveTeacher(e) {
-            e.preventDefault();
-            const id = document.getElementById('teacher-doc-id').value;
-            const data = {
-                name: document.getElementById('tea-name').value,
-                email: document.getElementById('tea-email').value,
-                password: document.getElementById('tea-pass').value,
-                subject: document.getElementById('tea-subject').value
-            };
-
-            if (id) {
-                db.collection("teachers").doc(id).update(data).then(() => {
-                    alert("Teacher updated!");
-                    resetTeacherForm();
-                    loadTeachers();
-                });
-            } else {
-                db.collection("teachers").add(data).then(() => {
-                    alert("Teacher added!");
-                    resetTeacherForm();
-                    loadTeachers();
-                });
-            }
-        }
-
-        function loadTeachers() {
-            db.collection("teachers").get().then(snapshot => {
-                document.getElementById('stat-teachers-count').innerText = snapshot.size;
-                const tbody = document.getElementById('admin-teachers-list');
-                tbody.innerHTML = "";
-                if (snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-gray-500">No teachers added yet.</td></tr>`;
-                    return;
-                }
-                snapshot.forEach(doc => {
-                    const t = doc.data();
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="p-2 border font-medium">${t.name || '-'}</td>
-                            <td class="p-2 border">${t.email || '-'}</td>
-                            <td class="p-2 border font-mono text-purple-600">${t.password || 'teacher123'}</td>
-                            <td class="p-2 border">${t.subject || '-'}</td>
-                            <td class="p-2 border text-center">
-                                <button onclick="editTeacher('${doc.id}', '${t.name || ''}', '${t.email || ''}', '${t.password || ''}', '${t.subject || ''}')" class="bg-amber-500 text-white text-xs px-2 py-1 rounded mr-1">Edit</button>
-                                <button onclick="deleteDoc('teachers', '${doc.id}', loadTeachers)" class="bg-red-500 text-white text-xs px-2 py-1 rounded">Delete</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            });
-        }
-
-        function editTeacher(id, name, email, pass, subject) {
-            document.getElementById('teacher-doc-id').value = id;
-            document.getElementById('tea-name').value = name;
-            document.getElementById('tea-email').value = email;
-            document.getElementById('tea-pass').value = pass;
-            document.getElementById('tea-subject').value = subject;
-            document.getElementById('tea-btn').innerText = "Update Teacher";
-        }
-
-        function resetTeacherForm() {
-            document.getElementById('teacher-doc-id').value = "";
-            document.getElementById('teacher-form').reset();
-            document.getElementById('tea-btn').innerText = "Save Teacher";
-        }
-
-        function loadResultsAndStats() {
-            db.collection("question_bank").get().then(s => document.getElementById('stat-questions-count').innerText = s.size);
-            
-            db.collection("exam_results").get().then(snapshot => {
-                document.getElementById('stat-exams-count').innerText = snapshot.size;
-                const tbody = document.getElementById('admin-results-list');
-                tbody.innerHTML = "";
-                if (snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-gray-500">No exam results recorded.</td></tr>`;
-                    return;
-                }
-                snapshot.forEach(doc => {
-                    const res = doc.data();
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="p-2 border font-medium">${res.rollNo || '-'}</td>
-                            <td class="p-2 border">${res.studentName || '-'}</td>
-                            <td class="p-2 border">${res.subject || 'General'}</td>
-                            <td class="p-2 border text-center">
-                                <button onclick="deleteDoc('exam_results', '${doc.id}', loadResultsAndStats)" class="bg-red-500 text-white text-xs px-2 py-1 rounded">Delete Log</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            });
-        }
-
-        // QUESTION-WISE OPTION ANALYSIS EXCEL EXPORT ENGINE
-        async function exportResultExcelCSV() {
-            try {
-                // Fetch Question Bank for Correct Answers
-                const qSnap = await db.collection("question_bank").get();
-                const questionsMap = {};
-                const questionIds = [];
-
-                qSnap.forEach(doc => {
-                    questionsMap[doc.id] = doc.data();
-                    questionIds.push(doc.id);
-                });
-
-                // Fetch Exam Results
-                const rSnap = await db.collection("exam_results").get();
-                if (rSnap.empty) {
-                    alert("No exam results available to download!");
-                    return;
-                }
-
-                // Prepare CSV Headers
-                let csvRows = [];
-                let headers = ["Roll No", "Student Name", "Subject", "Total Correct", "Total Questions", "Percentage (%)"];
-                
-                questionIds.forEach((qId, idx) => {
-                    headers.push(`Q${idx + 1} Selected Option`, `Q${idx + 1} Status`);
-                });
-                
-                csvRows.push(headers.join(","));
-
-                // Build Student Data Rows
-                rSnap.forEach(doc => {
-                    const res = doc.data();
-                    const answers = res.answers || {};
-                    let score = 0;
-                    let rowData = [
-                        `"${res.rollNo || ''}"`,
-                        `"${res.studentName || ''}"`,
-                        `"${res.subject || ''}"`
-                    ];
-
-                    let questionAnalysisCols = [];
-
-                    questionIds.forEach(qId => {
-                        const correctAns = questionsMap[qId]?.correctAnswer || '';
-                        const studentAns = answers[qId] || 'Unanswered';
-
-                        if (correctAns && studentAns === correctAns) {
-                            score++;
-                            questionAnalysisCols.push(`"${studentAns}"`, `"Correct"`);
-                        } else {
-                            questionAnalysisCols.push(`"${studentAns}"`, `"Incorrect"`);
-                        }
-                    });
-
-                    const totalQs = questionIds.length;
-                    const percent = totalQs > 0 ? ((score / totalQs) * 100).toFixed(2) : 0;
-
-                    rowData.push(score, totalQs, `"${percent}%"`, ...questionAnalysisCols);
-                    csvRows.push(rowData.join(","));
-                });
-
-                // Trigger Browser Download
-                const csvString = csvRows.join("\n");
-                const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.setAttribute("href", url);
-                link.setAttribute("download", `DAV_Exam_Option_Analysis_${new Date().toISOString().slice(0,10)}.csv`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-            } catch (err) {
-                alert("Error exporting CSV: " + err.message);
-            }
-        }
-
-        function deleteDoc(collection, id, callback) {
-            if (confirm("Are you sure you want to delete this record?")) {
-                db.collection(collection).doc(id).delete().then(() => {
-                    alert("Deleted!");
-                    if(callback) callback();
-                });
-            }
+            db.collection("exam_control").doc("current_exam").set({
+                title: title,
+                isActive: isActive,
+                duration: duration,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => alert("✅ Exam Control Settings Saved Successfully!"));
         }
     </script>
 </body>
