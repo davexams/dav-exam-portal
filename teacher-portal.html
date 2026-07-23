@@ -142,15 +142,21 @@
                     </form>
                 </div>
 
-                <!-- Box 2: Bulk Upload CSV -->
+                <!-- Box 2: Bulk Upload CSV with Sample Template Option -->
                 <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
-                    <h3 class="font-bold text-gray-800 text-sm flex items-center gap-1.5 border-b pb-2">
-                        📁 Bulk Question Upload (CSV File)
-                    </h3>
+                    <div class="flex justify-between items-center border-b pb-2 gap-2">
+                        <h3 class="font-bold text-gray-800 text-sm flex items-center gap-1.5">
+                            📁 Bulk Question Upload (CSV File)
+                        </h3>
+                        <!-- 📥 SAMPLE TEMPLATE DOWNLOAD BUTTON -->
+                        <button onclick="downloadTeacherSampleCSV()" class="bg-purple-800 hover:bg-purple-900 text-white font-bold text-[11px] py-1.5 px-3 rounded-lg shadow transition flex items-center gap-1">
+                            📥 Download Sample CSV
+                        </button>
+                    </div>
 
                     <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl space-y-3">
                         <p class="text-xs font-bold text-blue-900">CSV Columns Required Format:</p>
-                        <div class="bg-white p-2 rounded border border-blue-200 text-[11px] font-mono text-gray-700 overflow-x-auto">
+                        <div class="bg-white p-2 rounded border border-blue-200 text-[11px] font-mono text-gray-700 overflow-x-auto whitespace-nowrap">
                             Question, OptionA, OptionB, OptionC, OptionD, CorrectOption, Subject, Class, Chapter
                         </div>
                         
@@ -162,7 +168,7 @@
                     </div>
 
                     <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-[11px] text-emerald-900 leading-snug">
-                        💡 <b>Note:</b> Uploaded questions will appear in Master Bank for Admin deployment.
+                        💡 <b>Note:</b> Uploaded questions will appear in Master Bank for Admin deployment and will be private to your account.
                     </div>
                 </div>
 
@@ -406,29 +412,59 @@
             }
         }
 
+        // 📥 1. DOWNLOAD SAMPLE CSV TEMPLATE FOR TEACHERS
+        function downloadTeacherSampleCSV() {
+            const headers = "Question,OptionA,OptionB,OptionC,OptionD,CorrectOption,Subject,Class,Chapter";
+            const sampleRow1 = '"What is the unit of resistance?","Volt","Ampere","Ohm","Watt","C","Physics","Class 10","Electricity"';
+            const sampleRow2 = '"Which mirror is used as a rear-view mirror?","Convex mirror","Concave mirror","Plane mirror","None","A","Physics","Class 10","Light"';
+            
+            const csvContent = `${headers}\n${sampleRow1}\n${sampleRow2}`;
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", "teacher_sample_questions_dav.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 🚀 2. PROCESS & BULK UPLOAD QUESTIONS CSV
         function processQuestionCSV() {
             const fileInput = document.getElementById('question-csv-file');
             if (!fileInput.files.length) return alert("Please select a Question CSV file!");
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                const lines = e.target.result.split('\n');
+                const text = e.target.result;
+                const lines = text.split(/\r\n|\n/);
                 const batch = db.batch();
                 let count = 0;
+                const currentTeacherName = sessionStorage.getItem("teacherLoggedIn") || "Subject Teacher";
 
                 for (let i = 1; i < lines.length; i++) {
                     if (!lines[i].trim()) continue;
-                    const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
-                    
-                    if (cols.length >= 8) {
+
+                    // Parse CSV handling quotes correctly
+                    const cols = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
+                    const cleanCols = cols.map(c => c.trim().replace(/^"|"$/g, ''));
+
+                    if (cleanCols.length >= 6) {
                         const ref = db.collection("question_bank").doc();
                         batch.set(ref, {
-                            question: cols[0],
-                            options: { A: cols[1], B: cols[2], C: cols[3], D: cols[4] },
-                            correctOption: cols[5].toUpperCase(),
-                            subject: cols[6] || 'Physics',
-                            class: cols[7] || 'Class 10',
-                            chapter: cols[8] || '',
+                            question: cleanCols[0] || '',
+                            options: { 
+                                A: cleanCols[1] || '', 
+                                B: cleanCols[2] || '', 
+                                C: cleanCols[3] || '', 
+                                D: cleanCols[4] || '' 
+                            },
+                            correctOption: (cleanCols[5] || 'A').toUpperCase(),
+                            subject: cleanCols[6] || 'Physics',
+                            class: cleanCols[7] || 'Class 10',
+                            chapter: cleanCols[8] || 'General',
+                            teacherName: currentTeacherName,
                             teacherEmail: currentTeacherEmail || "teacher",
                             selectedForExam: false
                         });
@@ -436,10 +472,17 @@
                     }
                 }
 
+                if (count === 0) {
+                    return alert("❌ No valid questions found in CSV file. Please check the CSV format!");
+                }
+
                 batch.commit().then(() => {
                     alert(`✅ ${count} Questions Uploaded to Master Bank!`);
                     fileInput.value = "";
                     loadTeacherQuestions();
+                }).catch(err => {
+                    console.error("Bulk upload error:", err);
+                    alert("Failed to upload questions: " + err.message);
                 });
             };
             reader.readAsText(fileInput.files[0]);
@@ -447,4 +490,3 @@
     </script>
 </body>
 </html>
-
