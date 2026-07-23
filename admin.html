@@ -106,7 +106,7 @@
             </div>
         </div>
 
-        <!-- Section 3: User Management (Student / Teacher Edit & CSV) -->
+        <!-- Section 3: User Management (Student / Teacher Edit & CSV Upload) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             <!-- Student Management Box -->
@@ -267,6 +267,7 @@
         </div>
     </div>
 
+    <!-- Firebase Script Logic -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
@@ -282,7 +283,7 @@
 
         let fetchedResultsData = [];
         let masterQuestionsMap = {};
-        let activeQuestionsList = []; // Ordered array for consistent CSV generation
+        let activeQuestionsList = [];
 
         window.onload = function() {
             cacheQuestionBank().then(() => loadResultsAndAnalysis());
@@ -290,6 +291,17 @@
             loadTeachers();
             loadQuestionBank();
         };
+
+        // Helper to extract correct option from all potential database keys
+        function extractCorrectOption(qDetails) {
+            if(!qDetails) return "";
+            let rawCorrect = qDetails.correctOption || qDetails.correctAnswer || qDetails.correct || qDetails.answer || qDetails.ans || "";
+            let dbCorrect = rawCorrect.toString().trim().toUpperCase();
+            if (dbCorrect.startsWith("OPTION")) {
+                dbCorrect = dbCorrect.replace("OPTION", "").trim();
+            }
+            return dbCorrect;
+        }
 
         async function cacheQuestionBank() {
             const snapshot = await db.collection("question_bank").get();
@@ -334,10 +346,8 @@
                         const qDetails = masterQuestionsMap[qId];
 
                         if (qDetails) {
-                            let dbCorrect = (qDetails.correctOption || "").toString().trim().toUpperCase();
-                            if (dbCorrect.startsWith("OPTION")) dbCorrect = dbCorrect.replace("OPTION", "").trim();
-
-                            if (stAns !== "" && stAns === dbCorrect) calculatedScore++;
+                            let dbCorrect = extractCorrectOption(qDetails);
+                            if (stAns !== "" && dbCorrect !== "" && stAns === dbCorrect) calculatedScore++;
                         }
                     }
 
@@ -398,10 +408,9 @@
                 const qDetails = masterQuestionsMap[qId];
                 if (qDetails && qDetails.selectedForExam) {
                     const rawStudentAns = (studentAnswers[qId] || "").toString().trim().toUpperCase();
-                    let rawCorrectAns = (qDetails.correctOption || "").toString().trim().toUpperCase();
-                    if (rawCorrectAns.startsWith("OPTION")) rawCorrectAns = rawCorrectAns.replace("OPTION", "").trim();
+                    let rawCorrectAns = extractCorrectOption(qDetails);
 
-                    const isCorrect = rawStudentAns !== "" && rawStudentAns === rawCorrectAns;
+                    const isCorrect = rawStudentAns !== "" && rawCorrectAns !== "" && rawStudentAns === rawCorrectAns;
                     const isUnattempted = rawStudentAns === "";
 
                     let statusBadge = `<span class="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded text-[10px]">🔴 Incorrect</span>`;
@@ -420,7 +429,7 @@
                                     <span>Selected Option: <b>${!isUnattempted ? rawStudentAns : 'None'}</b></span>
                                 </div>
                                 <div class="p-2 rounded border bg-emerald-50 border-emerald-300 text-emerald-900 font-bold">
-                                    <span>Correct Option: <b>${rawCorrectAns}</b></span>
+                                    <span>Correct Option: <b>${rawCorrectAns || 'N/A'}</b></span>
                                 </div>
                             </div>
                         </div>
@@ -440,19 +449,16 @@
             document.getElementById('stat-pass-percentage').innerText = `${passPct}%`;
         }
 
-        // 🎯 FULL DETAILED EXCEL/CSV EXPORT WITH QUESTION-WISE ANALYSIS
+        // 🎯 CSV EXPORT WITH FULL QUESTION-WISE BREAKDOWN & FIXED CORRECT ANSWERS
         function exportResultsToCSV() {
             if(fetchedResultsData.length === 0) return alert("No result attempts available to export!");
 
-            // Determine active exam question columns dynamically
             let activeExamQuestions = activeQuestionsList.length > 0 
                 ? activeQuestionsList 
                 : Object.values(masterQuestionsMap).filter(q => q.selectedForExam);
 
-            // CSV Base Headers
             let csvHeaders = ["Roll No", "Exam Title", "Score", "Total Questions", "Percentage", "Status", "Submission Time"];
             
-            // Add Question Breakdown Columns
             activeExamQuestions.forEach((q, idx) => {
                 const qNum = idx + 1;
                 csvHeaders.push(`Q${qNum}_Text`, `Q${qNum}_StudentAns`, `Q${qNum}_CorrectAns`, `Q${qNum}_Marks`);
@@ -461,40 +467,40 @@
             let csvRows = [csvHeaders.join(",")];
 
             fetchedResultsData.forEach(r => {
-                const score = r.calculatedScore || 0;
-                const totalQs = r.totalQuestions || activeExamQuestions.length || 1;
-                const percentage = ((score / totalQs) * 100).toFixed(2);
+                const studentAnsMap = r.answers || {};
+                let calculatedScore = 0;
+                let questionColumns = [];
+
+                activeExamQuestions.forEach(q => {
+                    const stAns = (studentAnsMap[q.id] || "").toString().trim().toUpperCase();
+                    let dbCorrect = extractCorrectOption(q);
+
+                    const isCorrect = (stAns !== "" && dbCorrect !== "" && stAns === dbCorrect);
+                    const qMarks = isCorrect ? 1 : 0;
+                    if (isCorrect) calculatedScore++;
+                    
+                    const cleanQText = `"${(q.question || '').replace(/"/g, '""')}"`;
+                    const cleanStAns = stAns ? `"${stAns}"` : '"Skipped"';
+                    const cleanCorrectAns = dbCorrect ? `"${dbCorrect}"` : '"N/A"';
+
+                    questionColumns.push(cleanQText, cleanStAns, cleanCorrectAns, qMarks);
+                });
+
+                const totalQs = activeExamQuestions.length || r.totalQuestions || 1;
+                const percentage = ((calculatedScore / totalQs) * 100).toFixed(2);
                 const isPass = percentage >= 33 ? 'PASS' : 'FAIL';
                 const dateStr = r.submittedAt ? new Date(r.submittedAt.toDate()).toLocaleString().replace(/,/g, '') : 'N/A';
 
                 let rowData = [
                     `"${r.rollNo || ''}"`,
                     `"${r.examTitle || ''}"`,
-                    score,
+                    calculatedScore,
                     totalQs,
                     `"${percentage}%"`,
                     isPass,
-                    `"${dateStr}"`
+                    `"${dateStr}"`,
+                    ...questionColumns
                 ];
-
-                const studentAnsMap = r.answers || {};
-
-                // Question wise detailed column values for each student row
-                activeExamQuestions.forEach(q => {
-                    const stAns = (studentAnsMap[q.id] || "").toString().trim().toUpperCase();
-                    let dbCorrect = (q.correctOption || "").toString().trim().toUpperCase();
-                    if (dbCorrect.startsWith("OPTION")) dbCorrect = dbCorrect.replace("OPTION", "").trim();
-
-                    const isCorrect = (stAns !== "" && stAns === dbCorrect);
-                    const qMarks = isCorrect ? 1 : 0;
-                    
-                    // Sanitize question text for CSV commas and quotes
-                    const cleanQText = `"${(q.question || '').replace(/"/g, '""')}"`;
-                    const cleanStAns = stAns ? `"${stAns}"` : '"Skipped"';
-                    const cleanCorrectAns = `"${dbCorrect}"`;
-
-                    rowData.push(cleanQText, cleanStAns, cleanCorrectAns, qMarks);
-                });
 
                 csvRows.push(rowData.join(","));
             });
@@ -511,7 +517,7 @@
             document.body.removeChild(link);
         }
 
-        // --- USER EDITING LOGIC ---
+        // --- USER MANAGEMENT LOGIC ---
         function loadStudents() {
             db.collection("students").get().then(snapshot => {
                 const container = document.getElementById('student-list-container');
@@ -709,6 +715,8 @@
                     masterQuestionsMap[q.id] = q;
 
                     const isChecked = q.selectedForExam ? 'checked' : '';
+                    const correctChoice = extractCorrectOption(q);
+
                     container.innerHTML += `
                         <div class="border rounded-lg p-3 bg-gray-50 hover:bg-blue-50/40 transition shadow-sm relative flex gap-3 items-start">
                             <input type="checkbox" onchange="updateSelectedCount()" value="${q.id}" ${isChecked} class="q-checkbox w-4 h-4 text-blue-600 rounded mt-1 border-gray-300 cursor-pointer">
@@ -718,7 +726,7 @@
                                     <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-700">${q.class || 'Class 10'}</span>
                                 </div>
                                 <p class="text-xs font-bold text-gray-800 leading-snug">${q.question}</p>
-                                <p class="text-[11px] text-green-700 font-semibold mt-1">Ans: (${q.correctOption})</p>
+                                <p class="text-[11px] text-green-700 font-semibold mt-1">Ans: (${correctChoice || 'N/A'})</p>
                             </div>
                             <div class="flex flex-col gap-1">
                                 <button onclick="openEditQuestionModal('${q.id}')" class="text-blue-600 text-xs hover:underline font-bold">✏️ Edit</button>
@@ -744,8 +752,7 @@
             document.getElementById('edit-q-optC').value = q.options ? q.options.C : (q.optionC || '');
             document.getElementById('edit-q-optD').value = q.options ? q.options.D : (q.optionD || '');
             
-            let rawCorrect = (q.correctOption || 'A').toString().trim().toUpperCase();
-            if(rawCorrect.startsWith("OPTION")) rawCorrect = rawCorrect.replace("OPTION","").trim();
+            let rawCorrect = extractCorrectOption(q) || 'A';
             document.getElementById('edit-q-correct').value = rawCorrect;
 
             document.getElementById('edit-q-modal').classList.remove('hidden');
