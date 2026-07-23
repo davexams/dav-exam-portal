@@ -7,6 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- 🧮 MathJax Library Config & Script for Live Equation Rendering -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body class="bg-slate-100 font-sans min-h-screen p-4 md:p-6 select-none">
 
@@ -61,10 +73,11 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                <!-- Box 1: Add Single Question -->
+                <!-- Box 1: Add Single Question with Formula Assistant -->
                 <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
-                    <h3 class="font-bold text-gray-800 text-sm flex items-center gap-1.5 border-b pb-2">
-                        ➕ Add Single Question
+                    <h3 class="font-bold text-gray-800 text-sm flex items-center justify-between border-b pb-2">
+                        <span class="flex items-center gap-1.5">➕ Add Single Question</span>
+                        <span class="text-[10px] bg-purple-100 text-purple-900 font-black px-2 py-0.5 rounded border border-purple-200">🧪 Math & Chem Enabled</span>
                     </h3>
 
                     <form onsubmit="handleSingleQuestionSubmit(event)" class="space-y-3">
@@ -103,9 +116,39 @@
                             </div>
                         </div>
 
+                        <!-- 🧮 MATH & CHEMISTRY EQUATION TOOLBAR ASSISTANT -->
+                        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] font-black text-slate-700 uppercase tracking-wider">⚡ Quick Equation Toolbar:</span>
+                                <span class="text-[9px] text-gray-500 font-semibold">Click to Insert</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1">
+                                <!-- Math Operators -->
+                                <button type="button" onclick="insertSymbol('q-text', 'x^2')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50 text-blue-900 shadow-sm">x²</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\sqrt{x}')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50 text-blue-900 shadow-sm">√x</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\frac{a}{b}')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50 text-blue-900 shadow-sm">a/b</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\int')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50 text-blue-900 shadow-sm">∫</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\theta')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50 text-blue-900 shadow-sm">θ</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\tan^{-1}(x)')" class="px-2 py-1 bg-white border rounded text-xs font-bold hover:bg-blue-50 text-blue-900 shadow-sm">tan⁻¹</button>
+
+                                <!-- Chemistry Subscripts -->
+                                <button type="button" onclick="insertSymbol('q-text', 'H_2O')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100 shadow-sm">H₂O</button>
+                                <button type="button" onclick="insertSymbol('q-text', 'CO_2')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100 shadow-sm">CO₂</button>
+                                <button type="button" onclick="insertSymbol('q-text', '\\rightarrow')" class="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded text-xs font-bold hover:bg-emerald-100 shadow-sm">→</button>
+                            </div>
+                        </div>
+
                         <div>
                             <label class="block text-[11px] font-bold text-gray-700 mb-1">Question Text</label>
-                            <textarea id="q-text" rows="3" placeholder="Enter question here..." required class="w-full p-2 border rounded text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-medium"></textarea>
+                            <textarea id="q-text" rows="3" oninput="updateLivePreview()" placeholder="Enter question here or click symbols above..." required class="w-full p-2 border rounded text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-medium"></textarea>
+                        </div>
+
+                        <!-- 👁️ LIVE REAL-TIME PREVIEW BOX -->
+                        <div class="p-2.5 bg-blue-50/70 border border-blue-200 rounded-lg space-y-1">
+                            <span class="text-[10px] font-black text-blue-900 uppercase tracking-wider">👁️ Live Student View Preview:</span>
+                            <div id="live-math-preview" class="text-xs font-bold text-gray-800 min-h-[26px] bg-white p-2 rounded border border-blue-100">
+                                Preview will appear here as you type...
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-2">
@@ -204,6 +247,45 @@
 
         let myQuestionsMap = {};
         let currentTeacherEmail = "";
+
+        // 🛠️ TOOLBAR SYMBOL INSERTION LOGIC
+        function insertSymbol(elementId, symbol) {
+            const input = document.getElementById(elementId);
+            const start = input.selectionStart || 0;
+            const end = input.selectionEnd || 0;
+            const text = input.value;
+            
+            input.value = text.substring(0, start) + " " + symbol + " " + text.substring(end);
+            input.focus();
+            input.selectionStart = input.selectionEnd = start + symbol.length + 2;
+            
+            updateLivePreview();
+        }
+
+        // 👁️ REAL-TIME LIVE PREVIEW UPDATER
+        function updateLivePreview() {
+            const text = document.getElementById('q-text').value;
+            const previewBox = document.getElementById('live-math-preview');
+            
+            if (!text.trim()) {
+                previewBox.innerText = "Preview will appear here as you type...";
+                return;
+            }
+
+            let formatted = text;
+
+            // Auto wrap common symbols for preview rendering if not in LaTeX format
+            if (!formatted.includes('$')) {
+                formatted = formatted.replace(/\b(H_2O|CO_2)\b/g, '$\\text{$1}$');
+                formatted = formatted.replace(/([a-zA-Z0-9\(\)]+)\^\s*(-?\d+|[a-zA-Z])/g, '$$1^{$2}$');
+            }
+
+            previewBox.innerText = formatted;
+
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise([previewBox]);
+            }
+        }
 
         // 🔐 LOGIN LOGIC
         function handleTeacherLogin(e) {
@@ -392,6 +474,8 @@
             document.getElementById('btn-save-q').innerText = "💾 Update Question";
             document.getElementById('btn-save-q').className = "flex-grow bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition";
             document.getElementById('btn-cancel-q').classList.remove('hidden');
+
+            updateLivePreview();
         }
 
         function resetQuestionForm() {
@@ -404,6 +488,8 @@
             document.getElementById('btn-save-q').innerText = "💾 Save Question to Bank";
             document.getElementById('btn-save-q').className = "flex-grow bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition";
             document.getElementById('btn-cancel-q').classList.add('hidden');
+
+            updateLivePreview();
         }
 
         function deleteQuestion(qId) {
