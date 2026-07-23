@@ -224,11 +224,77 @@
 
     </div>
 
+    <!-- ✏️ EDIT QUESTION POPUP MODAL -->
+    <div id="edit-q-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="bg-blue-900 text-white p-4 flex justify-between items-center">
+                <h3 class="font-black text-sm md:text-base">✏️ Edit Question Details</h3>
+                <button onclick="closeEditQuestionModal()" class="text-white hover:bg-blue-800 text-xl font-bold px-3 py-1 rounded">✕</button>
+            </div>
+
+            <form onsubmit="handleUpdateQuestion(event)" class="p-6 overflow-y-auto space-y-4 bg-slate-50">
+                <input type="hidden" id="edit-q-id">
+                
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Subject</label>
+                        <input type="text" id="edit-q-subject" required class="w-full p-2 border rounded text-xs bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Class</label>
+                        <input type="text" id="edit-q-class" required class="w-full p-2 border rounded text-xs bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Chapter</label>
+                        <input type="text" id="edit-q-chapter" required class="w-full p-2 border rounded text-xs bg-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Question Text</label>
+                    <textarea id="edit-q-text" rows="3" required class="w-full p-2 border rounded text-xs bg-white font-medium"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Option A</label>
+                        <input type="text" id="edit-q-optA" required class="w-full p-2 border rounded text-xs bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Option B</label>
+                        <input type="text" id="edit-q-optB" required class="w-full p-2 border rounded text-xs bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Option C</label>
+                        <input type="text" id="edit-q-optC" required class="w-full p-2 border rounded text-xs bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Option D</label>
+                        <input type="text" id="edit-q-optD" required class="w-full p-2 border rounded text-xs bg-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Correct Option</label>
+                    <select id="edit-q-correct" required class="w-full p-2 border rounded text-xs bg-white font-bold text-blue-700">
+                        <option value="A">Option A</option>
+                        <option value="B">Option B</option>
+                        <option value="C">Option C</option>
+                        <option value="D">Option D</option>
+                    </select>
+                </div>
+
+                <div class="pt-3 border-t flex justify-end gap-2">
+                    <button type="button" onclick="closeEditQuestionModal()" class="bg-gray-400 text-white font-bold text-xs py-2 px-4 rounded">Cancel</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 px-5 rounded shadow">💾 Save Question Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- 🔍 QUESTION-WISE ANALYSIS POPUP MODAL -->
     <div id="analysis-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-            
-            <!-- Modal Header -->
             <div class="bg-blue-900 text-white p-4 flex justify-between items-center">
                 <div>
                     <h3 class="font-black text-sm md:text-base">📋 Question-wise Performance Analysis</h3>
@@ -237,19 +303,14 @@
                 <button onclick="closeAnalysisModal()" class="text-white hover:bg-blue-800 text-xl font-bold px-3 py-1 rounded">✕</button>
             </div>
 
-            <!-- Modal Content (Question List) -->
             <div class="p-4 overflow-y-auto space-y-4 flex-grow bg-slate-50" id="modal-questions-list">
                 <p class="text-center text-xs text-gray-400 py-8">Loading question analysis...</p>
             </div>
 
-            <!-- Modal Footer -->
             <div class="p-3 bg-white border-t flex justify-between items-center">
                 <span class="text-xs text-gray-500" id="modal-score-summary">Score: 0/0</span>
-                <button onclick="closeAnalysisModal()" class="bg-gray-600 hover:bg-gray-700 text-white text-xs font-bold py-2 px-4 rounded">
-                    Close Analysis
-                </button>
+                <button onclick="closeAnalysisModal()" class="bg-gray-600 hover:bg-gray-700 text-white text-xs font-bold py-2 px-4 rounded">Close Analysis</button>
             </div>
-
         </div>
     </div>
 
@@ -268,7 +329,7 @@
         const db = firebase.firestore();
 
         let fetchedResultsData = [];
-        let masterQuestionsMap = {}; // Stores questionId -> question details
+        let masterQuestionsMap = {};
 
         window.onload = function() {
             cacheQuestionBank().then(() => {
@@ -287,7 +348,6 @@
             });
         }
 
-        // --- RESULT ANALYSIS LOGIC (FIXED ZERO MARKS DISPLAY) ---
         function loadResultsAndAnalysis() {
             db.collection("exam_attempts").get().then(snapshot => {
                 const tbody = document.getElementById('results-table-body');
@@ -310,7 +370,6 @@
                     r.attemptId = doc.id;
                     fetchedResultsData.push(r);
 
-                    // Prioritize score stored by student portal
                     const score = r.score !== undefined ? Number(r.score) : 0;
                     const totalQs = r.totalQuestions || 1;
                     const percentage = ((score / totalQs) * 100).toFixed(2);
@@ -351,7 +410,6 @@
             });
         }
 
-        // Open Modal and Render Normalized Question Breakdown
         function openQuestionAnalysis(attemptId) {
             const attempt = fetchedResultsData.find(a => a.attemptId === attemptId);
             if(!attempt) return;
@@ -367,8 +425,6 @@
             let qIndex = 1;
             for (let qId in studentAnswers) {
                 const qDetails = masterQuestionsMap[qId];
-                
-                // Normalization Fix
                 const rawStudentAns = (studentAnswers[qId] || "").toString().trim().toUpperCase();
                 
                 if (qDetails) {
@@ -429,11 +485,7 @@
         }
 
         function exportResultsToCSV() {
-            if(fetchedResultsData.length === 0) {
-                alert("No results available to export!");
-                return;
-            }
-
+            if(fetchedResultsData.length === 0) return alert("No results available!");
             let csvContent = "data:text/csv;charset=utf-8,Roll No,Exam Title,Score,Total Questions,Percentage,Status,Date Time\n";
 
             fetchedResultsData.forEach(r => {
@@ -455,7 +507,135 @@
             document.body.removeChild(link);
         }
 
-        // --- BULK CSV UPLOADS ---
+        // --- MASTER QUESTION BANK & EDIT QUESTION LOGIC ---
+        function loadQuestionBank() {
+            db.collection("question_bank").get().then(snapshot => {
+                const container = document.getElementById('question-bank-container');
+                container.innerHTML = "";
+
+                if(snapshot.empty) {
+                    container.innerHTML = `<p class="text-xs text-gray-400 text-center py-8">No questions uploaded in database.</p>`;
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    const q = doc.data();
+                    q.id = doc.id;
+                    masterQuestionsMap[q.id] = q;
+
+                    const isChecked = q.selectedForExam ? 'checked' : '';
+                    const uploadedBy = q.uploadedBy || "System Admin";
+                    const uploadedDate = q.uploadedAt || "Earlier";
+
+                    const optA = q.options ? q.options.A : q.optionA;
+                    const optB = q.options ? q.options.B : q.optionB;
+                    const optC = q.options ? q.options.C : q.optionC;
+                    const optD = q.options ? q.options.D : q.optionD;
+
+                    container.innerHTML += `
+                        <div class="border rounded-lg p-3 bg-gray-50 hover:bg-blue-50/40 transition shadow-sm relative flex gap-3 items-start">
+                            <input type="checkbox" onchange="updateSelectedCount()" value="${q.id}" ${isChecked} class="q-checkbox w-4 h-4 text-blue-600 rounded mt-1 border-gray-300 cursor-pointer">
+                            <div class="flex-grow">
+                                <div class="flex flex-wrap gap-1.5 mb-1.5 items-center">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-600 text-white">${q.subject || 'General'}</span>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-700">${q.class || 'Class 10'}</span>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-800 text-white">${q.chapter || 'Chapter'}</span>
+                                </div>
+                                <p class="text-xs font-bold text-gray-800 leading-snug">${q.question}</p>
+                                <p class="text-[11px] text-green-700 font-semibold mt-1">Ans: (${q.correctOption})</p>
+                                
+                                <div class="mt-2 pt-2 border-t border-gray-200 flex justify-between text-[10px] text-gray-500 font-medium">
+                                    <span>👤 <b>Uploaded By:</b> ${uploadedBy}</span>
+                                    <span>📅 <b>Date:</b> ${uploadedDate}</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <button onclick="openEditQuestionModal('${q.id}')" class="text-blue-600 text-xs hover:underline font-bold">✏️ Edit</button>
+                                <button onclick="deleteDoc('question_bank', '${q.id}', loadQuestionBank)" class="text-red-500 text-xs hover:underline font-bold">🗑️ Delete</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                updateSelectedCount();
+            });
+        }
+
+        function openEditQuestionModal(qId) {
+            const q = masterQuestionsMap[qId];
+            if(!q) return;
+
+            document.getElementById('edit-q-id').value = qId;
+            document.getElementById('edit-q-subject').value = q.subject || 'Physics';
+            document.getElementById('edit-q-class').value = q.class || 'Class 10';
+            document.getElementById('edit-q-chapter').value = q.chapter || 'Chapter 1';
+            document.getElementById('edit-q-text').value = q.question || '';
+            
+            document.getElementById('edit-q-optA').value = q.options ? q.options.A : (q.optionA || '');
+            document.getElementById('edit-q-optB').value = q.options ? q.options.B : (q.optionB || '');
+            document.getElementById('edit-q-optC').value = q.options ? q.options.C : (q.optionC || '');
+            document.getElementById('edit-q-optD').value = q.options ? q.options.D : (q.optionD || '');
+            
+            let rawCorrect = (q.correctOption || 'A').toString().trim().toUpperCase();
+            if(rawCorrect.startsWith("OPTION")) rawCorrect = rawCorrect.replace("OPTION","").trim();
+            document.getElementById('edit-q-correct').value = rawCorrect;
+
+            document.getElementById('edit-q-modal').classList.remove('hidden');
+        }
+
+        function closeEditQuestionModal() {
+            document.getElementById('edit-q-modal').classList.add('hidden');
+        }
+
+        function handleUpdateQuestion(e) {
+            e.preventDefault();
+            const qId = document.getElementById('edit-q-id').value;
+
+            const updatedData = {
+                subject: document.getElementById('edit-q-subject').value.trim(),
+                class: document.getElementById('edit-q-class').value.trim(),
+                chapter: document.getElementById('edit-q-chapter').value.trim(),
+                question: document.getElementById('edit-q-text').value.trim(),
+                options: {
+                    A: document.getElementById('edit-q-optA').value.trim(),
+                    B: document.getElementById('edit-q-optB').value.trim(),
+                    C: document.getElementById('edit-q-optC').value.trim(),
+                    D: document.getElementById('edit-q-optD').value.trim()
+                },
+                correctOption: document.getElementById('edit-q-correct').value
+            };
+
+            db.collection("question_bank").doc(qId).update(updatedData).then(() => {
+                alert("✅ Question Updated Successfully!");
+                closeEditQuestionModal();
+                cacheQuestionBank().then(() => loadQuestionBank());
+            }).catch(err => alert("Update Error: " + err.message));
+        }
+
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('.q-checkbox:checked');
+            document.getElementById('selected-count-label').innerText = `Selected: ${checkboxes.length} Questions for Live Exam`;
+        }
+
+        function selectAllQuestions(status) {
+            const checkboxes = document.querySelectorAll('.q-checkbox');
+            checkboxes.forEach(cb => cb.checked = status);
+            updateSelectedCount();
+        }
+
+        async function saveActiveExamQuestions() {
+            const checkboxes = document.querySelectorAll('.q-checkbox');
+            const batch = db.batch();
+
+            checkboxes.forEach(cb => {
+                const ref = db.collection("question_bank").doc(cb.value);
+                batch.update(ref, { selectedForExam: cb.checked });
+            });
+
+            await batch.commit();
+            alert("🎯 Selected questions successfully activated for Live Exam!");
+        }
+
         function processStudentCSV() {
             const input = document.getElementById('student-csv-input');
             if(!input.files.length) return alert("Select a Student CSV file first!");
@@ -510,7 +690,6 @@
             reader.readAsText(input.files[0]);
         }
 
-        // --- STUDENT MANAGEMENT ---
         function loadStudents() {
             db.collection("students").get().then(snapshot => {
                 const container = document.getElementById('student-list-container');
@@ -588,7 +767,6 @@
             }
         }
 
-        // --- TEACHER MANAGEMENT ---
         function loadTeachers() {
             db.collection("teachers").get().then(snapshot => {
                 const container = document.getElementById('teacher-list-container');
@@ -665,75 +843,6 @@
                     loadTeachers();
                 });
             }
-        }
-
-        // --- QUESTION BANK & EXAM CONTROL ---
-        function loadQuestionBank() {
-            db.collection("question_bank").get().then(snapshot => {
-                const container = document.getElementById('question-bank-container');
-                container.innerHTML = "";
-
-                if(snapshot.empty) {
-                    container.innerHTML = `<p class="text-xs text-gray-400 text-center py-8">No questions uploaded in database.</p>`;
-                    return;
-                }
-
-                snapshot.forEach(doc => {
-                    const q = doc.data();
-                    q.id = doc.id;
-
-                    const isChecked = q.selectedForExam ? 'checked' : '';
-                    const uploadedBy = q.uploadedBy || "System Admin";
-                    const uploadedDate = q.uploadedAt || "Earlier";
-
-                    container.innerHTML += `
-                        <div class="border rounded-lg p-3 bg-gray-50 hover:bg-blue-50/40 transition shadow-sm relative flex gap-3 items-start">
-                            <input type="checkbox" onchange="updateSelectedCount()" value="${q.id}" ${isChecked} class="q-checkbox w-4 h-4 text-blue-600 rounded mt-1 border-gray-300 cursor-pointer">
-                            <div class="flex-grow">
-                                <div class="flex flex-wrap gap-1.5 mb-1.5 items-center">
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-600 text-white">${q.subject || 'General'}</span>
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-700">${q.class || 'Class 10'}</span>
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-800 text-white">${q.chapter || 'Chapter'}</span>
-                                </div>
-                                <p class="text-xs font-bold text-gray-800 leading-snug">${q.question}</p>
-                                <p class="text-[11px] text-green-700 font-semibold mt-1">Ans: (${q.correctOption}) ${q.options ? q.options[q.correctOption] || '' : ''}</p>
-                                
-                                <div class="mt-2 pt-2 border-t border-gray-200 flex justify-between text-[10px] text-gray-500 font-medium">
-                                    <span>👤 <b>Uploaded By:</b> ${uploadedBy}</span>
-                                    <span>📅 <b>Date:</b> ${uploadedDate}</span>
-                                </div>
-                            </div>
-                            <button onclick="deleteDoc('question_bank', '${q.id}', loadQuestionBank)" class="text-red-500 text-xs hover:underline font-semibold ml-1">🗑️ Delete</button>
-                        </div>
-                    `;
-                });
-
-                updateSelectedCount();
-            });
-        }
-
-        function updateSelectedCount() {
-            const checkboxes = document.querySelectorAll('.q-checkbox:checked');
-            document.getElementById('selected-count-label').innerText = `Selected: ${checkboxes.length} Questions for Live Exam`;
-        }
-
-        function selectAllQuestions(status) {
-            const checkboxes = document.querySelectorAll('.q-checkbox');
-            checkboxes.forEach(cb => cb.checked = status);
-            updateSelectedCount();
-        }
-
-        async function saveActiveExamQuestions() {
-            const checkboxes = document.querySelectorAll('.q-checkbox');
-            const batch = db.batch();
-
-            checkboxes.forEach(cb => {
-                const ref = db.collection("question_bank").doc(cb.value);
-                batch.update(ref, { selectedForExam: cb.checked });
-            });
-
-            await batch.commit();
-            alert("🎯 Selected questions successfully activated for Live Exam!");
         }
 
         function deleteDoc(collectionName, id, callback) {
