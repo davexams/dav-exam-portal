@@ -9,6 +9,11 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- 🧮 MathJax Library for Proper Math/Science Formula Rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <style>
         /* Custom NTA Palette Shapes */
         .nta-shape-not-visited { background-color: #ffffff; border: 1px solid #cccccc; color: #000; }
@@ -125,7 +130,7 @@
                     </div>
 
                     <!-- Question & Options Panel -->
-                    <div class="p-4 space-y-4 max-h-[50vh] overflow-y-auto">
+                    <div class="p-4 space-y-4 max-h-[50vh] overflow-y-auto" id="question-display-area">
                         <div class="text-sm md:text-base font-bold text-gray-900 leading-relaxed border-b pb-3" id="q-text-body">
                             Loading Question...
                         </div>
@@ -161,7 +166,7 @@
             <div class="bg-white rounded border shadow-sm p-3 flex flex-col justify-between space-y-3">
                 <div>
                     <h3 class="font-bold text-xs text-gray-800 border-b pb-1.5 mb-2 flex justify-between items-center">
-                        <span>QUESTION PALETTE</span>
+                        <span id="palette-subject-header">QUESTION PALETTE</span>
                     </h3>
 
                     <!-- NTA Grid Palette Buttons -->
@@ -219,7 +224,7 @@
         </div>
     </div>
 
-    <!-- Firebase Script Logic -->
+    <!-- Firebase & Logic Script -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
@@ -234,10 +239,12 @@
         const db = firebase.firestore();
 
         let loggedInStudent = null;
-        let examQuestionsList = [];
+        let masterQuestionsList = []; 
+        let subjectWiseMap = {}; 
+        let currentSubjectList = []; 
         let studentAnswersMap = {};
         let questionStatusMap = {};
-        let currentIndex = 0;
+        let currentIndex = 0; 
         let activeSubjectFilter = "ALL";
         let timerInterval = null;
 
@@ -303,14 +310,19 @@
                         return alert(`No questions deployed for ${targetClass} yet.`);
                     }
 
-                    examQuestionsList = [];
+                    masterQuestionsList = [];
+                    subjectWiseMap = {};
                     studentAnswersMap = {};
                     questionStatusMap = {};
 
                     snapshot.forEach(doc => {
                         const q = doc.data();
                         q.id = doc.id;
-                        examQuestionsList.push(q);
+                        masterQuestionsList.push(q);
+
+                        let subj = (q.subject || 'GENERAL').trim();
+                        if (!subjectWiseMap[subj]) subjectWiseMap[subj] = [];
+                        subjectWiseMap[subj].push(q);
                     });
 
                     document.getElementById('login-section').classList.add('hidden');
@@ -320,11 +332,9 @@
                     document.getElementById('display-student-name').innerText = loggedInStudent.name;
                     document.getElementById('display-student-info').innerText = `${loggedInStudent.class} | Roll: ${loggedInStudent.rollNo}`;
 
-                    currentIndex = 0;
                     buildSubjectTabs();
-                    loadActiveQuestion();
-                    renderPaletteGrid();
-                    startTimer(examMeta.duration || 30);
+                    filterBySubject('ALL');
+                    startTimer(examMeta.duration || 180);
                 });
         }
 
@@ -332,19 +342,12 @@
             const tabsContainer = document.getElementById('subject-tabs-container');
             tabsContainer.innerHTML = `
                 <button onclick="filterBySubject('ALL')" id="tab-ALL" class="subj-tab bg-blue-900 text-white font-bold text-xs px-3 py-1.5 rounded transition whitespace-nowrap shadow-sm">
-                    ALL SECTIONS (${examQuestionsList.length})
+                    ALL SECTIONS (${masterQuestionsList.length})
                 </button>
             `;
 
-            const subjectsSet = new Set();
-            examQuestionsList.forEach(q => { 
-                if (q.subject && q.subject.trim()) {
-                    subjectsSet.add(q.subject.trim()); 
-                }
-            });
-
-            subjectsSet.forEach(subj => {
-                const count = examQuestionsList.filter(q => (q.subject || '').trim().toLowerCase() === subj.toLowerCase()).length;
+            Object.keys(subjectWiseMap).forEach(subj => {
+                const count = subjectWiseMap[subj].length;
                 tabsContainer.innerHTML += `
                     <button onclick="filterBySubject('${subj}')" id="tab-${subj.replace(/\s+/g, '')}" class="subj-tab bg-white hover:bg-blue-50 text-gray-700 font-bold text-xs px-3 py-1.5 rounded border transition whitespace-nowrap">
                         ${subj.toUpperCase()} (${count})
@@ -364,19 +367,26 @@
             if (activeBtn) activeBtn.className = "subj-tab bg-blue-900 text-white font-bold text-xs px-3 py-1.5 rounded transition whitespace-nowrap shadow-sm";
 
             if (subjName === "ALL") {
-                currentIndex = 0;
+                currentSubjectList = masterQuestionsList;
+                document.getElementById('palette-subject-header').innerText = "QUESTION PALETTE (ALL)";
             } else {
-                const firstIdx = examQuestionsList.findIndex(q => (q.subject || '').trim().toLowerCase() === subjName.trim().toLowerCase());
-                if (firstIdx !== -1) currentIndex = firstIdx;
+                currentSubjectList = subjectWiseMap[subjName] || [];
+                document.getElementById('palette-subject-header').innerText = `PALETTE (${subjName.toUpperCase()})`;
             }
 
+            currentIndex = 0;
             loadActiveQuestion();
             renderPaletteGrid();
         }
 
+        function formatMathText(text) {
+            if (!text) return "";
+            return text.replace(/(\w+)\^(\w+|\d+)/g, "$1<sup>$2</sup>");
+        }
+
         function loadActiveQuestion() {
-            if (examQuestionsList.length === 0) return;
-            const q = examQuestionsList[currentIndex];
+            if (currentSubjectList.length === 0) return;
+            const q = currentSubjectList[currentIndex];
 
             if (!questionStatusMap[q.id]) {
                 questionStatusMap[q.id] = 'not-answered';
@@ -385,7 +395,7 @@
             document.getElementById('q-number-title').innerText = `Question No. ${currentIndex + 1}`;
             document.getElementById('q-subject-badge').innerText = (q.subject || 'GENERAL').toUpperCase();
             document.getElementById('q-chapter-badge').innerText = (q.chapter || 'CHAPTER').toUpperCase();
-            document.getElementById('q-text-body').innerText = q.question;
+            document.getElementById('q-text-body').innerHTML = formatMathText(q.question);
 
             const opts = q.options || { A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD };
             const selectedOpt = studentAnswersMap[q.id] || "";
@@ -394,24 +404,30 @@
             optsContainer.innerHTML = "";
 
             ['A', 'B', 'C', 'D'].forEach(key => {
+                let optVal = opts[key] || '';
                 optsContainer.innerHTML += `
                     <label class="flex items-center gap-3 p-2.5 rounded border cursor-pointer hover:bg-blue-50 transition ${selectedOpt === key ? 'border-blue-700 bg-blue-50 font-bold text-blue-950 ring-1 ring-blue-500' : 'bg-white text-gray-800'}">
                         <input type="radio" name="current-opt" value="${key}" ${selectedOpt === key ? 'checked' : ''} onchange="selectOption('${key}')" class="text-blue-900 focus:ring-blue-800 w-4 h-4">
-                        <span><b class="text-blue-900">(${key})</b> ${opts[key] || ''}</span>
+                        <span><b class="text-blue-900">(${key})</b> ${formatMathText(optVal)}</span>
                     </label>
                 `;
             });
+
+            // Trigger MathJax typesetting for proper math equations rendering
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('question-display-area')]);
+            }
 
             renderPaletteGrid();
         }
 
         function selectOption(key) {
-            const qId = examQuestionsList[currentIndex].id;
+            const qId = currentSubjectList[currentIndex].id;
             studentAnswersMap[qId] = key;
         }
 
         function saveAndNext() {
-            const qId = examQuestionsList[currentIndex].id;
+            const qId = currentSubjectList[currentIndex].id;
             if (studentAnswersMap[qId]) {
                 questionStatusMap[qId] = 'answered';
             } else {
@@ -421,7 +437,7 @@
         }
 
         function saveAndMarkForReview() {
-            const qId = examQuestionsList[currentIndex].id;
+            const qId = currentSubjectList[currentIndex].id;
             if (studentAnswersMap[qId]) {
                 questionStatusMap[qId] = 'ans-review';
             } else {
@@ -431,36 +447,25 @@
         }
 
         function markForReview() {
-            const qId = examQuestionsList[currentIndex].id;
+            const qId = currentSubjectList[currentIndex].id;
             questionStatusMap[qId] = 'review';
             goToNextQuestion();
         }
 
         function clearResponse() {
-            const qId = examQuestionsList[currentIndex].id;
+            const qId = currentSubjectList[currentIndex].id;
             delete studentAnswersMap[qId];
             questionStatusMap[qId] = 'not-answered';
             loadActiveQuestion();
         }
 
         function goToNextQuestion() {
-            if (activeSubjectFilter === "ALL") {
-                if (currentIndex < examQuestionsList.length - 1) {
-                    currentIndex++;
-                    loadActiveQuestion();
-                } else {
-                    alert("You are at the last question of the examination.");
-                    renderPaletteGrid();
-                }
+            if (currentIndex < currentSubjectList.length - 1) {
+                currentIndex++;
+                loadActiveQuestion();
             } else {
-                const nextIdx = examQuestionsList.findIndex((q, i) => i > currentIndex && (q.subject || '').trim().toLowerCase() === activeSubjectFilter.trim().toLowerCase());
-                if (nextIdx !== -1) {
-                    currentIndex = nextIdx;
-                    loadActiveQuestion();
-                } else {
-                    alert(`End of ${activeSubjectFilter.toUpperCase()} section.`);
-                    renderPaletteGrid();
-                }
+                alert(`You have reached the end of ${activeSubjectFilter} questions.`);
+                renderPaletteGrid();
             }
         }
 
@@ -469,17 +474,12 @@
             loadActiveQuestion();
         }
 
-        // 🎯 RENDER NTA PALETTE GRID WITH SHAPES
+        // 🎯 RENDER NTA PALETTE GRID WITH SUBJECT FILTER
         function renderPaletteGrid() {
             const grid = document.getElementById('question-palette-grid');
             grid.innerHTML = "";
 
-            examQuestionsList.forEach((q, idx) => {
-                const qSubj = (q.subject || '').trim().toLowerCase();
-                const selSubj = activeSubjectFilter.trim().toLowerCase();
-
-                if (activeSubjectFilter !== "ALL" && qSubj !== selSubj) return;
-
+            currentSubjectList.forEach((q, idx) => {
                 const status = questionStatusMap[q.id] || 'not-visited';
                 const isCurrent = (idx === currentIndex);
 
@@ -523,20 +523,24 @@
             const container = document.getElementById('qp-modal-content');
             container.innerHTML = "";
 
-            examQuestionsList.forEach((q, i) => {
+            masterQuestionsList.forEach((q, i) => {
                 const opts = q.options || { A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD };
                 container.innerHTML += `
                     <div class="border p-3 rounded bg-slate-50 space-y-1">
-                        <p class="font-bold text-gray-900">Q${i + 1}. ${q.question}</p>
+                        <p class="font-bold text-gray-900">Q${i + 1}. ${formatMathText(q.question)}</p>
                         <div class="grid grid-cols-2 gap-1 text-gray-700 pl-2">
-                            <span>(A) ${opts.A || ''}</span>
-                            <span>(B) ${opts.B || ''}</span>
-                            <span>(C) ${opts.C || ''}</span>
-                            <span>(D) ${opts.D || ''}</span>
+                            <span>(A) ${formatMathText(opts.A || '')}</span>
+                            <span>(B) ${formatMathText(opts.B || '')}</span>
+                            <span>(C) ${formatMathText(opts.C || '')}</span>
+                            <span>(D) ${formatMathText(opts.D || '')}</span>
                         </div>
                     </div>
                 `;
             });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise([container]);
+            }
 
             document.getElementById('qp-modal').classList.remove('hidden');
         }
@@ -554,7 +558,7 @@
                     studentName: loggedInStudent.name,
                     class: loggedInStudent.class,
                     answers: studentAnswersMap,
-                    totalQuestions: examQuestionsList.length,
+                    totalQuestions: masterQuestionsList.length,
                     submittedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
