@@ -10,144 +10,167 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen">
+<body class="bg-slate-100 font-sans min-h-screen">
 
-    <!-- LOGIN SCREEN -->
+    <!-- TEACHER LOGIN SCREEN -->
     <div id="login-container" class="flex items-center justify-center min-h-screen">
-        <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md border-t-4 border-blue-600">
-            <h2 class="text-2xl font-bold text-center text-blue-700 mb-6">DAV Teacher Portal Login</h2>
+        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border-t-4 border-blue-600">
+            <h2 class="text-2xl font-bold text-center text-blue-700 mb-1">DAV Teacher Portal</h2>
+            <p class="text-xs text-center text-gray-500 mb-6">Enter registered Teacher Credentials</p>
             
             <div id="login-error" class="hidden mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm text-center">
-                Invalid Email or Password!
+                Invalid Teacher Email or Password!
             </div>
 
             <form onsubmit="handleTeacherLogin(event)">
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2">Teacher Email</label>
-                    <input type="email" id="email" required placeholder="teacher@dav.com" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="email" id="teacher-email-input" required placeholder="teacher@dav.com" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
-                    <input type="password" id="password" required placeholder="••••••••" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="password" id="teacher-pass-input" required placeholder="••••••••" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                    Login to Teacher Dashboard
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 shadow">
+                    Login to Portal
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- DASHBOARD -->
+    <!-- TEACHER DASHBOARD -->
     <div id="dashboard-container" class="hidden">
-        <nav class="bg-blue-700 text-white p-4 shadow-lg flex justify-between items-center">
-            <h1 class="text-xl font-bold">DAV Exam Portal - Teacher Dashboard</h1>
-            <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-1 px-3 rounded">
-                Logout
-            </button>
+        <!-- Header Bar -->
+        <nav class="bg-white p-4 shadow flex justify-between items-center px-8 border-b">
+            <div>
+                <h1 class="text-2xl font-black text-blue-600 tracking-wide">DAV PUBLIC SCHOOL</h1>
+                <p class="text-xs text-gray-600 font-medium">Welcome, <span id="teacher-display-name" class="font-bold text-gray-800">Teacher</span> <span id="teacher-subject-badge" class="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full ml-2">Subject</span></p>
+            </div>
+            <div class="flex gap-2">
+                <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs py-2 px-4 rounded-lg border flex items-center gap-1">
+                    📊 Exam Results
+                </button>
+                <button onclick="handleLogout()" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-semibold text-xs py-2 px-4 rounded-lg flex items-center gap-1">
+                    🔒 Logout
+                </button>
+            </div>
         </nav>
 
-        <div class="max-w-6xl mx-auto p-6 space-y-8">
+        <div class="max-w-7xl mx-auto p-6 space-y-6">
             
-            <!-- STUDENT MANAGEMENT -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Student Management (Add / Edit)</h2>
-                <form id="student-form" onsubmit="saveStudent(event)" class="space-y-4 mb-6 bg-gray-50 p-4 rounded border">
-                    <input type="hidden" id="student-doc-id">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Roll Number</label>
-                            <input type="text" id="stu-roll" required placeholder="e.g. 101" class="w-full p-2 border rounded text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Student Name</label>
-                            <input type="text" id="stu-name" required placeholder="e.g. Amit Kumar" class="w-full p-2 border rounded text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Class & Section</label>
-                            <input type="text" id="stu-class" required placeholder="e.g. 10-A" class="w-full p-2 border rounded text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Student Password</label>
-                            <input type="text" id="stu-pass" required placeholder="Set Password" class="w-full p-2 border rounded text-sm">
-                        </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="submit" id="stu-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-5 rounded text-sm">
-                            Save Student Record
-                        </button>
-                        <button type="button" onclick="resetStudentForm()" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-1.5 px-4 rounded text-sm">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse border border-gray-200 text-sm">
-                        <thead>
-                            <tr class="bg-gray-100">
-                                <th class="p-2 border">Roll No</th>
-                                <th class="p-2 border">Student Name</th>
-                                <th class="p-2 border">Class</th>
-                                <th class="p-2 border">Password</th>
-                                <th class="p-2 border text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="teacher-students-list">
-                            <tr><td colspan="5" class="p-4 text-center text-gray-500">Loading students...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- QUESTION BANK ENTRY -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Add New Question to Question Bank</h2>
-                <form id="add-question-form" onsubmit="addQuestion(event)" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Subject / Section</label>
-                            <input type="text" id="q-subject" required placeholder="e.g. Science" class="w-full p-2 border rounded">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Chapter / Topic</label>
-                            <input type="text" id="q-chapter" required placeholder="e.g. Light" class="w-full p-2 border rounded">
-                        </div>
-                    </div>
-
+            <!-- 1. Subject Exam Batch Control -->
+            <div class="bg-amber-50 p-5 rounded-xl border border-amber-200 shadow-sm relative">
+                <span class="absolute top-4 right-4 bg-black text-white text-xs px-3 py-1 rounded-full font-bold" id="badge-assigned-subject">Subject: Physics</span>
+                <h2 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">⚙️ Subject Exam Batch & Timing Control</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Question Statement</label>
-                        <textarea id="q-text" rows="3" required placeholder="Enter the question statement here..." class="w-full p-2 border rounded"></textarea>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Exam Title / Batch Name</label>
+                        <input type="text" id="batch-title" placeholder="Unit Test 1" class="w-full p-2 border rounded-lg text-xs bg-white">
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" id="q-optA" required placeholder="Option A" class="p-2 border rounded">
-                        <input type="text" id="q-optB" required placeholder="Option B" class="p-2 border rounded">
-                        <input type="text" id="q-optC" required placeholder="Option C" class="p-2 border rounded">
-                        <input type="text" id="q-optD" required placeholder="Option D" class="p-2 border rounded">
-                    </div>
-
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Correct Answer</label>
-                        <select id="q-correct" required class="w-full p-2 border rounded">
-                            <option value="A">Option A</option>
-                            <option value="B">Option B</option>
-                            <option value="C">Option C</option>
-                            <option value="D">Option D</option>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Exam Status</label>
+                        <select id="batch-status" class="w-full p-2 border rounded-lg text-xs bg-white">
+                            <option value="ACTIVE">🟢 ACTIVE (Live)</option>
+                            <option value="INACTIVE">🔴 INACTIVE (Stopped)</option>
                         </select>
                     </div>
-
-                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded">
-                        Save Question
-                    </button>
-                </form>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Start Time</label>
+                        <input type="datetime-local" id="batch-start" class="w-full p-2 border rounded-lg text-xs bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">End Time</label>
+                        <input type="datetime-local" id="batch-end" class="w-full p-2 border rounded-lg text-xs bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Duration (Mins)</label>
+                        <input type="number" id="batch-duration" placeholder="e.g. 45" class="w-full p-2 border rounded-lg text-xs bg-white">
+                    </div>
+                </div>
+                <button onclick="saveBatchTiming()" class="mt-4 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-2 px-6 rounded-lg shadow flex items-center gap-2">
+                    💾 Save & Activate Exam
+                </button>
             </div>
 
-            <!-- QUESTION BANK LIST -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Question Bank List</h2>
-                <div id="questions-list" class="space-y-4">
-                    <p class="text-gray-500 text-sm">Loading questions...</p>
+            <!-- 2. Bulk Upload Questions via Excel / CSV -->
+            <div class="bg-blue-50/50 p-4 rounded-xl border-2 border-dashed border-blue-300 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-sm font-bold text-blue-800 flex items-center gap-2">📁 Bulk Upload Questions via Excel / CSV</h3>
+                    <p class="text-xs text-gray-500">Upload CSV file formatted as: Class, Subject, Chapter, QuestionText, OptionA, OptionB, OptionC, OptionD, CorrectOption</p>
                 </div>
+                <div class="flex items-center gap-2">
+                    <input type="file" id="csv-file-input" accept=".csv" class="text-xs border rounded p-1.5 bg-white">
+                    <button onclick="uploadCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-4 rounded-lg shadow">
+                        🚀 Upload All
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. Add Single Question & Active Question Bank Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- Left: Add Single Question Form -->
+                <div class="bg-white p-5 rounded-xl border shadow-sm space-y-4">
+                    <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2 border-b pb-2">➕ Add Single Question</h3>
+                    <form onsubmit="addSingleQuestion(event)" class="space-y-3">
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600">Class</label>
+                                <input type="text" id="q-class" required placeholder="Class 10" class="w-full p-2 border rounded text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600">Subject</label>
+                                <input type="text" id="q-subject" required placeholder="Physics" class="w-full p-2 border rounded text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600">Chapter</label>
+                                <input type="text" id="q-chapter" required placeholder="Electricity" class="w-full p-2 border rounded text-xs">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600">Question Text</label>
+                            <textarea id="q-text" rows="3" required placeholder="Enter question text..." class="w-full p-2 border rounded text-xs"></textarea>
+                        </div>
+
+                        <div class="space-y-2">
+                            <input type="text" id="q-optA" required placeholder="Option A" class="w-full p-2 border rounded text-xs">
+                            <input type="text" id="q-optB" required placeholder="Option B" class="w-full p-2 border rounded text-xs">
+                            <input type="text" id="q-optC" required placeholder="Option C" class="w-full p-2 border rounded text-xs">
+                            <input type="text" id="q-optD" required placeholder="Option D" class="w-full p-2 border rounded text-xs">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600">Correct Option</label>
+                            <select id="q-correct" required class="w-full p-2 border rounded text-xs bg-white">
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 rounded-lg shadow">
+                            Save Question
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right: Active Question Bank Display -->
+                <div class="bg-white p-5 rounded-xl border shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center border-b pb-2 mb-3">
+                            <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2">📚 Active Question Bank</h3>
+                            <button onclick="loadQuestions()" class="text-xs text-blue-600 hover:underline border px-2 py-1 rounded">🔄 Refresh</button>
+                        </div>
+                        
+                        <div id="active-questions-list" class="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                            <p class="text-xs text-gray-500">Loading questions...</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -167,16 +190,33 @@
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        let loggedInTeacher = null;
 
-        function handleTeacherLogin(e) {
+        async function handleTeacherLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('teacher-email-input').value.trim();
+            const password = document.getElementById('teacher-pass-input').value.trim();
 
-            if (email === "teacher@dav.com" && password === "teacher123") {
+            const snapshot = await db.collection("teachers").where("email", "==", email).get();
+            if (snapshot.empty) {
+                document.getElementById('login-error').classList.remove('hidden');
+                return;
+            }
+
+            let found = null;
+            snapshot.forEach(doc => {
+                if (doc.data().password === password) found = doc.data();
+            });
+
+            if (found) {
+                loggedInTeacher = found;
                 document.getElementById('login-container').classList.add('hidden');
                 document.getElementById('dashboard-container').classList.remove('hidden');
-                loadStudents();
+                
+                document.getElementById('teacher-display-name').innerText = found.name || 'Teacher';
+                document.getElementById('teacher-subject-badge').innerText = found.subject || 'General';
+                document.getElementById('badge-assigned-subject').innerText = `Subject: ${found.subject || 'General'}`;
+
                 loadQuestions();
             } else {
                 document.getElementById('login-error').classList.remove('hidden');
@@ -184,79 +224,32 @@
         }
 
         function handleLogout() {
-            document.getElementById('dashboard-container').classList.add('hidden');
-            document.getElementById('login-container').classList.remove('hidden');
+            location.reload();
         }
 
-        function saveStudent(e) {
-            e.preventDefault();
-            const id = document.getElementById('student-doc-id').value;
-            const data = {
-                rollNo: document.getElementById('stu-roll').value,
-                name: document.getElementById('stu-name').value,
-                studentClass: document.getElementById('stu-class').value,
-                password: document.getElementById('stu-pass').value
+        function saveBatchTiming() {
+            const batchData = {
+                title: document.getElementById('batch-title').value,
+                status: document.getElementById('batch-status').value,
+                startTime: document.getElementById('batch-start').value,
+                endTime: document.getElementById('batch-end').value,
+                duration: document.getElementById('batch-duration').value,
+                subject: loggedInTeacher?.subject || "General",
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            if (id) {
-                db.collection("students").doc(id).update(data).then(() => {
-                    alert("Student details updated!");
-                    resetStudentForm();
-                    loadStudents();
-                });
-            } else {
-                db.collection("students").add(data).then(() => {
-                    alert("Student added successfully!");
-                    resetStudentForm();
-                    loadStudents();
-                });
-            }
+            db.collection("exam_control").doc("current_exam").set({
+                isActive: batchData.status === "ACTIVE",
+                subject: batchData.subject,
+                duration: Number(batchData.duration || 30),
+                batchTitle: batchData.title
+            }).then(() => alert("Exam Batch Timing Updated & Saved!"));
         }
 
-        function loadStudents() {
-            db.collection("students").get().then(snapshot => {
-                const tbody = document.getElementById('teacher-students-list');
-                tbody.innerHTML = "";
-                if (snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-gray-500">No students found.</td></tr>`;
-                    return;
-                }
-                snapshot.forEach(doc => {
-                    const s = doc.data();
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="p-2 border font-medium">${s.rollNo || '-'}</td>
-                            <td class="p-2 border">${s.name || '-'}</td>
-                            <td class="p-2 border">${s.studentClass || '-'}</td>
-                            <td class="p-2 border font-mono text-blue-600">${s.password || '123456'}</td>
-                            <td class="p-2 border text-center">
-                                <button onclick="editStudent('${doc.id}', '${s.rollNo || ''}', '${s.name || ''}', '${s.studentClass || ''}', '${s.password || ''}')" class="bg-amber-500 text-white text-xs px-2 py-1 rounded mr-1">Edit</button>
-                                <button onclick="deleteDoc('students', '${doc.id}', loadStudents)" class="bg-red-500 text-white text-xs px-2 py-1 rounded">Delete</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            });
-        }
-
-        function editStudent(id, roll, name, sClass, pass) {
-            document.getElementById('student-doc-id').value = id;
-            document.getElementById('stu-roll').value = roll;
-            document.getElementById('stu-name').value = name;
-            document.getElementById('stu-class').value = sClass;
-            document.getElementById('stu-pass').value = pass;
-            document.getElementById('stu-btn').innerText = "Update Student";
-        }
-
-        function resetStudentForm() {
-            document.getElementById('student-doc-id').value = "";
-            document.getElementById('student-form').reset();
-            document.getElementById('stu-btn').innerText = "Save Student Record";
-        }
-
-        function addQuestion(e) {
+        function addSingleQuestion(e) {
             e.preventDefault();
-            const questionData = {
+            db.collection("question_bank").add({
+                className: document.getElementById('q-class').value,
                 subject: document.getElementById('q-subject').value,
                 chapter: document.getElementById('q-chapter').value,
                 question: document.getElementById('q-text').value,
@@ -268,50 +261,72 @@
                 },
                 correctAnswer: document.getElementById('q-correct').value,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            db.collection("question_bank").add(questionData).then(() => {
-                alert("Question added to Question Bank!");
-                document.getElementById('add-question-form').reset();
+            }).then(() => {
+                alert("Question Saved!");
                 loadQuestions();
             });
         }
 
         function loadQuestions() {
-            const list = document.getElementById('questions-list');
-            db.collection("question_bank").orderBy("createdAt", "desc").get().then(snapshot => {
+            const list = document.getElementById('active-questions-list');
+            db.collection("question_bank").get().then(snapshot => {
                 list.innerHTML = "";
                 if (snapshot.empty) {
-                    list.innerHTML = "<p class='text-gray-500'>No questions added yet.</p>";
+                    list.innerHTML = "<p class='text-xs text-gray-500'>No questions found.</p>";
                     return;
                 }
                 snapshot.forEach(doc => {
                     const q = doc.data();
                     list.innerHTML += `
-                        <div class="p-4 border rounded bg-gray-50 relative">
-                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded">${q.subject || 'General'}</span>
-                            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2 py-0.5 rounded ml-2">${q.chapter || 'Topic'}</span>
-                            <p class="font-semibold text-gray-800 mt-2">Q. ${q.question}</p>
-                            <div class="grid grid-cols-2 gap-2 mt-2 text-sm text-gray-600">
-                                <p>A) ${q.options?.A || ''}</p>
-                                <p>B) ${q.options?.B || ''}</p>
-                                <p>C) ${q.options?.C || ''}</p>
-                                <p>D) ${q.options?.D || ''}</p>
+                        <div class="p-3 border rounded-lg bg-slate-50 text-xs space-y-1 relative">
+                            <div class="flex gap-1">
+                                <span class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold">${q.subject || 'Physics'}</span>
+                                <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-semibold">${q.className || 'Class 10'}</span>
+                                <span class="bg-gray-800 text-white px-2 py-0.5 rounded font-semibold">${q.chapter || 'Topic'}</span>
                             </div>
-                            <button onclick="deleteDoc('question_bank', '${doc.id}', loadQuestions)" class="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded">Delete</button>
+                            <p class="font-bold text-gray-800 pt-1">${q.question}</p>
+                            <p class="${q.correctAnswer === 'A' ? 'text-green-600 font-bold' : 'text-gray-600'}">(A) ${q.options?.A || ''} ${q.correctAnswer === 'A' ? '✓' : ''}</p>
+                            <p class="${q.correctAnswer === 'B' ? 'text-green-600 font-bold' : 'text-gray-600'}">(B) ${q.options?.B || ''} ${q.correctAnswer === 'B' ? '✓' : ''}</p>
+                            <p class="${q.correctAnswer === 'C' ? 'text-green-600 font-bold' : 'text-gray-600'}">(C) ${q.options?.C || ''} ${q.correctAnswer === 'C' ? '✓' : ''}</p>
+                            <p class="${q.correctAnswer === 'D' ? 'text-green-600 font-bold' : 'text-gray-600'}">(D) ${q.options?.D || ''} ${q.correctAnswer === 'D' ? '✓' : ''}</p>
+                            <button onclick="deleteDoc('${doc.id}')" class="absolute top-2 right-2 text-red-500 hover:underline text-xs">🗑 Delete</button>
                         </div>
                     `;
                 });
             });
         }
 
-        function deleteDoc(collection, id, callback) {
-            if (confirm("Are you sure you want to delete this?")) {
-                db.collection(collection).doc(id).delete().then(() => {
-                    alert("Deleted!");
-                    if(callback) callback();
-                });
+        function deleteDoc(id) {
+            if (confirm("Delete this question?")) {
+                db.collection("question_bank").doc(id).delete().then(() => loadQuestions());
             }
+        }
+
+        function uploadCSV() {
+            const file = document.getElementById('csv-file-input').files[0];
+            if (!file) return alert("Select a CSV file first!");
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n');
+                lines.forEach((line, idx) => {
+                    if (idx === 0 || !line.trim()) return; // Skip Header
+                    const cols = line.split(',');
+                    if (cols.length >= 9) {
+                        db.collection("question_bank").add({
+                            className: cols[0].trim(),
+                            subject: cols[1].trim(),
+                            chapter: cols[2].trim(),
+                            question: cols[3].trim(),
+                            options: { A: cols[4].trim(), B: cols[5].trim(), C: cols[6].trim(), D: cols[7].trim() },
+                            correctAnswer: cols[8].trim().toUpperCase()
+                        });
+                    }
+                });
+                alert("CSV Batch Upload Complete!");
+                loadQuestions();
+            };
+            reader.readAsText(file);
         }
     </script>
 </body>
