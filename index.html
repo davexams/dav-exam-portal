@@ -261,7 +261,7 @@
         let activeSubjectFilter = "ALL";
         let timerInterval = null;
 
-        // 🧮 SMART AUTOMATIC MATH & DETERMINANT PARSER
+        // 🧮 FOOLPROOF AUTOMATIC MATH & DETERMINANT PARSER
         function formatMathText(text) {
             if (!text) return "";
 
@@ -276,19 +276,19 @@
                 return `$ \\begin{vmatrix} ${row1} \\\\ ${row2} \\\\ ${row3} \\end{vmatrix} $`;
             });
 
-            // 2. Convert Inverse Trig functions: tan^-1(1) -> $\tan^{-1}(1)$
-            formatted = formatted.replace(/\b(sin|cos|tan|sec|cosec|cot)\^\s*(-?\d+)\s*\((.*?)\)/gi, '$\\$1^{$2}($3)$');
-            formatted = formatted.replace(/\b(sin|cos|tan|sec|cosec|cot)\^\s*(-?\d+)/gi, '$\\$1^{$2}$');
+            // 2. Wrap LaTeX Backslash Commands (\sqrt{x}, \frac{a}{b}, \int) in $...$ if un-wrapped
+            formatted = formatted.replace(/(\\[a-zA-Z]+(?:\{.*?\})*)/g, (match) => {
+                if (match.includes('$')) return match;
+                return `$${match}$`;
+            });
 
-            // 3. Convert Power Notation: x^2 -> $x^2$, y^2 -> $y^2$ (Only math variables)
-            formatted = formatted.replace(/([a-zA-Z0-9\(\)]+)\^\s*(-?\d+|[a-zA-Z])/g, '$$1^{$2}$');
+            // 3. FOOLPROOF POWER CONVERTER: x^2 -> $x^{2}$ (Fixes 1^2 bug via Function Callback)
+            formatted = formatted.replace(/([a-zA-Z0-9\)\>]+)\^\s*(-?\d+|[a-zA-Z]+)/g, (match, varName, power) => {
+                return `$${varName}^{${power}}$`;
+            });
 
-            // 4. Convert Pi & Greek symbols: pi -> $\pi$
-            formatted = formatted.replace(/\bpi\b/gi, '$\\pi$');
-
-            // 5. Convert Fractions: 3*pi/4 -> $\frac{3\pi}{4}$
-            formatted = formatted.replace(/(\d+\*?\\pi|\d+|\\pi)\/(\d+|\\pi)/g, '$\\frac{$1}{$2}$');
-            formatted = formatted.replace(/\*/g, ''); // Clean multiplication stars
+            // 4. Clean double $$ if any
+            formatted = formatted.replace(/\$\$/g, '$');
 
             return formatted;
         }
