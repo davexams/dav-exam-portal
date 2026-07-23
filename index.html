@@ -57,22 +57,22 @@
             </div>
         </div>
 
-        <!-- 🚫 SECTION 3: SUBMITTED SUCCESS SCREEN (NO MARKS DISPLAYED) -->
+        <!-- 🚫 SECTION 3: SUBMITTED SUCCESS SCREEN (SCORE HIDDEN) -->
         <div id="already-submitted-screen" class="hidden bg-white p-8 rounded-xl border border-green-200 text-center shadow-sm space-y-4">
             <div class="text-5xl">✅</div>
             <h2 class="text-xl font-bold text-green-700">Exam Submitted Successfully!</h2>
             <p class="text-xs text-gray-600 max-w-md mx-auto leading-relaxed">
                 Thank you! Your response for Roll No <b id="blocked-roll-display"></b> has been recorded successfully. 
-                The evaluation has been saved into the central system. Result will be declared by the administration later.
+                Result will be declared by school administration later.
             </p>
             <div>
                 <span class="bg-green-50 text-green-700 text-xs px-4 py-1.5 rounded-full font-bold border border-green-300">
-                    Status: Test Completed
+                    Status: Test Attempt Completed
                 </span>
             </div>
             <div class="pt-4 border-t">
                 <button onclick="logoutStudent()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 px-6 rounded-lg shadow transition">
-                    🔄 Exit / Switch Student
+                    🔄 Back to Login / Exit
                 </button>
             </div>
         </div>
@@ -80,17 +80,13 @@
         <!-- 📝 SECTION 4: EXAM ACTIVE INTERFACE GRID -->
         <div id="exam-screen" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-4">
             
-            <!-- LEFT MAIN PANEL -->
             <div class="lg:col-span-3 space-y-4">
-                
-                <!-- Subject Filter Tabs -->
                 <div class="bg-white p-3 rounded-xl border shadow-sm flex items-center gap-2 overflow-x-auto" id="subject-tabs-container">
                     <button class="tab-btn bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap">
                         🌐 All Subjects
                     </button>
                 </div>
 
-                <!-- Single Question Card -->
                 <div class="bg-white p-5 rounded-xl border shadow-sm space-y-4 min-h-[320px] flex flex-col justify-between">
                     <div>
                         <div class="flex justify-between items-center border-b pb-3 mb-3">
@@ -102,13 +98,11 @@
                             Question text will load here...
                         </p>
 
-                        <!-- Options Container -->
                         <div id="options-container" class="space-y-2">
                             <!-- Dynamic Options -->
                         </div>
                     </div>
 
-                    <!-- Action Controls -->
                     <div class="border-t pt-4 flex flex-wrap gap-2 justify-between items-center">
                         <div class="flex gap-2">
                             <button onclick="markForReview()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs py-2 px-3 rounded shadow">
@@ -128,24 +122,18 @@
                         </div>
                     </div>
                 </div>
-
             </div>
 
-            <!-- RIGHT PANEL: Question Palette Grid -->
             <div class="bg-white p-4 rounded-xl border shadow-sm space-y-4 flex flex-col justify-between">
                 <div>
                     <h3 class="font-bold text-gray-800 text-xs border-b pb-2 mb-3">📋 Question Palette</h3>
-                    
                     <div class="grid grid-cols-2 gap-2 text-[10px] text-gray-600 mb-4 bg-slate-50 p-2.5 rounded-lg border">
                         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-gray-200 border inline-block"></span> Not Visited</div>
                         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span> Not Answered</div>
                         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span> Answered</div>
                         <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-purple-600 inline-block"></span> Marked Review</div>
                     </div>
-
-                    <div class="grid grid-cols-5 gap-2 max-h-[260px] overflow-y-auto pr-1" id="question-palette-grid">
-                        <!-- Palette Numbers -->
-                    </div>
+                    <div class="grid grid-cols-5 gap-2 max-h-[260px] overflow-y-auto pr-1" id="question-palette-grid"></div>
                 </div>
 
                 <div class="border-t pt-3">
@@ -159,7 +147,6 @@
 
     </div>
 
-    <!-- Firebase Script -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
@@ -179,14 +166,10 @@
         let allQuestions = [];
         let filteredQuestions = [];
         let currentIndex = 0;
-        let selectedSubjectFilter = 'ALL';
-        
         let questionState = {}; 
         let timerInterval;
 
-        window.onload = function() {
-            fetchExamInfo();
-        };
+        window.onload = function() { fetchExamInfo(); };
 
         function fetchExamInfo() {
             db.collection("exam_control").doc("current_exam").get().then(doc => {
@@ -194,13 +177,10 @@
                     const data = doc.data();
                     currentExamTitle = data.title || "Class 10 Combined Test";
                     examDurationMins = data.duration || 30;
-                    
                     document.getElementById('login-exam-title').innerText = `${currentExamTitle} (${examDurationMins} Mins)`;
                     document.getElementById('exam-title-display').innerText = `${currentExamTitle} | Duration: ${examDurationMins} Mins`;
 
-                    if (currentStudentRoll) {
-                        verifyStudentAttempt(currentStudentRoll);
-                    }
+                    if (currentStudentRoll) verifyStudentAttempt(currentStudentRoll);
                 }
             });
         }
@@ -210,38 +190,24 @@
             const rollInput = document.getElementById('input-roll-no').value.trim();
             const passInput = document.getElementById('input-password').value.trim();
 
-            if(!rollInput || !passInput) {
-                alert("Please fill both Roll No and Password!");
-                return;
-            }
+            if(!rollInput || !passInput) return alert("Please enter Roll No and Password!");
 
-            db.collection("students")
-              .where("rollNo", "==", rollInput)
-              .get()
-              .then(snapshot => {
-                  if (snapshot.empty) {
-                      alert("❌ Invalid Roll No or Student not registered!");
-                      return;
-                  }
+            db.collection("students").where("rollNo", "==", rollInput).get().then(snapshot => {
+                if (snapshot.empty) return alert("❌ Invalid Roll No!");
 
-                  let isValidPass = false;
-                  snapshot.forEach(doc => {
-                      if (doc.data().password === passInput) isValidPass = true;
-                  });
+                let isValidPass = false;
+                snapshot.forEach(doc => { if (doc.data().password === passInput) isValidPass = true; });
 
-                  if (isValidPass) {
-                      currentStudentRoll = rollInput;
-                      sessionStorage.setItem('activeRollNo', currentStudentRoll);
-                      verifyStudentAttempt(currentStudentRoll);
-                  } else {
-                      alert("❌ Incorrect Password!");
-                  }
-              }).catch(err => alert("Login Error: " + err.message));
+                if (isValidPass) {
+                    currentStudentRoll = rollInput;
+                    sessionStorage.setItem('activeRollNo', currentStudentRoll);
+                    verifyStudentAttempt(currentStudentRoll);
+                } else alert("❌ Incorrect Password!");
+            });
         }
 
         function verifyStudentAttempt(rollNo) {
             const attemptDocId = `${rollNo.trim()}_${currentExamTitle.trim()}`;
-
             db.collection("exam_attempts").doc(attemptDocId).get().then(doc => {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('top-header').classList.remove('hidden');
@@ -265,71 +231,42 @@
             sessionStorage.removeItem('activeRollNo');
             currentStudentRoll = null;
             if(timerInterval) clearInterval(timerInterval);
-            
             document.getElementById('exam-screen').classList.add('hidden');
             document.getElementById('already-submitted-screen').classList.add('hidden');
             document.getElementById('top-header').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
-            document.getElementById('input-roll-no').value = "";
-            document.getElementById('input-password').value = "";
         }
 
         function loadActiveQuestions() {
-            db.collection("question_bank")
-              .where("selectedForExam", "==", true)
-              .get()
-              .then(snapshot => {
-                  allQuestions = [];
-                  let subjectSet = new Set();
-
-                  snapshot.forEach(doc => {
-                      const q = doc.data();
-                      q.id = doc.id;
-                      allQuestions.push(q);
-                      if (q.subject) subjectSet.add(q.subject);
-
-                      if(!questionState[q.id]) {
-                          questionState[q.id] = { answer: '', status: 'unvisited' };
-                      }
-                  });
-
-                  renderSubjectTabs(Array.from(subjectSet));
-                  filterSubject('ALL');
-              });
+            db.collection("question_bank").where("selectedForExam", "==", true).get().then(snapshot => {
+                allQuestions = [];
+                let subjectSet = new Set();
+                snapshot.forEach(doc => {
+                    const q = doc.data();
+                    q.id = doc.id;
+                    allQuestions.push(q);
+                    if (q.subject) subjectSet.add(q.subject);
+                    if(!questionState[q.id]) questionState[q.id] = { answer: '', status: 'unvisited' };
+                });
+                renderSubjectTabs(Array.from(subjectSet));
+                filterSubject('ALL');
+            });
         }
 
         function renderSubjectTabs(subjects) {
             const tabsContainer = document.getElementById('subject-tabs-container');
-            tabsContainer.innerHTML = `
-                <button onclick="filterSubject('ALL')" id="tab-btn-ALL" class="tab-btn bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shadow">
-                    🌐 All Subjects
-                </button>
-            `;
-
+            tabsContainer.innerHTML = `<button onclick="filterSubject('ALL')" id="tab-btn-ALL" class="tab-btn bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shadow">🌐 All Subjects</button>`;
             subjects.forEach(sub => {
-                tabsContainer.innerHTML += `
-                    <button onclick="filterSubject('${sub}')" id="tab-btn-${sub}" class="tab-btn bg-gray-200 text-gray-700 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap">
-                        📖 ${sub}
-                    </button>
-                `;
+                tabsContainer.innerHTML += `<button onclick="filterSubject('${sub}')" id="tab-btn-${sub}" class="tab-btn bg-gray-200 text-gray-700 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap">📖 ${sub}</button>`;
             });
         }
 
         function filterSubject(sub) {
-            selectedSubjectFilter = sub;
-
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.className = "tab-btn bg-gray-200 text-gray-700 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap";
-            });
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.className = "tab-btn bg-gray-200 text-gray-700 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap");
             const activeBtn = document.getElementById(`tab-btn-${sub}`);
             if(activeBtn) activeBtn.className = "tab-btn bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shadow";
 
-            if(sub === 'ALL') {
-                filteredQuestions = allQuestions;
-            } else {
-                filteredQuestions = allQuestions.filter(q => q.subject && q.subject.trim().toLowerCase() === sub.trim().toLowerCase());
-            }
-
+            filteredQuestions = (sub === 'ALL') ? allQuestions : allQuestions.filter(q => q.subject && q.subject.trim().toLowerCase() === sub.trim().toLowerCase());
             currentIndex = 0;
             renderSingleQuestion();
             renderPalette();
@@ -337,12 +274,8 @@
 
         function renderSingleQuestion() {
             if(filteredQuestions.length === 0) return;
-
             const q = filteredQuestions[currentIndex];
-
-            if(questionState[q.id].status === 'unvisited') {
-                questionState[q.id].status = 'not_answered';
-            }
+            if(questionState[q.id].status === 'unvisited') questionState[q.id].status = 'not_answered';
 
             document.getElementById('current-q-subject').innerText = q.subject || 'General';
             document.getElementById('current-q-number').innerText = `Question ${currentIndex + 1} of ${filteredQuestions.length}`;
@@ -352,18 +285,12 @@
             optsContainer.innerHTML = "";
 
             ['A', 'B', 'C', 'D'].forEach(key => {
-                let optText = "";
-                if(q.options && q.options[key]) {
-                    optText = q.options[key];
-                } else if(q[`option${key}`]) {
-                    optText = q[`option${key}`];
-                }
-
+                let optText = q.options ? q.options[key] : q[`option${key}`];
                 if(optText) {
                     const isChecked = questionState[q.id].answer === key ? 'checked' : '';
                     optsContainer.innerHTML += `
                         <label onclick="selectOption('${q.id}', '${key}')" class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-blue-50/70 transition text-xs md:text-sm font-medium text-gray-700 bg-gray-50/50">
-                            <input type="radio" name="opt_choice_${q.id}" value="${key}" ${isChecked} class="w-4 h-4 text-blue-600">
+                            <input type="radio" name="opt_${q.id}" value="${key}" ${isChecked} class="w-4 h-4 text-blue-600">
                             <span><b>(${key})</b> ${optText}</span>
                         </label>
                     `;
@@ -374,15 +301,11 @@
             renderPalette();
         }
 
-        function selectOption(qId, key) {
-            questionState[qId].answer = key;
-        }
+        function selectOption(qId, key) { questionState[qId].answer = key; }
 
         function saveAndNext() {
             const q = filteredQuestions[currentIndex];
-            if(questionState[q.id].answer !== '') {
-                questionState[q.id].status = 'answered';
-            }
+            if(questionState[q.id].answer !== '') questionState[q.id].status = 'answered';
             navigateQuestion(1);
         }
 
@@ -407,30 +330,20 @@
             }
         }
 
-        function jumpToQuestion(idx) {
-            currentIndex = idx;
-            renderSingleQuestion();
-        }
+        function jumpToQuestion(idx) { currentIndex = idx; renderSingleQuestion(); }
 
         function renderPalette() {
             const palette = document.getElementById('question-palette-grid');
             palette.innerHTML = "";
-
             filteredQuestions.forEach((q, idx) => {
                 const state = questionState[q.id] || { status: 'unvisited' };
-                let bgClass = "bg-gray-200 text-gray-700 border-gray-300";
-
+                let bgClass = "bg-gray-200 text-gray-700";
                 if(state.status === 'not_answered') bgClass = "bg-red-500 text-white font-bold";
                 if(state.status === 'answered') bgClass = "bg-green-500 text-white font-bold";
                 if(state.status === 'review') bgClass = "bg-purple-600 text-white font-bold";
 
                 const isCurrent = idx === currentIndex ? 'ring-2 ring-blue-600 ring-offset-1 font-black scale-105' : '';
-
-                palette.innerHTML += `
-                    <button onclick="jumpToQuestion(${idx})" class="w-8 h-8 text-xs rounded-lg flex items-center justify-center transition ${bgClass} ${isCurrent}">
-                        ${idx + 1}
-                    </button>
-                `;
+                palette.innerHTML += `<button onclick="jumpToQuestion(${idx})" class="w-8 h-8 text-xs rounded-lg flex items-center justify-center transition ${bgClass} ${isCurrent}">${idx + 1}</button>`;
             });
         }
 
@@ -441,53 +354,33 @@
             timerInterval = setInterval(() => {
                 let minutes = parseInt(timer / 60, 10);
                 let seconds = parseInt(timer % 60, 10);
-
-                minutes = minutes < 10 ? "0" + minutes : minutes;
-                seconds = seconds < 10 ? "0" + seconds : seconds;
-
-                display.textContent = minutes + ":" + seconds;
-
+                display.textContent = (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
                 if (--timer < 0) {
                     clearInterval(timerInterval);
-                    alert("⏰ Time is up! Submitting your exam automatically.");
+                    alert("⏰ Time is up! Submitting exam.");
                     submitExam();
                 }
             }, 1000);
         }
 
-        // ACCURATE SCORE EVALUATION (Saves Score quietly for Admin)
         function submitExam() {
             if(!confirm("Are you sure you want to submit your final exam?")) return;
 
             document.getElementById('btn-submit-exam').disabled = true;
-            document.getElementById('btn-submit-exam').innerText = "Submitting...";
-
             let score = 0;
             let formattedAnswers = {};
 
             allQuestions.forEach(q => {
                 const st = questionState[q.id];
                 const studentAns = st ? (st.answer || "").toString().trim().toUpperCase() : '';
-                
-                // Smart Correct Option Extraction
-                let dbCorrectAns = "";
-                if(q.correctOption) {
-                    dbCorrectAns = q.correctOption.toString().trim().toUpperCase();
-                }
-                
-                if (dbCorrectAns.startsWith("OPTION")) {
-                    dbCorrectAns = dbCorrectAns.replace("OPTION", "").trim();
-                }
+                let dbCorrectAns = (q.correctOption || "").toString().trim().toUpperCase();
+                if (dbCorrectAns.startsWith("OPTION")) dbCorrectAns = dbCorrectAns.replace("OPTION", "").trim();
 
                 formattedAnswers[q.id] = studentAns;
-
-                if (studentAns !== "" && studentAns === dbCorrectAns) {
-                    score++;
-                }
+                if (studentAns !== "" && studentAns === dbCorrectAns) score++;
             });
 
             const attemptDocId = `${currentStudentRoll.trim()}_${currentExamTitle.trim()}`;
-
             db.collection("exam_attempts").doc(attemptDocId).set({
                 rollNo: currentStudentRoll,
                 examTitle: currentExamTitle,
@@ -499,9 +392,6 @@
                 if(timerInterval) clearInterval(timerInterval);
                 alert("🎉 Exam Submitted Successfully!");
                 verifyStudentAttempt(currentStudentRoll);
-            }).catch(err => {
-                alert("Submission Error: " + err.message);
-                document.getElementById('btn-submit-exam').disabled = false;
             });
         }
     </script>
