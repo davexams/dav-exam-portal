@@ -61,7 +61,7 @@
             <div class="flex flex-wrap justify-between items-center border-b pb-3 gap-2">
                 <div>
                     <h3 class="font-bold text-gray-800 text-sm">📊 Student Result Analysis & Reports</h3>
-                    <p class="text-[11px] text-gray-400">View real-time student test attempts, performance metrics, and export data</p>
+                    <p class="text-[11px] text-gray-400">View real-time student test attempts, performance metrics, and question-wise analysis</p>
                 </div>
                 <button onclick="exportResultsToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-4 rounded shadow transition flex items-center gap-1.5">
                     📥 Export Results to CSV (Excel)
@@ -88,8 +88,8 @@
                 </div>
             </div>
 
-            <!-- Student Results Table -->
-            <div class="overflow-x-auto max-h-[250px] border rounded-lg">
+            <!-- Student Results Table with View Details Action -->
+            <div class="overflow-x-auto max-h-[280px] border rounded-lg">
                 <table class="w-full text-left text-xs text-gray-600">
                     <thead class="bg-slate-100 text-gray-700 uppercase font-bold sticky top-0 border-b">
                         <tr>
@@ -100,11 +100,12 @@
                             <th class="p-2.5">Percentage</th>
                             <th class="p-2.5">Status</th>
                             <th class="p-2.5">Submitted At</th>
+                            <th class="p-2.5 text-center">Detailed Analysis</th>
                         </tr>
                     </thead>
                     <tbody id="results-table-body" class="divide-y">
                         <tr>
-                            <td colspan="7" class="p-4 text-center text-gray-400">Loading exam results...</td>
+                            <td colspan="8" class="p-4 text-center text-gray-400">Loading exam results...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -121,19 +122,17 @@
                     <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold" id="student-count-badge">0 Students</span>
                 </div>
 
-                <!-- Student Bulk CSV Upload Box -->
                 <div class="bg-blue-50 p-3 rounded-lg border border-dashed border-blue-300">
                     <p class="text-[11px] font-bold text-blue-900 mb-1">📁 Bulk Upload Students (CSV)</p>
                     <p class="text-[10px] text-gray-500 mb-2">CSV Format: RollNo, Name, Class, Password</p>
                     <div class="flex items-center gap-2">
                         <input type="file" id="student-csv-input" accept=".csv" class="text-[11px] bg-white p-1 border rounded w-full">
                         <button onclick="processStudentCSV()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-1.5 px-3 rounded whitespace-nowrap shadow">
-                            Upload Students CSV
+                            Upload CSV
                         </button>
                     </div>
                 </div>
                 
-                <!-- Add/Edit Single Student Form -->
                 <form onsubmit="handleStudentSubmit(event)" class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-lg border">
                     <input type="hidden" id="edit-student-id">
                     <input type="text" id="std-roll" placeholder="Roll No / ID" required class="p-2 border rounded text-xs bg-white">
@@ -150,7 +149,6 @@
                     </div>
                 </form>
 
-                <!-- Registered Students List -->
                 <div class="max-h-[170px] overflow-y-auto space-y-2 pr-1" id="student-list-container">
                     <p class="text-xs text-gray-400 text-center py-4">Loading students list...</p>
                 </div>
@@ -163,19 +161,17 @@
                     <span class="text-[10px] bg-purple-100 text-purple-800 px-2 py-0.5 rounded font-bold" id="teacher-count-badge">0 Teachers</span>
                 </div>
 
-                <!-- Teacher Bulk CSV Upload Box -->
                 <div class="bg-purple-50 p-3 rounded-lg border border-dashed border-purple-300">
                     <p class="text-[11px] font-bold text-purple-900 mb-1">📁 Bulk Upload Teachers (CSV)</p>
                     <p class="text-[10px] text-gray-500 mb-2">CSV Format: Name, Subject, Email, Password</p>
                     <div class="flex items-center gap-2">
                         <input type="file" id="teacher-csv-input" accept=".csv" class="text-[11px] bg-white p-1 border rounded w-full">
                         <button onclick="processTeacherCSV()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs py-1.5 px-3 rounded whitespace-nowrap shadow">
-                            Upload Teachers CSV
+                            Upload CSV
                         </button>
                     </div>
                 </div>
 
-                <!-- Add/Edit Single Teacher Form -->
                 <form onsubmit="handleTeacherSubmit(event)" class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-lg border">
                     <input type="hidden" id="edit-teacher-id">
                     <input type="text" id="t-name" placeholder="Teacher Name" required class="p-2 border rounded text-xs bg-white">
@@ -192,7 +188,6 @@
                     </div>
                 </form>
 
-                <!-- Registered Teachers List -->
                 <div class="max-h-[170px] overflow-y-auto space-y-2 pr-1" id="teacher-list-container">
                     <p class="text-xs text-gray-400 text-center py-4">Loading teachers list...</p>
                 </div>
@@ -200,12 +195,12 @@
 
         </div>
 
-        <!-- Section 4: Master Question Bank & Live Question Activation -->
+        <!-- Section 4: Master Question Bank -->
         <div class="bg-white p-6 rounded-xl border shadow-sm flex flex-col justify-between">
             <div>
                 <div class="flex justify-between items-center border-b pb-3 mb-4">
                     <div>
-                        <h3 class="font-bold text-gray-800 text-sm">📚 Master Question Bank (All Teachers Content)</h3>
+                        <h3 class="font-bold text-gray-800 text-sm">📚 Master Question Bank</h3>
                         <p class="text-[11px] text-gray-400">Select questions to activate for the current live exam</p>
                     </div>
                     <div class="flex items-center gap-2">
@@ -229,6 +224,35 @@
 
     </div>
 
+    <!-- 🔍 QUESTION-WISE ANALYSIS POPUP MODAL -->
+    <div id="analysis-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            
+            <!-- Modal Header -->
+            <div class="bg-blue-900 text-white p-4 flex justify-between items-center">
+                <div>
+                    <h3 class="font-black text-sm md:text-base">📋 Question-wise Performance Analysis</h3>
+                    <p class="text-xs text-blue-200">Roll No: <span id="modal-student-roll" class="font-bold text-white"></span></p>
+                </div>
+                <button onclick="closeAnalysisModal()" class="text-white hover:bg-blue-800 text-xl font-bold px-3 py-1 rounded">✕</button>
+            </div>
+
+            <!-- Modal Content (Question List) -->
+            <div class="p-4 overflow-y-auto space-y-4 flex-grow bg-slate-50" id="modal-questions-list">
+                <p class="text-center text-xs text-gray-400 py-8">Loading question analysis...</p>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-3 bg-white border-t flex justify-between items-center">
+                <span class="text-xs text-gray-500" id="modal-score-summary">Score: 0/0</span>
+                <button onclick="closeAnalysisModal()" class="bg-gray-600 hover:bg-gray-700 text-white text-xs font-bold py-2 px-4 rounded">
+                    Close Analysis
+                </button>
+            </div>
+
+        </div>
+    </div>
+
     <!-- Firebase Script Logic -->
     <script>
         const firebaseConfig = {
@@ -243,16 +267,28 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        let fetchedResultsData = []; // Store result data for CSV export
+        let fetchedResultsData = [];
+        let masterQuestionsMap = {}; // Stores questionId -> question details
 
         window.onload = function() {
-            loadResultsAndAnalysis();
+            cacheQuestionBank().then(() => {
+                loadResultsAndAnalysis();
+            });
             loadStudents();
             loadTeachers();
             loadQuestionBank();
         };
 
-        // --- RESULT ANALYSIS & EXPORT LOGIC ---
+        // Pre-cache Questions for Analysis lookup
+        async function cacheQuestionBank() {
+            const snapshot = await db.collection("question_bank").get();
+            masterQuestionsMap = {};
+            snapshot.forEach(doc => {
+                masterQuestionsMap[doc.id] = doc.data();
+            });
+        }
+
+        // --- RESULT ANALYSIS LOGIC ---
         function loadResultsAndAnalysis() {
             db.collection("exam_attempts").get().then(snapshot => {
                 const tbody = document.getElementById('results-table-body');
@@ -260,7 +296,7 @@
                 fetchedResultsData = [];
 
                 if(snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-400">No student exam submissions recorded yet.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-gray-400">No student exam submissions recorded yet.</td></tr>`;
                     updateAnalysisCards(0, 0, 0, 0);
                     return;
                 }
@@ -272,6 +308,7 @@
 
                 snapshot.forEach(doc => {
                     const r = doc.data();
+                    r.attemptId = doc.id;
                     fetchedResultsData.push(r);
 
                     const score = r.score || 0;
@@ -298,6 +335,11 @@
                                 </span>
                             </td>
                             <td class="p-2.5 text-[11px] text-gray-400">${dateStr}</td>
+                            <td class="p-2.5 text-center">
+                                <button onclick="openQuestionAnalysis('${r.attemptId}')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-bold text-[11px] px-2.5 py-1 rounded shadow-sm">
+                                    🔍 View Details
+                                </button>
+                            </td>
                         </tr>
                     `;
                 });
@@ -307,6 +349,71 @@
 
                 updateAnalysisCards(totalAttempts, avgScore, highestScore, passPercentage);
             });
+        }
+
+        // Open Modal and Render Question-wise Detailed Options Breakdown
+        function openQuestionAnalysis(attemptId) {
+            const attempt = fetchedResultsData.find(a => a.attemptId === attemptId);
+            if(!attempt) return;
+
+            document.getElementById('modal-student-roll').innerText = attempt.rollNo;
+            document.getElementById('modal-score-summary').innerText = `Total Score: ${attempt.score} / ${attempt.totalQuestions}`;
+
+            const listContainer = document.getElementById('modal-questions-list');
+            listContainer.innerHTML = "";
+
+            const studentAnswers = attempt.answers || {};
+
+            let qIndex = 1;
+            for (let qId in studentAnswers) {
+                const qDetails = masterQuestionsMap[qId];
+                const studentOption = studentAnswers[qId] || "Unattempted";
+                
+                if (qDetails) {
+                    const correctOption = qDetails.correctOption;
+                    const isCorrect = studentOption === correctOption;
+                    const isUnattempted = studentOption === "" || studentOption === "Unattempted";
+
+                    let statusBadge = `<span class="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded text-[10px]">🔴 Incorrect</span>`;
+                    if (isCorrect) {
+                        statusBadge = `<span class="bg-green-100 text-green-800 font-bold px-2 py-0.5 rounded text-[10px]">🟢 Correct (+1)</span>`;
+                    } else if (isUnattempted) {
+                        statusBadge = `<span class="bg-gray-100 text-gray-700 font-bold px-2 py-0.5 rounded text-[10px]">⚪ Skipped</span>`;
+                    }
+
+                    listContainer.innerHTML += `
+                        <div class="bg-white p-4 rounded-xl border shadow-sm space-y-2">
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <span class="text-xs font-bold text-gray-500">Q#${qIndex} (${qDetails.subject || 'General'})</span>
+                                ${statusBadge}
+                            </div>
+                            
+                            <p class="font-bold text-gray-800 text-xs md:text-sm leading-snug">${qDetails.question}</p>
+
+                            <!-- Breakdown Options Grid -->
+                            <div class="grid grid-cols-2 gap-2 text-xs pt-1">
+                                <div class="p-2 rounded border ${isCorrect ? 'bg-green-50 border-green-300 text-green-900 font-bold' : (studentOption !== 'Unattempted' && !isCorrect ? 'bg-red-50 border-red-300 text-red-900 font-bold' : 'bg-gray-50')}">
+                                    <span>Selected Option: <b>${studentOption !== '' ? studentOption : 'None'}</b></span>
+                                </div>
+                                <div class="p-2 rounded border bg-emerald-50 border-emerald-300 text-emerald-900 font-bold">
+                                    <span>Correct Option: <b>${correctOption}</b></span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    qIndex++;
+                }
+            }
+
+            if (qIndex === 1) {
+                listContainer.innerHTML = `<p class="text-center text-xs text-gray-400 py-6">Detailed question breakdown unavailable for this attempt.</p>`;
+            }
+
+            document.getElementById('analysis-modal').classList.remove('hidden');
+        }
+
+        function closeAnalysisModal() {
+            document.getElementById('analysis-modal').classList.add('hidden');
         }
 
         function updateAnalysisCards(attempts, avg, highest, passPct) {
@@ -343,7 +450,7 @@
             document.body.removeChild(link);
         }
 
-        // --- BULK STUDENT & TEACHER CSV UPLOADS ---
+        // --- BULK CSV UPLOADS ---
         function processStudentCSV() {
             const input = document.getElementById('student-csv-input');
             if(!input.files.length) return alert("Select a Student CSV file first!");
@@ -398,7 +505,7 @@
             reader.readAsText(input.files[0]);
         }
 
-        // --- STUDENT MANAGEMENT (LOAD/ADD/EDIT) ---
+        // --- STUDENT MANAGEMENT ---
         function loadStudents() {
             db.collection("students").get().then(snapshot => {
                 const container = document.getElementById('student-list-container');
@@ -476,7 +583,7 @@
             }
         }
 
-        // --- TEACHER MANAGEMENT (LOAD/ADD/EDIT) ---
+        // --- TEACHER MANAGEMENT ---
         function loadTeachers() {
             db.collection("teachers").get().then(snapshot => {
                 const container = document.getElementById('teacher-list-container');
