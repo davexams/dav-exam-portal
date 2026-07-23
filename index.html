@@ -3,164 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NTA Style CBT Exam Portal - DAV Public School</title>
+    <title>Student Online Exam Portal - DAV Public School</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        body { user-select: none; -webkit-user-select: none; }
-    </style>
 </head>
-<body class="bg-slate-100 font-sans min-h-screen text-slate-800 antialiased flex flex-col justify-between">
+<body class="bg-slate-100 font-sans min-h-screen p-3 md:p-6 select-none">
 
-    <!-- LOGIN SCREEN CONTAINER -->
-    <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6 md:p-8 space-y-6">
-            
-            <div class="text-center space-y-2 border-b pb-4">
-                <div class="inline-block bg-blue-900 text-white font-black text-xl px-4 py-1.5 rounded-lg shadow-sm tracking-wider">
-                    DAV PUBLIC SCHOOL
-                </div>
-                <h1 class="text-lg font-bold text-slate-800">Online Computer Based Test (CBT)</h1>
-                <p class="text-xs text-slate-500 font-medium">NTA Pattern Secure Assessment Engine</p>
+    <div class="max-w-5xl mx-auto space-y-4">
+
+        <!-- 1. LOGIN SECTION -->
+        <div id="login-section" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-200 max-w-md mx-auto space-y-5">
+            <div class="text-center">
+                <h1 class="text-2xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
+                <p class="text-xs text-gray-500 font-semibold mt-1">Student CBT Assessment Portal</p>
             </div>
 
             <form onsubmit="handleStudentLogin(event)" class="space-y-4">
-                <!-- Class Selection Dropdown (Classes 8th to 12th) -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">1. Select Your Class / Grade</label>
-                    <select id="login-class-select" required class="w-full p-3 border border-slate-300 rounded-xl text-xs font-bold text-blue-900 bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:bg-white focus:outline-none transition">
-                        <option value="" disabled selected>-- Select Class --</option>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Class</label>
+                    <select id="login-class" required class="w-full p-2.5 border rounded-lg text-xs font-bold text-blue-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
                         <option value="Class 8">Class 8th</option>
                         <option value="Class 9">Class 9th</option>
-                        <option value="Class 10">Class 10th</option>
+                        <option value="Class 10" selected>Class 10th</option>
                         <option value="Class 11">Class 11th</option>
                         <option value="Class 12">Class 12th</option>
                     </select>
                 </div>
-
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">2. Student Roll No / User ID</label>
-                    <input type="text" id="login-rollno" required placeholder="Enter your Roll Number" class="w-full p-3 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:bg-white focus:outline-none transition">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Roll Number / ID</label>
+                    <input type="text" id="login-roll" placeholder="Enter Roll No" required class="w-full p-2.5 border rounded-lg text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-semibold">
                 </div>
-
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">3. Security Password</label>
-                    <input type="password" id="login-password" required placeholder="Enter Passcode" class="w-full p-3 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 bg-slate-50 focus:ring-2 focus:ring-blue-600 focus:bg-white focus:outline-none transition">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Password</label>
+                    <input type="password" id="login-password" placeholder="Enter Password" required class="w-full p-2.5 border rounded-lg text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
                 </div>
-
-                <button type="submit" id="btn-login-submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3.5 px-4 rounded-xl text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition">
-                    🚀 Authenticate & Start Exam
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg text-xs shadow-md transition">
+                    🚀 Login to Test Portal
                 </button>
             </form>
-
-            <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 leading-snug space-y-1">
-                <p class="font-bold flex items-center gap-1">⚠️ Exam Instructions:</p>
-                <ul class="list-disc pl-4 space-y-0.5 text-[10.5px] text-amber-800">
-                    <li>Select correct class before logging in.</li>
-                    <li>Timer will start automatically upon login.</li>
-                    <li>Do not refresh or close tab during live examination.</li>
-                </ul>
-            </div>
         </div>
-    </div>
 
-    <!-- MAIN EXAMINATION PORTAL (Hidden initially) -->
-    <div id="exam-screen" class="hidden min-h-screen flex flex-col justify-between bg-slate-100">
-        
-        <!-- Header Panel -->
-        <header class="bg-blue-900 text-white p-3 md:p-4 shadow-md sticky top-0 z-20">
-            <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
-                <div class="flex items-center gap-3">
-                    <div class="bg-white text-blue-900 font-black px-2.5 py-1 rounded text-xs">DAV</div>
-                    <div>
-                        <h2 class="font-extrabold text-xs md:text-sm tracking-wide" id="portal-exam-title">DAV CBT Assessment</h2>
-                        <p class="text-[10px] text-blue-200 font-semibold" id="portal-student-info">Candidate: Loading...</p>
-                    </div>
-                </div>
+        <!-- 2. EXAM INTERFACE SECTION (Hidden by default) -->
+        <div id="exam-section" class="hidden space-y-4">
 
-                <div class="flex items-center gap-3">
-                    <div class="bg-amber-400 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-extrabold flex items-center gap-1.5 shadow-sm">
-                        <span>⏳ Remaining Time:</span>
-                        <span id="timer-display" class="font-mono text-sm">30:00</span>
-                    </div>
-                    <button onclick="confirmSubmitExam()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg shadow transition">
-                        Finish Test
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- Question Body & Palette Area -->
-        <main class="max-w-7xl w-full mx-auto p-3 md:p-5 flex-grow grid grid-cols-1 lg:grid-cols-4 gap-5">
-            
-            <!-- Left Side: Single Question View Panel -->
-            <div class="lg:col-span-3 bg-white rounded-2xl border border-slate-200 shadow-sm p-4 md:p-6 flex flex-col justify-between min-h-[420px]">
+            <!-- Top Header & Timer Bar -->
+            <div class="bg-white p-4 rounded-xl shadow border flex flex-wrap justify-between items-center gap-2">
                 <div>
-                    <div class="flex justify-between items-center border-b border-slate-200 pb-3 mb-4">
-                        <span class="text-xs font-extrabold text-blue-900 uppercase tracking-wide" id="question-header-label">Question #1</span>
-                        <span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-slate-300" id="question-subject-badge">Subject: General</span>
-                    </div>
-
-                    <!-- Question Content Text -->
-                    <div class="mb-6">
-                        <p class="text-sm md:text-base font-bold text-slate-800 leading-relaxed" id="question-text-display">
-                            Loading question details...
-                        </p>
-                    </div>
-
-                    <!-- Radio Options Grid -->
-                    <div class="space-y-3" id="options-container"></div>
+                    <h2 class="text-lg font-black text-blue-900" id="display-student-name">Student Portal</h2>
+                    <p class="text-xs text-gray-500 font-bold" id="display-student-info">Class 10 | Roll: --</p>
                 </div>
+                <div class="bg-amber-100 border border-amber-300 px-4 py-2 rounded-xl text-center">
+                    <p class="text-[10px] uppercase font-bold text-amber-800">Time Remaining</p>
+                    <p class="text-xl font-black text-amber-900 font-mono" id="timer-display">00:00</p>
+                </div>
+            </div>
 
-                <!-- Navigation Action Buttons -->
-                <div class="border-t border-slate-200 pt-4 mt-6 flex justify-between items-center gap-2">
-                    <button onclick="navigateQuestion(-1)" id="btn-prev-q" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs py-2.5 px-4 rounded-xl transition disabled:opacity-40">
-                        ⬅️ Previous
-                    </button>
-                    <button onclick="clearCurrentChoice()" class="text-xs text-red-600 font-bold hover:underline">
-                        Clear Response
-                    </button>
-                    <button onclick="navigateQuestion(1)" id="btn-next-q" class="bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs py-2.5 px-5 rounded-xl shadow transition">
-                        Save & Next ➡️
+            <!-- 🎯 SUBJECT FILTER TABS (Student can click to filter questions) -->
+            <div class="bg-white p-3 rounded-xl shadow border space-y-2">
+                <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Choose Subject Section:</p>
+                <div class="flex flex-wrap gap-2" id="subject-tabs-container">
+                    <button onclick="filterBySubject('ALL')" class="subj-tab bg-blue-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow transition">
+                        ALL
                     </button>
                 </div>
             </div>
 
-            <!-- Right Side: NTA Style Question Palette -->
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between space-y-4">
-                <div>
-                    <h3 class="text-xs font-bold text-slate-800 border-b pb-2 mb-3">Question Palette</h3>
-                    
-                    <!-- Color Status Indicators -->
-                    <div class="grid grid-cols-2 gap-2 text-[10px] font-bold mb-4">
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 border"></span> Answered</div>
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-400 border"></span> Not Answered</div>
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-200 border"></span> Not Visited</div>
-                    </div>
-
-                    <!-- Palette Buttons Container -->
-                    <div class="grid grid-cols-5 gap-2 max-h-[260px] overflow-y-auto custom-scrollbar p-1" id="palette-container"></div>
+            <!-- Question Paper List Container -->
+            <div class="bg-white p-5 rounded-xl shadow border space-y-4 min-h-[350px]">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <span class="text-xs font-bold text-gray-600" id="showing-subject-label">Showing: All Subjects</span>
+                    <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full" id="attempted-counter">Attempted: 0 / 0</span>
                 </div>
 
-                <div class="pt-2 border-t">
-                    <button onclick="confirmSubmitExam()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs uppercase shadow transition">
-                        ✅ Finalize & Submit Test
+                <div class="space-y-4 max-h-[500px] overflow-y-auto pr-1" id="questions-list-container">
+                    <p class="text-center text-xs text-gray-400 py-6">Loading exam paper...</p>
+                </div>
+
+                <div class="border-t pt-4 flex justify-between items-center">
+                    <p class="text-[11px] text-gray-400">Ensure all answers are checked before submitting.</p>
+                    <button onclick="submitExamPaper()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-6 rounded-lg shadow transition">
+                        ✅ Submit Complete Exam
                     </button>
                 </div>
             </div>
-        </main>
 
-        <!-- Footer -->
-        <footer class="bg-white border-t border-slate-200 p-3 text-center text-[11px] text-slate-500 font-semibold">
-            DAV Public School Exam Engine • Secure NTA CBT Evaluation Portal
-        </footer>
+        </div>
+
     </div>
 
     <!-- Firebase Script Logic -->
@@ -177,216 +108,229 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        let currentStudent = null;
+        let loggedInStudent = null;
         let examQuestionsList = [];
         let studentAnswersMap = {};
-        let currentQuestionIndex = 0;
-        let examTimerInterval = null;
-        let totalExamSeconds = 1800; // 30 Mins default
+        let activeSubjectFilter = "ALL";
+        let timerInterval = null;
 
-        async function handleStudentLogin(e) {
+        function handleStudentLogin(e) {
             e.preventDefault();
-            const selectedClass = document.getElementById('login-class-select').value;
-            const rollNo = document.getElementById('login-rollno').value.trim();
-            const password = document.getElementById('login-password').value.trim();
+            const roll = document.getElementById('login-roll').value.trim();
+            const pass = document.getElementById('login-password').value.trim();
+            const targetClass = document.getElementById('login-class').value;
 
-            if (!selectedClass) return alert("Please select your Class!");
-
-            const btnSubmit = document.getElementById('btn-login-submit');
-            btnSubmit.disabled = true;
-            btnSubmit.innerText = "Authenticating...";
-
-            try {
-                // 1. Verify Student Credentials
-                const studentQuery = await db.collection("students")
-                    .where("rollNo", "==", rollNo)
-                    .where("password", "==", password)
-                    .get();
-
-                if (studentQuery.empty) {
-                    alert("Invalid Roll Number or Security Passcode!");
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerText = "🚀 Authenticate & Start Exam";
-                    return;
-                }
-
-                currentStudent = studentQuery.docs[0].data();
-                currentStudent.id = studentQuery.docs[0].id;
-
-                // 2. Fetch Master Exam Control Settings
-                const controlDoc = await db.collection("exam_control").doc("current_exam").get();
-                if (controlDoc.exists) {
-                    const cData = controlDoc.data();
-                    if (cData.isActive === false) {
-                        alert("The Exam is currently INACTIVE. Please wait for administrator instruction.");
-                        btnSubmit.disabled = false;
-                        btnSubmit.innerText = "🚀 Authenticate & Start Exam";
-                        return;
+            db.collection("students")
+                .where("rollNo", "==", roll)
+                .where("class", "==", targetClass)
+                .where("password", "==", pass)
+                .get()
+                .then(snapshot => {
+                    if (snapshot.empty) {
+                        return alert("❌ Invalid Roll Number, Password, or Class Selection!");
                     }
-                    if (cData.duration) totalExamSeconds = cData.duration * 60;
-                }
 
-                // 3. Dynamic Question Fetching based on Selected Class
-                const qSnapshot = await db.collection("question_bank")
-                    .where("selectedForExam", "==", true)
-                    .where("class", "==", selectedClass)
-                    .get();
+                    snapshot.forEach(doc => {
+                        loggedInStudent = doc.data();
+                        loggedInStudent.id = doc.id;
+                    });
 
-                if (qSnapshot.empty) {
-                    alert(`No active questions found for ${selectedClass}. Please contact teacher or administrator.`);
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerText = "🚀 Authenticate & Start Exam";
-                    return;
-                }
-
-                examQuestionsList = [];
-                qSnapshot.forEach(doc => {
-                    let qData = doc.data();
-                    qData.id = doc.id;
-                    examQuestionsList.push(qData);
+                    checkExamStatusAndStart(targetClass);
                 });
-
-                // Initialize Exam View
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('exam-screen').classList.remove('hidden');
-
-                document.getElementById('portal-student-info').innerText = `Candidate: ${currentStudent.name} (${currentStudent.rollNo}) | ${selectedClass}`;
-                
-                startExamTimer();
-                renderQuestion(0);
-                renderPalette();
-
-            } catch (err) {
-                console.error("Login error:", err);
-                alert("Database connection error. Please try again.");
-                btnSubmit.disabled = false;
-                btnSubmit.innerText = "🚀 Authenticate & Start Exam";
-            }
         }
 
-        function renderQuestion(index) {
-            currentQuestionIndex = index;
-            const q = examQuestionsList[index];
-
-            document.getElementById('question-header-label').innerText = `Question #${index + 1} of ${examQuestionsList.length}`;
-            document.getElementById('question-subject-badge').innerText = `Subject: ${q.subject || 'General'}`;
-            document.getElementById('question-text-display').innerText = q.question;
-
-            const optsContainer = document.getElementById('options-container');
-            optsContainer.innerHTML = "";
-
-            const optionsMap = q.options || { A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD };
-            const selectedOpt = studentAnswersMap[q.id] || "";
-
-            ['A', 'B', 'C', 'D'].forEach(optKey => {
-                if (optionsMap[optKey]) {
-                    const isChecked = selectedOpt === optKey;
-                    optsContainer.innerHTML += `
-                        <label class="flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition ${isChecked ? 'bg-blue-50 border-blue-600 text-blue-900 font-bold' : 'border-slate-200 hover:bg-slate-50 text-slate-700'}">
-                            <input type="radio" name="q-option" value="${optKey}" ${isChecked ? 'checked' : ''} onchange="recordAnswer('${q.id}', '${optKey}')" class="w-4 h-4 text-blue-900 focus:ring-blue-600">
-                            <span class="text-xs font-bold text-slate-500">(${optKey})</span>
-                            <span class="text-xs font-medium">${optionsMap[optKey]}</span>
-                        </label>
-                    `;
+        function checkExamStatusAndStart(targetClass) {
+            db.collection("exam_control").doc(targetClass).get().then(doc => {
+                if (!doc.exists || !doc.data().isActive) {
+                    return alert(`🔴 Exam for ${targetClass} is currently NOT ACTIVE! Please contact your teacher.`);
                 }
+
+                const examMeta = doc.data();
+                
+                // Check if already attempted
+                db.collection("exam_attempts")
+                    .where("rollNo", "==", loggedInStudent.rollNo)
+                    .where("class", "==", targetClass)
+                    .get()
+                    .then(attemptSnap => {
+                        if (!attemptSnap.empty) {
+                            return alert("⚠️ You have ALREADY SUBMITTED this exam! Re-attempts are not allowed.");
+                        }
+
+                        // Load Questions for this Class
+                        fetchExamQuestions(targetClass, examMeta);
+                    });
+            });
+        }
+
+        function fetchExamQuestions(targetClass, examMeta) {
+            db.collection("question_bank")
+                .where("class", "==", targetClass)
+                .where("selectedForExam", "==", true)
+                .get()
+                .then(snapshot => {
+                    if (snapshot.empty) {
+                        return alert(`No questions deployed for ${targetClass} yet.`);
+                    }
+
+                    examQuestionsList = [];
+                    studentAnswersMap = {};
+
+                    snapshot.forEach(doc => {
+                        const q = doc.data();
+                        q.id = doc.id;
+                        examQuestionsList.push(q);
+                    });
+
+                    // Hide Login, Show Exam Interface
+                    document.getElementById('login-section').classList.add('hidden');
+                    document.getElementById('exam-section').classList.remove('hidden');
+
+                    document.getElementById('display-student-name').innerText = loggedInStudent.name;
+                    document.getElementById('display-student-info').innerText = `${loggedInStudent.class} | Roll: ${loggedInStudent.rollNo}`;
+
+                    buildSubjectTabs();
+                    renderQuestionList();
+                    startTimer(examMeta.duration || 30);
+                });
+        }
+
+        // 🎯 BUILD SUBJECT TABS DYNAMICALLY BASED ON LOADED QUESTIONS
+        function buildSubjectTabs() {
+            const tabsContainer = document.getElementById('subject-tabs-container');
+            tabsContainer.innerHTML = `
+                <button onclick="filterBySubject('ALL')" id="tab-ALL" class="subj-tab bg-blue-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow transition">
+                    ALL (${examQuestionsList.length})
+                </button>
+            `;
+
+            // Extract unique subjects
+            const subjectsSet = new Set();
+            examQuestionsList.forEach(q => {
+                if (q.subject) subjectsSet.add(q.subject.trim());
             });
 
-            document.getElementById('btn-prev-q').disabled = (index === 0);
-            document.getElementById('btn-next-q').innerText = (index === examQuestionsList.length - 1) ? "Save & Review" : "Save & Next ➡️";
-
-            renderPalette();
-        }
-
-        function recordAnswer(questionId, optionKey) {
-            studentAnswersMap[questionId] = optionKey;
-            renderPalette();
-        }
-
-        function clearCurrentChoice() {
-            const q = examQuestionsList[currentQuestionIndex];
-            delete studentAnswersMap[q.id];
-            renderQuestion(currentQuestionIndex);
-        }
-
-        function navigateQuestion(step) {
-            let targetIndex = currentQuestionIndex + step;
-            if (targetIndex >= 0 && targetIndex < examQuestionsList.length) {
-                renderQuestion(targetIndex);
-            }
-        }
-
-        function renderPalette() {
-            const container = document.getElementById('palette-container');
-            container.innerHTML = "";
-
-            examQuestionsList.forEach((q, idx) => {
-                const isAnswered = studentAnswersMap.hasOwnProperty(q.id);
-                const isCurrent = (idx === currentQuestionIndex);
-
-                let btnStyle = "bg-slate-200 text-slate-700 border-slate-300"; // Not visited
-                if (isAnswered) btnStyle = "bg-emerald-500 text-white font-bold border-emerald-600";
-                else if (isCurrent) btnStyle = "bg-amber-400 text-slate-900 font-bold border-amber-500";
-
-                container.innerHTML += `
-                    <button onclick="renderQuestion(${idx})" class="w-8 h-8 rounded-lg text-xs border shadow-sm transition flex items-center justify-center ${btnStyle}">
-                        ${idx + 1}
+            subjectsSet.forEach(subj => {
+                const count = examQuestionsList.filter(q => q.subject === subj).length;
+                tabsContainer.innerHTML += `
+                    <button onclick="filterBySubject('${subj}')" id="tab-${subj.replace(/\s+/g, '')}" class="subj-tab bg-slate-200 hover:bg-blue-100 text-gray-700 font-bold text-xs px-3.5 py-1.5 rounded-lg transition">
+                        ${subj} (${count})
                     </button>
                 `;
             });
         }
 
-        function startExamTimer() {
-            examTimerInterval = setInterval(() => {
-                totalExamSeconds--;
-                const mins = Math.floor(totalExamSeconds / 60);
-                const secs = totalExamSeconds % 60;
+        // 🎯 FILTER QUESTIONS BY SUBJECT
+        function filterBySubject(subjName) {
+            activeSubjectFilter = subjName;
+            document.getElementById('showing-subject-label').innerText = `Showing: ${subjName === 'ALL' ? 'All Subjects' : subjName}`;
 
-                document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            // Reset tab styles
+            document.querySelectorAll('.subj-tab').forEach(btn => {
+                btn.className = "subj-tab bg-slate-200 hover:bg-blue-100 text-gray-700 font-bold text-xs px-3.5 py-1.5 rounded-lg transition";
+            });
 
-                if (totalExamSeconds <= 0) {
-                    clearInterval(examTimerInterval);
-                    alert("⏰ Time is up! Submitting your exam automatically...");
-                    autoSubmitExam();
+            const activeBtn = document.getElementById(`tab-${subjName.replace(/\s+/g, '')}`);
+            if (activeBtn) {
+                activeBtn.className = "subj-tab bg-blue-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-lg shadow transition";
+            }
+
+            renderQuestionList();
+        }
+
+        function renderQuestionList() {
+            const container = document.getElementById('questions-list-container');
+            container.innerHTML = "";
+
+            const filteredQuestions = activeSubjectFilter === "ALL" 
+                ? examQuestionsList 
+                : examQuestionsList.filter(q => q.subject === activeSubjectFilter);
+
+            if (filteredQuestions.length === 0) {
+                container.innerHTML = `<p class="text-center text-xs text-gray-400 py-6">No questions found in this section.</p>`;
+                return;
+            }
+
+            filteredQuestions.forEach((q, index) => {
+                const globalIndex = examQuestionsList.findIndex(item => item.id === q.id) + 1;
+                const opts = q.options || { A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD };
+                const selectedOpt = studentAnswersMap[q.id] || "";
+
+                container.innerHTML += `
+                    <div class="p-4 border rounded-xl bg-slate-50 hover:bg-blue-50/20 transition space-y-3">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <span class="text-xs font-bold text-blue-900 bg-blue-100 px-2.5 py-0.5 rounded">Q#${globalIndex}</span>
+                            <div class="flex gap-1.5">
+                                <span class="text-[10px] font-bold bg-blue-600 text-white px-2 py-0.5 rounded uppercase">${q.subject || 'General'}</span>
+                                <span class="text-[10px] font-bold bg-gray-200 text-gray-700 px-2 py-0.5 rounded">${q.chapter || 'Chapter'}</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs md:text-sm font-bold text-gray-800 leading-relaxed">${q.question}</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs pt-1">
+                            ${['A', 'B', 'C', 'D'].map(key => `
+                                <label class="flex items-center gap-2 p-2 rounded-lg border cursor-pointer bg-white hover:bg-blue-50 transition ${selectedOpt === key ? 'border-blue-600 bg-blue-50/80 font-bold text-blue-900' : 'text-gray-700'}">
+                                    <input type="radio" name="opt-${q.id}" value="${key}" ${selectedOpt === key ? 'checked' : ''} onchange="recordAnswer('${q.id}', '${key}')" class="text-blue-600 focus:ring-blue-500">
+                                    <span><b>(${key})</b> ${opts[key] || ''}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            updateAttemptCounter();
+        }
+
+        function recordAnswer(qId, selectedKey) {
+            studentAnswersMap[qId] = selectedKey;
+            updateAttemptCounter();
+        }
+
+        function updateAttemptCounter() {
+            const count = Object.keys(studentAnswersMap).length;
+            document.getElementById('attempted-counter').innerText = `Attempted: ${count} / ${examQuestionsList.length}`;
+        }
+
+        function startTimer(durationMins) {
+            let totalSeconds = durationMins * 60;
+            const timerDisplay = document.getElementById('timer-display');
+
+            timerInterval = setInterval(() => {
+                let mins = Math.floor(totalSeconds / 60);
+                let secs = totalSeconds % 60;
+
+                timerDisplay.innerText = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+                if (totalSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    alert("⏰ Time is UP! Submitting your exam automatically...");
+                    submitExamPaper();
                 }
+                totalSeconds--;
             }, 1000);
         }
 
-        function confirmSubmitExam() {
-            const answeredCount = Object.keys(studentAnswersMap).length;
-            if (confirm(`You have answered ${answeredCount} out of ${examQuestionsList.length} questions. Are you sure you want to submit?`)) {
-                autoSubmitExam();
-            }
-        }
+        function submitExamPaper() {
+            if (timerInterval) clearInterval(timerInterval);
 
-        async function autoSubmitExam() {
-            clearInterval(examTimerInterval);
-
-            const submissionPayload = {
-                rollNo: currentStudent.rollNo,
-                studentName: currentStudent.name,
-                class: document.getElementById('login-class-select').value || "Class 10",
-                examTitle: document.getElementById('portal-exam-title').innerText,
+            const payload = {
+                rollNo: loggedInStudent.rollNo,
+                studentName: loggedInStudent.name,
+                class: loggedInStudent.class,
                 answers: studentAnswersMap,
                 totalQuestions: examQuestionsList.length,
                 submittedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            try {
-                await db.collection("exam_attempts").add(submissionPayload);
-                document.body.innerHTML = `
-                    <div class="min-h-screen bg-slate-100 flex items-center justify-center p-4">
-                        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center space-y-4">
-                            <div class="text-5xl">🎉</div>
-                            <h2 class="text-xl font-black text-blue-900">Exam Submitted Successfully!</h2>
-                            <p class="text-xs text-slate-600 font-medium">Your responses have been recorded securely in DAV Server.</p>
-                            <p class="text-[11px] text-slate-400">You may close this window now.</p>
-                        </div>
-                    </div>
-                `;
-            } catch (err) {
-                console.error("Submission error:", err);
-                alert("Error recording submission. Please contact invigilator immediately.");
-            }
+            db.collection("exam_attempts").add(payload).then(() => {
+                alert("🎉 Exam Submitted Successfully! Thank you.");
+                location.reload();
+            }).catch(err => {
+                console.error("Submission Error:", err);
+                alert("Failed to submit exam. Please try again.");
+            });
         }
     </script>
 </body>
