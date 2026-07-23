@@ -8,140 +8,171 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-slate-100 font-sans min-h-screen p-4 md:p-6">
+<body class="bg-slate-100 font-sans min-h-screen p-4 md:p-6 select-none">
 
     <div class="max-w-7xl mx-auto space-y-6">
 
-        <div class="flex flex-wrap justify-between items-center bg-white p-4 rounded-xl shadow border border-gray-200">
-            <div>
+        <!-- 🔒 1. LOGIN SECTION (Shows when Logged Out) -->
+        <div id="login-section" class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200 max-w-md mx-auto space-y-4 my-16">
+            <div class="text-center">
                 <h1 class="text-2xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
-                <p class="text-xs text-gray-500 font-semibold">Teacher Question Bank Management Portal</p>
+                <p class="text-xs text-gray-500 font-bold">Teacher Management Login</p>
             </div>
-            <div>
-                <span class="bg-amber-100 text-amber-800 text-xs px-3 py-1.5 rounded-full font-bold border border-amber-200">
-                    👨‍🏫 Role: Subject Teacher
-                </span>
-            </div>
+            <form onsubmit="handleTeacherLogin(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">Teacher Username / Email</label>
+                    <input type="text" id="t-user" placeholder="Enter Username or Email" required class="w-full p-2.5 border rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-semibold">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">Password</label>
+                    <input type="password" id="t-pass" placeholder="Enter Password" required class="w-full p-2.5 border rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow transition">
+                    🔑 Login to Teacher Portal
+                </button>
+            </form>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- 🖥️ 2. MAIN DASHBOARD SECTION (Hidden until Login) -->
+        <div id="dashboard-section" class="hidden space-y-6">
 
-            <!-- Box 1: Add Single Question -->
-            <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
-                <h3 class="font-bold text-gray-800 text-sm flex items-center gap-1.5 border-b pb-2">
-                    ➕ Add Single Question
-                </h3>
-
-                <form onsubmit="handleSingleQuestionSubmit(event)" class="space-y-3">
-                    <input type="hidden" id="q-edit-id">
-
-                    <div class="grid grid-cols-3 gap-2">
-                        <div>
-                            <!-- 🎯 Subject Dropdown -->
-                            <label class="block text-[11px] font-bold text-gray-700 mb-1">Subject</label>
-                            <select id="q-subject" required class="w-full p-2 border rounded text-xs bg-slate-50 font-bold text-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-500">
-                                <option value="Physics" selected>Physics</option>
-                                <option value="Chemistry">Chemistry</option>
-                                <option value="Biology">Biology</option>
-                                <option value="Mathematics">Mathematics</option>
-                                <option value="Science">Science (General)</option>
-                                <option value="Social Science">Social Science</option>
-                                <option value="English">English</option>
-                                <option value="Hindi">Hindi</option>
-                                <option value="Computer Science">Computer Science</option>
-                            </select>
-                        </div>
-                        <div>
-                            <!-- Class Dropdown -->
-                            <label class="block text-[11px] font-bold text-gray-700 mb-1">Class</label>
-                            <select id="q-class" required class="w-full p-2 border rounded text-xs bg-slate-50 font-bold text-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-500">
-                                <option value="Class 8">Class 8th</option>
-                                <option value="Class 9">Class 9th</option>
-                                <option value="Class 10" selected>Class 10th</option>
-                                <option value="Class 11">Class 11th</option>
-                                <option value="Class 12">Class 12th</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-gray-700 mb-1">Chapter</label>
-                            <input type="text" id="q-chapter" placeholder="e.g. Light" required class="w-full p-2 border rounded text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-[11px] font-bold text-gray-700 mb-1">Question Text</label>
-                        <textarea id="q-text" rows="3" placeholder="Enter question here..." required class="w-full p-2 border rounded text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-medium"></textarea>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="text" id="q-optA" placeholder="Option A" required class="p-2 border rounded text-xs bg-slate-50 focus:bg-white">
-                        <input type="text" id="q-optB" placeholder="Option B" required class="p-2 border rounded text-xs bg-slate-50 focus:bg-white">
-                        <input type="text" id="q-optC" placeholder="Option C" required class="p-2 border rounded text-xs bg-slate-50 focus:bg-white">
-                        <input type="text" id="q-optD" placeholder="Option D" required class="p-2 border rounded text-xs bg-slate-50 focus:bg-white">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[11px] font-bold text-gray-700 mb-1">Correct Option</label>
-                            <select id="q-correct" required class="w-full p-2 border rounded text-xs bg-slate-50 font-bold text-blue-700 focus:bg-white">
-                                <option value="A">Option A</option>
-                                <option value="B">Option B</option>
-                                <option value="C">Option C</option>
-                                <option value="D">Option D</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-gray-700 mb-1">Teacher Name</label>
-                            <input type="text" id="q-teacher-name" placeholder="Your Name" required class="w-full p-2 border rounded text-xs bg-slate-50 focus:bg-white">
-                        </div>
-                    </div>
-
-                    <div class="flex gap-2 pt-1">
-                        <button type="submit" id="btn-save-q" class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition">
-                            💾 Save Question to Bank
-                        </button>
-                        <button type="button" id="btn-cancel-q" onclick="resetQuestionForm()" class="hidden bg-gray-400 text-white font-bold py-2.5 px-4 rounded-lg text-xs">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Box 2: Bulk Upload CSV -->
-            <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
-                <h3 class="font-bold text-gray-800 text-sm flex items-center gap-1.5 border-b pb-2">
-                    📁 Bulk Question Upload (CSV File)
-                </h3>
-
-                <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl space-y-3">
-                    <p class="text-xs font-bold text-blue-900">CSV Columns Required Format:</p>
-                    <div class="bg-white p-2 rounded border border-blue-200 text-[11px] font-mono text-gray-700 overflow-x-auto">
-                        Question, OptionA, OptionB, OptionC, OptionD, CorrectOption, Subject, Class, Chapter
-                    </div>
-                    
-                    <input type="file" id="question-csv-file" accept=".csv" class="block w-full text-xs text-gray-600 bg-white p-2 border rounded-lg">
-                    
-                    <button onclick="processQuestionCSV()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-4 rounded-lg text-xs shadow transition">
-                        🚀 Process & Upload Questions CSV
+            <!-- Top Header Bar with Role & Logout Button -->
+            <div class="flex flex-wrap justify-between items-center bg-white p-4 rounded-xl shadow border border-gray-200">
+                <div>
+                    <h1 class="text-2xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
+                    <p class="text-xs text-gray-500 font-semibold" id="teacher-welcome-label">Teacher Question Bank Management Portal</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="bg-amber-100 text-amber-800 text-xs px-3 py-1.5 rounded-full font-bold border border-amber-200">
+                        👨‍🏫 Role: Subject Teacher
+                    </span>
+                    <!-- 🚪 LOGOUT BUTTON -->
+                    <button onclick="handleTeacherLogout()" class="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-4 py-2 rounded-lg shadow transition flex items-center gap-1.5">
+                        🚪 Logout
                     </button>
                 </div>
+            </div>
 
-                <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-[11px] text-emerald-900 leading-snug">
-                    💡 <b>Note:</b> Uploaded questions will appear in Master Bank for Admin deployment.
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- Box 1: Add Single Question -->
+                <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
+                    <h3 class="font-bold text-gray-800 text-sm flex items-center gap-1.5 border-b pb-2">
+                        ➕ Add Single Question
+                    </h3>
+
+                    <form onsubmit="handleSingleQuestionSubmit(event)" class="space-y-3">
+                        <input type="hidden" id="q-edit-id">
+
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <!-- 🎯 Subject Dropdown -->
+                                <label class="block text-[11px] font-bold text-gray-700 mb-1">Subject</label>
+                                <select id="q-subject" required class="w-full p-2 border rounded text-xs bg-slate-50 font-bold text-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-500">
+                                    <option value="Physics" selected>Physics</option>
+                                    <option value="Chemistry">Chemistry</option>
+                                    <option value="Biology">Biology</option>
+                                    <option value="Mathematics">Mathematics</option>
+                                    <option value="Science">Science (General)</option>
+                                    <option value="Social Science">Social Science</option>
+                                    <option value="English">English</option>
+                                    <option value="Hindi">Hindi</option>
+                                    <option value="Computer Science">Computer Science</option>
+                                </select>
+                            </div>
+                            <div>
+                                <!-- Class Dropdown -->
+                                <label class="block text-[11px] font-bold text-gray-700 mb-1">Class</label>
+                                <select id="q-class" required class="w-full p-2 border rounded text-xs bg-slate-50 font-bold text-blue-900 focus:bg-white focus:ring-2 focus:ring-blue-500">
+                                    <option value="Class 8">Class 8th</option>
+                                    <option value="Class 9">Class 9th</option>
+                                    <option value="Class 10" selected>Class 10th</option>
+                                    <option value="Class 11">Class 11th</option>
+                                    <option value="Class 12">Class 12th</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-700 mb-1">Chapter</label>
+                                <input type="text" id="q-chapter" placeholder="e.g. Light" required class="w-full p-2 border rounded text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">Question Text</label>
+                            <textarea id="q-text" rows="3" placeholder="Enter question here..." required class="w-full p-2 border rounded text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-medium"></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="q-optA" placeholder="Option A" required class="p-2 border rounded text-xs bg-slate-50 focus:bg-white">
+                            <input type="text" id="q-optB" placeholder="Option B" required class="p-2 border rounded text-xs bg-slate-50 focus:bg-white">
+                            <input type="text" id="q-optC" placeholder="Option C" required class="p-2 border rounded text-xs bg-slate-50 focus:bg-white">
+                            <input type="text" id="q-optD" placeholder="Option D" required class="p-2 border rounded text-xs bg-slate-50 focus:bg-white">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-700 mb-1">Correct Option</label>
+                                <select id="q-correct" required class="w-full p-2 border rounded text-xs bg-slate-50 font-bold text-blue-700 focus:bg-white">
+                                    <option value="A">Option A</option>
+                                    <option value="B">Option B</option>
+                                    <option value="C">Option C</option>
+                                    <option value="D">Option D</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-700 mb-1">Teacher Name</label>
+                                <input type="text" id="q-teacher-name" placeholder="Your Name" required class="w-full p-2 border rounded text-xs bg-slate-50 focus:bg-white">
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 pt-1">
+                            <button type="submit" id="btn-save-q" class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition">
+                                💾 Save Question to Bank
+                            </button>
+                            <button type="button" id="btn-cancel-q" onclick="resetQuestionForm()" class="hidden bg-gray-400 text-white font-bold py-2.5 px-4 rounded-lg text-xs">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Box 2: Bulk Upload CSV -->
+                <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
+                    <h3 class="font-bold text-gray-800 text-sm flex items-center gap-1.5 border-b pb-2">
+                        📁 Bulk Question Upload (CSV File)
+                    </h3>
+
+                    <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl space-y-3">
+                        <p class="text-xs font-bold text-blue-900">CSV Columns Required Format:</p>
+                        <div class="bg-white p-2 rounded border border-blue-200 text-[11px] font-mono text-gray-700 overflow-x-auto">
+                            Question, OptionA, OptionB, OptionC, OptionD, CorrectOption, Subject, Class, Chapter
+                        </div>
+                        
+                        <input type="file" id="question-csv-file" accept=".csv" class="block w-full text-xs text-gray-600 bg-white p-2 border rounded-lg">
+                        
+                        <button onclick="processQuestionCSV()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-4 rounded-lg text-xs shadow transition">
+                            🚀 Process & Upload Questions CSV
+                        </button>
+                    </div>
+
+                    <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-[11px] text-emerald-900 leading-snug">
+                        💡 <b>Note:</b> Uploaded questions will appear in Master Bank for Admin deployment.
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h3 class="font-bold text-gray-800 text-sm">📚 My Uploaded Questions Bank</h3>
+                    <span class="text-xs font-bold text-blue-800 bg-blue-100 px-2.5 py-1 rounded-full" id="teacher-q-count">Total: 0 Questions</span>
+                </div>
+
+                <div class="space-y-3 max-h-[400px] overflow-y-auto pr-1" id="teacher-q-list">
+                    <p class="text-xs text-gray-400 text-center py-4">Loading questions...</p>
                 </div>
             </div>
 
-        </div>
-
-        <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="font-bold text-gray-800 text-sm">📚 My Uploaded Questions Bank</h3>
-                <span class="text-xs font-bold text-blue-800 bg-blue-100 px-2.5 py-1 rounded-full" id="teacher-q-count">Total: 0 Questions</span>
-            </div>
-
-            <div class="space-y-3 max-h-[400px] overflow-y-auto pr-1" id="teacher-q-list">
-                <p class="text-xs text-gray-400 text-center py-4">Loading questions...</p>
-            </div>
         </div>
 
     </div>
@@ -161,7 +192,64 @@
 
         let myQuestionsMap = {};
 
-        window.onload = function() { loadTeacherQuestions(); };
+        // 🔐 LOGIN LOGIC (Static or Dynamic Firestore verification)
+        function handleTeacherLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('t-user').value.trim();
+            const pass = document.getElementById('t-pass').value.trim();
+
+            if (user === "teacher" && pass === "dav123") {
+                sessionStorage.setItem("teacherLoggedIn", user);
+                showTeacherDashboard(user);
+                return;
+            }
+
+            // Check in Firestore 'teachers' collection
+            db.collection("teachers")
+                .where("email", "==", user)
+                .where("password", "==", pass)
+                .get()
+                .then(snapshot => {
+                    if (!snapshot.empty) {
+                        let tData = snapshot.docs[0].data();
+                        let displayName = tData.name || user;
+                        sessionStorage.setItem("teacherLoggedIn", displayName);
+                        showTeacherDashboard(displayName);
+                    } else {
+                        alert("❌ Invalid Teacher Username/Email or Password!");
+                    }
+                });
+        }
+
+        function showTeacherDashboard(teacherName) {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.remove('hidden');
+            document.getElementById('teacher-welcome-label').innerText = `Welcome, ${teacherName} • Question Bank Management`;
+            document.getElementById('q-teacher-name').value = teacherName;
+            loadTeacherQuestions();
+        }
+
+        // 🚪 LOGOUT LOGIC (Switches back to Teacher Login Page)
+        function handleTeacherLogout() {
+            if (confirm("Are you sure you want to LOGOUT from Teacher Portal?")) {
+                sessionStorage.removeItem("teacherLoggedIn");
+                document.getElementById('dashboard-section').classList.add('hidden');
+                document.getElementById('login-section').classList.remove('hidden');
+                document.getElementById('t-user').value = "";
+                document.getElementById('t-pass').value = "";
+            }
+        }
+
+        // Check Login Session on Page Load
+        window.onload = function() {
+            const savedTeacher = sessionStorage.getItem("teacherLoggedIn");
+            if (savedTeacher) {
+                showTeacherDashboard(savedTeacher);
+            } else {
+                document.getElementById('login-section').classList.remove('hidden');
+                document.getElementById('dashboard-section').classList.add('hidden');
+            }
+        };
 
         function extractCorrectOption(q) {
             if (!q) return "N/A";
