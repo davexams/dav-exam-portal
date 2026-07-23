@@ -36,16 +36,22 @@
         <!-- 🖥️ 2. MAIN DASHBOARD SECTION (Hidden until Login) -->
         <div id="dashboard-section" class="hidden space-y-6">
 
-            <!-- Top Header Bar with Role & Logout Button -->
-            <div class="flex flex-wrap justify-between items-center bg-white p-4 rounded-xl shadow border border-gray-200">
+            <!-- Top Header Bar with Role, Teacher Name & Logout Button -->
+            <div class="flex flex-wrap justify-between items-center bg-white p-4 rounded-xl shadow border border-gray-200 gap-3">
                 <div>
                     <h1 class="text-2xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
                     <p class="text-xs text-gray-500 font-semibold" id="teacher-welcome-label">Teacher Question Bank Management Portal</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <span class="bg-amber-100 text-amber-800 text-xs px-3 py-1.5 rounded-full font-bold border border-amber-200">
-                        👨‍🏫 Role: Subject Teacher
+                <div class="flex flex-wrap items-center gap-2 md:gap-3">
+                    <!-- 👤 ACTIVE LOGGED-IN TEACHER NAME BADGE -->
+                    <span class="bg-blue-100 text-blue-900 text-xs px-3 py-1.5 rounded-full font-black border border-blue-200 flex items-center gap-1.5 shadow-sm">
+                        👤 <span id="header-teacher-name">Subject Teacher</span>
                     </span>
+
+                    <span class="bg-amber-100 text-amber-800 text-xs px-3 py-1.5 rounded-full font-bold border border-amber-200">
+                        👨‍🏫 Role: Teacher
+                    </span>
+
                     <!-- 🚪 LOGOUT BUTTON -->
                     <button onclick="handleTeacherLogout()" class="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-4 py-2 rounded-lg shadow transition flex items-center gap-1.5">
                         🚪 Logout
@@ -200,9 +206,9 @@
             const pass = document.getElementById('t-pass').value.trim();
 
             if (user === "teacher" && pass === "dav123") {
-                sessionStorage.setItem("teacherLoggedIn", user);
+                sessionStorage.setItem("teacherLoggedIn", "Default Teacher");
                 sessionStorage.setItem("teacherEmail", user);
-                showTeacherDashboard(user, user);
+                showTeacherDashboard("Default Teacher", user);
                 return;
             }
 
@@ -228,8 +234,12 @@
             currentTeacherEmail = teacherEmail || sessionStorage.getItem("teacherEmail") || "teacher";
             document.getElementById('login-section').classList.add('hidden');
             document.getElementById('dashboard-section').classList.remove('hidden');
+            
+            // 🎯 Update Header Badges & Labels with Teacher Name
+            document.getElementById('header-teacher-name').innerText = teacherName;
             document.getElementById('teacher-welcome-label').innerText = `Welcome, ${teacherName} • Question Bank Management`;
             document.getElementById('q-teacher-name').value = teacherName;
+            
             loadTeacherQuestions();
         }
 
@@ -335,7 +345,7 @@
                 },
                 correctOption: document.getElementById('q-correct').value.toUpperCase(),
                 teacherName: document.getElementById('q-teacher-name').value.trim(),
-                teacherEmail: currentTeacherEmail || "teacher", // 👈 Saved for filtering
+                teacherEmail: currentTeacherEmail || "teacher",
                 selectedForExam: false
             };
 
@@ -419,7 +429,7 @@
                             subject: cols[6] || 'Physics',
                             class: cols[7] || 'Class 10',
                             chapter: cols[8] || '',
-                            teacherEmail: currentTeacherEmail || "teacher", // 👈 Saved for filtering
+                            teacherEmail: currentTeacherEmail || "teacher",
                             selectedForExam: false
                         });
                         count++;
