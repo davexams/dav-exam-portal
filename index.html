@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Portal - DAV Public School</title>
+    <title>Student Login - DAV Public School</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase SDKs -->
@@ -12,135 +12,35 @@
 </head>
 <body class="bg-gray-100 font-sans min-h-screen">
 
-    <!-- STEP 1: STUDENT LOGIN SCREEN -->
-    <div id="student-login-container" class="flex items-center justify-center min-h-screen">
-        <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md border-t-4 border-blue-600">
-            <h2 class="text-2xl font-bold text-center text-blue-700 mb-2">DAV Student Online Exam</h2>
-            <p class="text-xs text-center text-gray-500 mb-6">Enter Roll Number & Password to begin</p>
-            
-            <div id="login-msg" class="hidden mb-4 p-3 rounded text-sm text-center"></div>
+    <!-- Top DAV Header Banner -->
+    <div class="bg-blue-800 text-white py-6 text-center shadow-md">
+        <h1 class="text-3xl font-black tracking-wider">DAV PUBLIC SCHOOL</h1>
+        <p class="text-xs text-blue-200 uppercase tracking-widest mt-1">Online Examination Portal</p>
+    </div>
 
-            <form onsubmit="handleStudentLogin(event)">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Roll Number</label>
-                    <input type="text" id="stu-roll-input" required placeholder="e.g. 101" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <!-- LOGIN FORM CARD -->
+    <div class="flex items-center justify-center mt-12 px-4">
+        <div class="bg-white p-8 rounded-xl shadow-xl w-full max-w-md border border-gray-100">
+            <h2 class="text-2xl font-bold text-center text-blue-600 mb-6">Student Login</h2>
+
+            <div id="student-msg" class="hidden mb-4 p-3 rounded text-sm text-center"></div>
+
+            <form onsubmit="handleStudentLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1">Roll Number</label>
+                    <input type="text" id="stu-roll" required placeholder="Enter Roll No." class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
-                    <input type="password" id="stu-pass-input" required placeholder="••••••••" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div>
+                    <label class="block text-gray-700 text-xs font-bold mb-1">Password</label>
+                    <input type="password" id="stu-pass" required placeholder="Enter Password" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                    Verify & Start Exam
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg transition duration-200 shadow flex items-center justify-center gap-2">
+                    🔓 Start Examination
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- STEP 2: LIVE EXAM INTERFACE -->
-    <div id="exam-container" class="hidden min-h-screen flex flex-col">
-        <!-- Header / Navbar -->
-        <nav class="bg-blue-800 text-white p-4 shadow-lg flex justify-between items-center sticky top-0 z-10">
-            <div>
-                <h1 class="text-lg font-bold" id="header-student-info">Student Exam</h1>
-                <p class="text-xs text-blue-200" id="header-subject-info">Exam Portal</p>
-            </div>
-            <div class="bg-red-600 text-white px-4 py-2 rounded-lg text-lg font-mono font-bold shadow" id="exam-timer">
-                00:00
-            </div>
-        </nav>
-
-        <!-- Section Navigation Bar -->
-        <div class="bg-white border-b px-6 py-2 shadow-sm flex items-center gap-2 overflow-x-auto" id="sections-bar">
-            <span class="text-xs font-semibold text-gray-500 uppercase mr-2">Sections:</span>
-            <!-- Section buttons rendered dynamically -->
-        </div>
-
-        <!-- Main Content Area -->
-        <div class="max-w-7xl mx-auto p-4 md:p-6 w-full flex-grow grid grid-cols-1 lg:grid-cols-4 gap-6">
-            
-            <!-- Left Area: Question Display Card & Action Buttons -->
-            <div class="lg:col-span-3 flex flex-col justify-between bg-white p-6 rounded-lg shadow-md border min-h-[450px]">
-                <div>
-                    <!-- Question Header Info -->
-                    <div class="flex justify-between items-center border-b pb-3 mb-4">
-                        <span class="text-sm font-bold text-blue-800" id="q-number-title">Question 1</span>
-                        <span class="text-xs bg-gray-200 text-gray-700 px-2.5 py-1 rounded-full font-semibold" id="q-section-badge">Section: General</span>
-                    </div>
-
-                    <!-- Question Body -->
-                    <p class="font-medium text-gray-800 text-lg mb-6" id="q-statement">Loading question...</p>
-
-                    <!-- Options List -->
-                    <div class="space-y-3" id="options-container">
-                        <!-- Options rendered dynamically -->
-                    </div>
-                </div>
-
-                <!-- Action Controls Footer -->
-                <div class="border-t pt-4 mt-6 flex flex-wrap justify-between items-center gap-3">
-                    <div class="flex gap-2">
-                        <button onclick="markForReview()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2 px-3.5 rounded">
-                            Mark for Review & Next
-                        </button>
-                        <button onclick="clearResponse()" class="bg-gray-500 hover:bg-gray-600 text-white text-xs font-bold py-2 px-3.5 rounded">
-                            Clear Response
-                        </button>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="skipQuestion()" class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2 px-3.5 rounded">
-                            Skip / Next
-                        </button>
-                        <button onclick="saveAndNext()" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2 px-4 rounded">
-                            Save & Next
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Area: Question Palette Sidebar -->
-            <div class="bg-white p-5 rounded-lg shadow-md border flex flex-col justify-between">
-                <div>
-                    <h3 class="font-bold text-gray-700 text-md border-b pb-2 mb-4">Question Palette</h3>
-                    
-                    <!-- Color Legends -->
-                    <div class="grid grid-cols-2 gap-2 text-xs mb-4 pb-3 border-b">
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-gray-200 inline-block"></span> Not Visited</div>
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-red-500 inline-block"></span> Skipped</div>
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-green-600 inline-block"></span> Answered</div>
-                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-purple-600 inline-block"></span> Review</div>
-                    </div>
-
-                    <!-- Question Numbers Palette Grid -->
-                    <div class="grid grid-cols-5 gap-2 max-h-60 overflow-y-auto p-1" id="palette-grid">
-                        <!-- Palette Buttons rendered dynamically -->
-                    </div>
-                </div>
-
-                <div class="border-t pt-4 mt-4">
-                    <button onclick="confirmSubmit()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded text-sm shadow">
-                        Submit Final Exam
-                    </button>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- STEP 3: RESULT SCREEN -->
-    <div id="result-container" class="hidden flex items-center justify-center min-h-screen">
-        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center border-t-4 border-green-500">
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">Exam Submitted!</h2>
-            <p class="text-gray-600 mb-6">Your answers have been saved to the school examination server.</p>
-            <div class="bg-green-50 p-4 rounded-lg border border-green-200 mb-6">
-                <p class="text-sm text-green-800 font-semibold">Status: Completed</p>
-            </div>
-            <button onclick="location.reload()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">
-                Back to Home
-            </button>
-        </div>
-    </div>
-
-    <!-- JavaScript Logic -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
@@ -155,270 +55,27 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        let currentStudent = null;
-        let examTimerInterval = null;
-        let questionsList = [];
-        let currentIndex = 0;
-        let questionStates = {}; // Stores { answer: 'A', status: 'answered'/'skipped'/'review'/'visited' }
-        let availableSections = ["All"];
-        let currentSection = "All";
-
-        function showMsg(text, isError) {
-            const msgBox = document.getElementById('login-msg');
-            msgBox.innerText = text;
-            msgBox.className = `mb-4 p-3 rounded text-sm text-center ${isError ? 'bg-red-100 text-red-700 border border-red-400' : 'bg-yellow-100 text-yellow-800'}`;
-            msgBox.classList.remove('hidden');
-        }
-
         async function handleStudentLogin(e) {
             e.preventDefault();
-            const roll = document.getElementById('stu-roll-input').value.trim();
-            const password = document.getElementById('stu-pass-input').value.trim();
+            const roll = document.getElementById('stu-roll').value.trim();
+            const pass = document.getElementById('stu-pass').value.trim();
 
-            showMsg("Verifying student credentials...", false);
-
-            const examCtrlDoc = await db.collection("exam_control").doc("current_exam").get();
-            if (!examCtrlDoc.exists || !examCtrlDoc.data().isActive) {
-                showMsg("❌ No Live Exam currently active! Please wait for admin to start.", true);
+            const snapshot = await db.collection("students").where("rollNo", "==", roll).get();
+            if (snapshot.empty) {
+                alert("Invalid Roll Number!");
                 return;
             }
 
-            const examData = examCtrlDoc.data();
-
-            const studentQuery = await db.collection("students").where("rollNo", "==", roll).get();
-            if (studentQuery.empty) {
-                showMsg("❌ Roll Number not registered!", true);
-                return;
-            }
-
-            let foundStudent = null;
-            studentQuery.forEach(doc => {
-                if (doc.data().password === password) foundStudent = doc.data();
+            let verified = false;
+            snapshot.forEach(doc => {
+                if (doc.data().password === pass) verified = true;
             });
 
-            if (!foundStudent) {
-                showMsg("❌ Incorrect Password!", true);
-                return;
-            }
-
-            currentStudent = { rollNo: roll, name: foundStudent.name, subject: examData.subject };
-
-            document.getElementById('student-login-container').classList.add('hidden');
-            document.getElementById('exam-container').classList.remove('hidden');
-            
-            document.getElementById('header-student-info').innerText = `${foundStudent.name} (Roll: ${roll})`;
-            document.getElementById('header-subject-info').innerText = `Subject: ${examData.subject}`;
-
-            startTimer(examData.duration || 30);
-            fetchQuestions();
-        }
-
-        function startTimer(durationMinutes) {
-            let timerSeconds = durationMinutes * 60;
-            const timerDisplay = document.getElementById('exam-timer');
-
-            examTimerInterval = setInterval(() => {
-                let mins = Math.floor(timerSeconds / 60);
-                let secs = timerSeconds % 60;
-                timerDisplay.innerText = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
-
-                if (--timerSeconds < 0) {
-                    clearInterval(examTimerInterval);
-                    alert("Time's Up! Auto submitting exam.");
-                    submitExam();
-                }
-            }, 1000);
-        }
-
-        function fetchQuestions() {
-            db.collection("question_bank").get().then(snapshot => {
-                questionsList = [];
-                const secSet = new Set(["All"]);
-
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    data.id = doc.id;
-                    questionsList.push(data);
-
-                    const secName = data.subject || "General";
-                    secSet.add(secName);
-
-                    questionStates[doc.id] = { answer: null, status: 'not-visited' };
-                });
-
-                availableSections = Array.from(secSet);
-                renderSectionsBar();
-
-                if (questionsList.length > 0) {
-                    questionStates[questionsList[0].id].status = 'skipped';
-                    loadQuestion(0);
-                } else {
-                    document.getElementById('q-statement').innerText = "No questions found in Question Bank.";
-                }
-            });
-        }
-
-        function renderSectionsBar() {
-            const bar = document.getElementById('sections-bar');
-            bar.innerHTML = `<span class="text-xs font-semibold text-gray-500 uppercase mr-2">Sections:</span>`;
-            
-            availableSections.forEach(sec => {
-                const isSelected = sec === currentSection;
-                bar.innerHTML += `
-                    <button onclick="filterSection('${sec}')" 
-                            class="text-xs px-3 py-1 rounded-full border transition ${isSelected ? 'bg-blue-600 text-white font-bold' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}">
-                        ${sec}
-                    </button>
-                `;
-            });
-        }
-
-        function filterSection(sec) {
-            currentSection = sec;
-            renderSectionsBar();
-            
-            // Find first question matching section
-            let targetIndex = 0;
-            if (sec !== "All") {
-                targetIndex = questionsList.findIndex(q => (q.subject || "General") === sec);
-                if (targetIndex === -1) targetIndex = 0;
-            }
-            loadQuestion(targetIndex);
-        }
-
-        function loadQuestion(index) {
-            if (index < 0 || index >= questionsList.length) return;
-            currentIndex = index;
-
-            const q = questionsList[currentIndex];
-            const state = questionStates[q.id];
-
-            if (state.status === 'not-visited') {
-                state.status = 'skipped';
-            }
-
-            document.getElementById('q-number-title').innerText = `Question ${currentIndex + 1} of ${questionsList.length}`;
-            document.getElementById('q-section-badge').innerText = `Section: ${q.subject || 'General'}`;
-            document.getElementById('q-statement').innerText = q.question;
-
-            const opts = q.options || {};
-            const optKeys = ['A', 'B', 'C', 'D'];
-            const container = document.getElementById('options-container');
-            container.innerHTML = "";
-
-            optKeys.forEach(key => {
-                if (opts[key]) {
-                    const isChecked = state.answer === key;
-                    container.innerHTML += `
-                        <label class="flex items-center p-3 border rounded-lg hover:bg-blue-50 cursor-pointer transition ${isChecked ? 'bg-blue-50 border-blue-500 font-semibold' : ''}">
-                            <input type="radio" name="current_option" value="${key}" ${isChecked ? 'checked' : ''} class="mr-3 w-4 h-4 text-blue-600">
-                            (${key}) ${opts[key]}
-                        </label>
-                    `;
-                }
-            });
-
-            renderPalette();
-        }
-
-        function getSelectedOption() {
-            const selected = document.querySelector('input[name="current_option"]:checked');
-            return selected ? selected.value : null;
-        }
-
-        function saveAndNext() {
-            const qId = questionsList[currentIndex].id;
-            const ans = getSelectedOption();
-
-            if (ans) {
-                questionStates[qId].answer = ans;
-                questionStates[qId].status = 'answered';
+            if (verified) {
+                alert("Login Successful! Redirecting to Exam Engine...");
             } else {
-                questionStates[qId].status = 'skipped';
+                alert("Incorrect Password!");
             }
-
-            nextQuestion();
-        }
-
-        function markForReview() {
-            const qId = questionsList[currentIndex].id;
-            const ans = getSelectedOption();
-            
-            questionStates[qId].answer = ans;
-            questionStates[qId].status = 'review';
-
-            nextQuestion();
-        }
-
-        function skipQuestion() {
-            const qId = questionsList[currentIndex].id;
-            if (questionStates[qId].status !== 'answered' && questionStates[qId].status !== 'review') {
-                questionStates[qId].status = 'skipped';
-            }
-            nextQuestion();
-        }
-
-        function clearResponse() {
-            const qId = questionsList[currentIndex].id;
-            questionStates[qId].answer = null;
-            questionStates[qId].status = 'skipped';
-            loadQuestion(currentIndex);
-        }
-
-        function nextQuestion() {
-            if (currentIndex < questionsList.length - 1) {
-                loadQuestion(currentIndex + 1);
-            } else {
-                renderPalette();
-            }
-        }
-
-        function renderPalette() {
-            const grid = document.getElementById('palette-grid');
-            grid.innerHTML = "";
-
-            questionsList.forEach((q, idx) => {
-                const state = questionStates[q.id];
-                let colorClass = "bg-gray-200 text-gray-700"; // default not visited
-
-                if (state.status === 'answered') colorClass = "bg-green-600 text-white font-bold";
-                else if (state.status === 'skipped') colorClass = "bg-red-500 text-white font-bold";
-                else if (state.status === 'review') colorClass = "bg-purple-600 text-white font-bold";
-
-                const isCurrent = idx === currentIndex;
-
-                grid.innerHTML += `
-                    <button onclick="loadQuestion(${idx})" 
-                            class="w-8 h-8 rounded text-xs transition border-2 ${isCurrent ? 'border-black scale-105' : 'border-transparent'} ${colorClass}">
-                        ${idx + 1}
-                    </button>
-                `;
-            });
-        }
-
-        function confirmSubmit() {
-            if (confirm("Are you sure you want to final submit your exam?")) {
-                submitExam();
-            }
-        }
-
-        function submitExam() {
-            clearInterval(examTimerInterval);
-            const answers = {};
-            Object.keys(questionStates).forEach(qId => {
-                answers[qId] = questionStates[qId].answer;
-            });
-
-            db.collection("exam_results").add({
-                rollNo: currentStudent.rollNo,
-                studentName: currentStudent.name,
-                subject: currentStudent.subject,
-                answers: answers,
-                submittedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                document.getElementById('exam-container').classList.add('hidden');
-                document.getElementById('result-container').classList.remove('hidden');
-            }).catch(err => alert("Error submitting: " + err.message));
         }
     </script>
 </body>
