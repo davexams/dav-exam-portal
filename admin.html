@@ -279,7 +279,6 @@
             loadQuestionBank();
         };
 
-        // Pre-cache Questions for Analysis lookup
         async function cacheQuestionBank() {
             const snapshot = await db.collection("question_bank").get();
             masterQuestionsMap = {};
@@ -288,7 +287,7 @@
             });
         }
 
-        // --- RESULT ANALYSIS LOGIC ---
+        // --- RESULT ANALYSIS LOGIC (FIXED ZERO MARKS DISPLAY) ---
         function loadResultsAndAnalysis() {
             db.collection("exam_attempts").get().then(snapshot => {
                 const tbody = document.getElementById('results-table-body');
@@ -311,7 +310,8 @@
                     r.attemptId = doc.id;
                     fetchedResultsData.push(r);
 
-                    const score = r.score || 0;
+                    // Prioritize score stored by student portal
+                    const score = r.score !== undefined ? Number(r.score) : 0;
                     const totalQs = r.totalQuestions || 1;
                     const percentage = ((score / totalQs) * 100).toFixed(2);
                     const isPass = percentage >= 33;
@@ -351,7 +351,7 @@
             });
         }
 
-        // Open Modal and Render Question-wise Detailed Options Breakdown
+        // Open Modal and Render Normalized Question Breakdown
         function openQuestionAnalysis(attemptId) {
             const attempt = fetchedResultsData.find(a => a.attemptId === attemptId);
             if(!attempt) return;
@@ -367,12 +367,18 @@
             let qIndex = 1;
             for (let qId in studentAnswers) {
                 const qDetails = masterQuestionsMap[qId];
-                const studentOption = studentAnswers[qId] || "Unattempted";
+                
+                // Normalization Fix
+                const rawStudentAns = (studentAnswers[qId] || "").toString().trim().toUpperCase();
                 
                 if (qDetails) {
-                    const correctOption = qDetails.correctOption;
-                    const isCorrect = studentOption === correctOption;
-                    const isUnattempted = studentOption === "" || studentOption === "Unattempted";
+                    let rawCorrectAns = (qDetails.correctOption || "").toString().trim().toUpperCase();
+                    if (rawCorrectAns.startsWith("OPTION")) {
+                        rawCorrectAns = rawCorrectAns.replace("OPTION", "").trim();
+                    }
+
+                    const isCorrect = rawStudentAns !== "" && rawStudentAns === rawCorrectAns;
+                    const isUnattempted = rawStudentAns === "";
 
                     let statusBadge = `<span class="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded text-[10px]">🔴 Incorrect</span>`;
                     if (isCorrect) {
@@ -390,13 +396,12 @@
                             
                             <p class="font-bold text-gray-800 text-xs md:text-sm leading-snug">${qDetails.question}</p>
 
-                            <!-- Breakdown Options Grid -->
                             <div class="grid grid-cols-2 gap-2 text-xs pt-1">
-                                <div class="p-2 rounded border ${isCorrect ? 'bg-green-50 border-green-300 text-green-900 font-bold' : (studentOption !== 'Unattempted' && !isCorrect ? 'bg-red-50 border-red-300 text-red-900 font-bold' : 'bg-gray-50')}">
-                                    <span>Selected Option: <b>${studentOption !== '' ? studentOption : 'None'}</b></span>
+                                <div class="p-2 rounded border ${isCorrect ? 'bg-green-50 border-green-300 text-green-900 font-bold' : (!isUnattempted && !isCorrect ? 'bg-red-50 border-red-300 text-red-900 font-bold' : 'bg-gray-50')}">
+                                    <span>Selected Option: <b>${!isUnattempted ? rawStudentAns : 'None'}</b></span>
                                 </div>
                                 <div class="p-2 rounded border bg-emerald-50 border-emerald-300 text-emerald-900 font-bold">
-                                    <span>Correct Option: <b>${correctOption}</b></span>
+                                    <span>Correct Option: <b>${rawCorrectAns}</b></span>
                                 </div>
                             </div>
                         </div>
