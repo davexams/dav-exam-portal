@@ -261,33 +261,36 @@
         let activeSubjectFilter = "ALL";
         let timerInterval = null;
 
-        // 🧮 AUTOMATIC MATH TEXT TO LATEX CONVERTER
+        // 🧮 SMART AUTOMATIC MATH & DETERMINANT PARSER
         function formatMathText(text) {
             if (!text) return "";
-            
-            // If text is already formatted in LaTeX ($...$), return as is
-            if (text.includes('$')) return text;
 
             let formatted = text;
 
-            // 1. Convert Inverse Trig functions: tan^-1(x) -> \tan^{-1}(x)
-            formatted = formatted.replace(/\b(sin|cos|tan|sec|cosec|cot)\^\s*(-?\d+)\s*\((.*?)\)/gi, '\\$1^{$2}($3)');
-            
-            // 2. Convert Inverse Trig with simple power: tan^-1 -> \tan^{-1}
-            formatted = formatted.replace(/\b(sin|cos|tan|sec|cosec|cot)\^\s*(-?\d+)/gi, '\\$1^{$2}');
+            // 1. Detect 3-Row Determinants e.g., | 1 1 1 | | 1 2 3 | | 1 3 6 | and convert to LaTeX Matrix
+            const detRegex = /\|\s*([\d\w\s]+)\s*\|\s*\|\s*([\d\w\s]+)\s*\|\s*\|\s*([\d\w\s]+)\s*\|/g;
+            formatted = formatted.replace(detRegex, (match, r1, r2, r3) => {
+                let row1 = r1.trim().split(/\s+/).join(' & ');
+                let row2 = r2.trim().split(/\s+/).join(' & ');
+                let row3 = r3.trim().split(/\s+/).join(' & ');
+                return `$ \\begin{vmatrix} ${row1} \\\\ ${row2} \\\\ ${row3} \\end{vmatrix} $`;
+            });
 
-            // 3. Convert normal powers: x^2 -> x^{2}, a^-2 -> a^{-2}
-            formatted = formatted.replace(/([a-zA-Z0-9\)\>])\^\s*(-?\d+|[a-zA-Z])/g, '$1^{$2}');
+            // 2. Convert Inverse Trig functions: tan^-1(1) -> $\tan^{-1}(1)$
+            formatted = formatted.replace(/\b(sin|cos|tan|sec|cosec|cot)\^\s*(-?\d+)\s*\((.*?)\)/gi, '$\\$1^{$2}($3)$');
+            formatted = formatted.replace(/\b(sin|cos|tan|sec|cosec|cot)\^\s*(-?\d+)/gi, '$\\$1^{$2}$');
 
-            // 4. Convert Pi symbol: pi -> \pi
-            formatted = formatted.replace(/\bpi\b/gi, '\\pi');
+            // 3. Convert Power Notation: x^2 -> $x^2$, y^2 -> $y^2$ (Only math variables)
+            formatted = formatted.replace(/([a-zA-Z0-9\(\)]+)\^\s*(-?\d+|[a-zA-Z])/g, '$$1^{$2}$');
 
-            // 5. Convert Fractions: a/b or 3*pi/4 -> \frac{3\pi}{4}
-            formatted = formatted.replace(/(\d+\*?\\pi|\d+|\\pi)\/(\d+|\\pi)/g, '\\frac{$1}{$2}');
+            // 4. Convert Pi & Greek symbols: pi -> $\pi$
+            formatted = formatted.replace(/\bpi\b/gi, '$\\pi$');
+
+            // 5. Convert Fractions: 3*pi/4 -> $\frac{3\pi}{4}$
+            formatted = formatted.replace(/(\d+\*?\\pi|\d+|\\pi)\/(\d+|\\pi)/g, '$\\frac{$1}{$2}$');
             formatted = formatted.replace(/\*/g, ''); // Clean multiplication stars
 
-            // Wrap in LaTeX inline math delimiters
-            return `$${formatted}$`;
+            return formatted;
         }
 
         function handleStudentLogin(e) {
