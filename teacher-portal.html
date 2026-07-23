@@ -4,36 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Portal - DAV Public School</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-slate-100 font-sans min-h-screen p-3 md:p-6">
+<body class="bg-slate-100 font-sans min-h-screen p-3 md:p-6 select-none">
 
     <div class="max-w-6xl mx-auto space-y-4">
 
-        <!-- LOGIN SECTION -->
-        <div id="login-section" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border max-w-md mx-auto space-y-4 my-10">
+        <!-- 1. LOGIN SECTION -->
+        <div id="login-section" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-200 max-w-md mx-auto space-y-4 my-10">
             <div class="text-center">
-                <h1 class="text-xl font-black text-blue-900">DAV PUBLIC SCHOOL</h1>
+                <h1 class="text-xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
                 <p class="text-xs text-gray-500 font-bold">Teacher Management Portal</p>
             </div>
             <form onsubmit="handleTeacherLogin(event)" class="space-y-3 text-xs">
                 <div>
-                    <label class="block font-bold mb-1">Teacher Username / ID</label>
-                    <input type="text" id="t-user" required class="w-full p-2.5 border rounded-lg bg-slate-50">
+                    <label class="block font-bold text-gray-700 mb-1">Teacher Username / ID</label>
+                    <input type="text" id="t-user" placeholder="Enter Username" required class="w-full p-2.5 border rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-semibold">
                 </div>
                 <div>
-                    <label class="block font-bold mb-1">Password</label>
-                    <input type="password" id="t-pass" required class="w-full p-2.5 border rounded-lg bg-slate-50">
+                    <label class="block font-bold text-gray-700 mb-1">Password</label>
+                    <input type="password" id="t-pass" placeholder="Enter Password" required class="w-full p-2.5 border rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow transition">
                     🔑 Teacher Login
                 </button>
             </form>
         </div>
 
-        <!-- MAIN TEACHER DASHBOARD -->
+        <!-- 2. MAIN TEACHER DASHBOARD -->
         <div id="dashboard-section" class="hidden space-y-4">
 
             <!-- Top Header Bar with Logout -->
@@ -53,8 +55,8 @@
                 <h3 class="font-bold text-sm text-blue-900 border-b pb-2">➕ Add New Question</h3>
                 <form onsubmit="handleAddQuestion(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                     <div>
-                        <label class="block font-bold mb-1">Class</label>
-                        <select id="q-class" required class="w-full p-2 border rounded-lg bg-slate-50">
+                        <label class="block font-bold text-gray-700 mb-1">Class</label>
+                        <select id="q-class" required class="w-full p-2 border rounded-lg bg-slate-50 font-bold text-blue-900">
                             <option value="Class 8">Class 8th</option>
                             <option value="Class 9">Class 9th</option>
                             <option value="Class 10" selected>Class 10th</option>
@@ -63,8 +65,8 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block font-bold mb-1">Subject</label>
-                        <select id="q-subject" required class="w-full p-2 border rounded-lg bg-slate-50">
+                        <label class="block font-bold text-gray-700 mb-1">Subject</label>
+                        <select id="q-subject" required class="w-full p-2 border rounded-lg bg-slate-50 font-bold text-blue-900">
                             <option value="Physics">Physics</option>
                             <option value="Chemistry">Chemistry</option>
                             <option value="Mathematics">Mathematics</option>
@@ -73,31 +75,31 @@
                         </select>
                     </div>
                     <div class="md:col-span-2">
-                        <label class="block font-bold mb-1">Chapter Name</label>
-                        <input type="text" id="q-chapter" placeholder="e.g. Electricity / Motion" required class="w-full p-2 border rounded-lg bg-slate-50">
+                        <label class="block font-bold text-gray-700 mb-1">Chapter Name</label>
+                        <input type="text" id="q-chapter" placeholder="e.g. Electricity / Motion" required class="w-full p-2 border rounded-lg bg-slate-50 font-semibold">
                     </div>
                     <div class="md:col-span-2">
-                        <label class="block font-bold mb-1">Question Statement</label>
+                        <label class="block font-bold text-gray-700 mb-1">Question Statement</label>
                         <textarea id="q-text" rows="2" required class="w-full p-2 border rounded-lg bg-slate-50" placeholder="Enter full question text..."></textarea>
                     </div>
                     <div>
-                        <label class="block font-bold mb-1">Option A</label>
+                        <label class="block font-bold text-gray-700 mb-1">Option A</label>
                         <input type="text" id="q-optA" required class="w-full p-2 border rounded-lg bg-slate-50">
                     </div>
                     <div>
-                        <label class="block font-bold mb-1">Option B</label>
+                        <label class="block font-bold text-gray-700 mb-1">Option B</label>
                         <input type="text" id="q-optB" required class="w-full p-2 border rounded-lg bg-slate-50">
                     </div>
                     <div>
-                        <label class="block font-bold mb-1">Option C</label>
+                        <label class="block font-bold text-gray-700 mb-1">Option C</label>
                         <input type="text" id="q-optC" required class="w-full p-2 border rounded-lg bg-slate-50">
                     </div>
                     <div>
-                        <label class="block font-bold mb-1">Option D</label>
+                        <label class="block font-bold text-gray-700 mb-1">Option D</label>
                         <input type="text" id="q-optD" required class="w-full p-2 border rounded-lg bg-slate-50">
                     </div>
                     <div>
-                        <label class="block font-bold mb-1">Correct Answer Key</label>
+                        <label class="block font-bold text-gray-700 mb-1">Correct Answer Key</label>
                         <select id="q-correct" required class="w-full p-2 border rounded-lg bg-slate-50 font-bold text-blue-900">
                             <option value="A">Option A</option>
                             <option value="B">Option B</option>
@@ -106,7 +108,7 @@
                         </select>
                     </div>
                     <div class="flex items-end">
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow">
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow transition">
                             💾 Save Question to Database
                         </button>
                     </div>
@@ -117,6 +119,7 @@
 
     </div>
 
+    <!-- Firebase Logic -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
@@ -174,7 +177,6 @@
             });
         }
 
-        // LOGOUT FUNCTION
         function handleLogout() {
             if (confirm("Are you sure you want to LOGOUT from Teacher Portal?")) {
                 location.reload();
