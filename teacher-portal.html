@@ -306,7 +306,7 @@
             updateLivePreview();
         }
 
-        // 👁️ ACCURATE LIVE PREVIEW ENGINE (Preserves English spaces)
+        // 👁️ FOOLPROOF LIVE PREVIEW ENGINE (Fixes 1^2 bug & preserves English spaces)
         function updateLivePreview() {
             const text = document.getElementById('q-text').value;
             const previewBox = document.getElementById('live-math-preview');
@@ -333,8 +333,10 @@
                 return `$${match}$`;
             });
 
-            // 3. Convert standalone powers like x^2 or y^3
-            formatted = formatted.replace(/([a-zA-Z0-9\)\>]+)\^\s*(-?\d+|[a-zA-Z]+)/g, '$$1^{$2}$');
+            // 3. FOOLPROOF POWER CONVERTER: x^2 -> $x^{2}$ (Fixes 1^2 bug via Function Callback)
+            formatted = formatted.replace(/([a-zA-Z0-9\)\>]+)\^\s*(-?\d+|[a-zA-Z]+)/g, (match, varName, power) => {
+                return `$${varName}^{${power}}$`;
+            });
 
             // 4. Clean up any unintended double $$ delimiters
             formatted = formatted.replace(/\$\$/g, '$');
