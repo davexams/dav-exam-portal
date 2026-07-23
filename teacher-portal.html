@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Portal - DAV Public School</title>
+    <title>Teacher Management Portal - DAV Public School</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Firebase SDKs -->
@@ -12,155 +12,178 @@
 </head>
 <body class="bg-slate-100 font-sans min-h-screen p-4 md:p-6">
 
-    <div class="max-w-7xl mx-auto space-y-6">
+    <div class="max-w-6xl mx-auto space-y-6">
 
-        <!-- Header Banner & Subject Selector -->
-        <div class="flex flex-wrap justify-between items-center bg-white p-4 rounded-xl shadow border border-gray-200 gap-3">
+        <!-- Header -->
+        <div class="flex flex-wrap justify-between items-center bg-white p-4 rounded-xl shadow border border-gray-200">
             <div>
-                <h1 class="text-2xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
-                <p class="text-xs text-gray-500 font-semibold">Teacher Content & Exam Control Panel</p>
+                <h1 class="text-xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
+                <p class="text-xs text-gray-500 font-semibold">Teacher Question Bank Management Portal</p>
             </div>
             <div class="flex items-center gap-3">
                 <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1.5 rounded-full font-bold border border-blue-200">
-                    👤 Teacher: Vikram Sir
+                    👩‍🏫 Role: Subject Teacher
                 </span>
-                <!-- Subject Filter Dropdown -->
-                <div class="flex items-center gap-1.5 bg-gray-100 p-1 rounded-lg border">
-                    <label class="text-xs font-bold text-gray-600 pl-1">Active Subject:</label>
-                    <select id="active-subject-filter" onchange="loadQuestionBank()" class="bg-white text-xs font-bold text-blue-900 p-1.5 rounded border focus:outline-none">
-                        <option value="Physics">Physics</option>
-                        <option value="Mathematics">Mathematics</option>
-                        <option value="Science">Science</option>
-                    </select>
-                </div>
             </div>
         </div>
 
-        <!-- Section 1: Exam Control & Timing Panel -->
-        <div class="bg-amber-50 border border-amber-200 p-6 rounded-xl shadow-sm">
-            <h2 class="text-md font-bold text-amber-900 mb-4 flex items-center gap-2">
-                ⚙️ Live Exam Batch & Timing Control
-            </h2>
-            <form onsubmit="handleExamControl(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Exam Title / Batch</label>
-                    <input type="text" id="exam-title" required value="Class 10 Physics & Math Test" class="w-full p-2 border rounded text-xs focus:ring-2 focus:ring-amber-500 bg-white">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Exam Status</label>
-                    <select id="exam-status" class="w-full p-2 border rounded text-xs bg-white focus:ring-2 focus:ring-amber-500">
-                        <option value="true">🟢 ACTIVE (Live for Students)</option>
-                        <option value="false">🔴 INACTIVE (Hidden)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Duration (Mins)</label>
-                    <input type="number" id="exam-duration" value="30" min="1" class="w-full p-2 border rounded text-xs bg-white focus:ring-2 focus:ring-amber-500">
-                </div>
-                <div class="md:col-span-2">
-                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 px-4 rounded text-xs shadow transition">
-                        💾 Save & Activate Exam Settings
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Section 2: CSV Bulk Question Upload Box -->
-        <div class="bg-blue-50 border border-dashed border-blue-300 p-5 rounded-xl flex flex-wrap justify-between items-center gap-4">
-            <div>
-                <h3 class="font-bold text-sm text-blue-900 flex items-center gap-2">
-                    📁 Bulk Upload Questions via Excel / CSV
-                </h3>
-                <p class="text-xs text-gray-600 mt-0.5">CSV Format: Class, Subject, Chapter, QuestionText, OptionA, OptionB, OptionC, OptionD, CorrectOption</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <input type="file" id="csv-file-input" accept=".csv" class="text-xs bg-white p-1 border rounded cursor-pointer">
-                <button onclick="processCSVUpload()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-4 rounded shadow transition flex items-center gap-1">
-                    🚀 Upload CSV
-                </button>
-            </div>
-        </div>
-
-        <!-- Section 3: Add Single Question & Filtered Question Bank -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-            <!-- Left Box: Add Single Question -->
-            <div class="bg-white p-6 rounded-xl border shadow-sm">
-                <h3 class="font-bold text-gray-800 text-sm mb-4 border-b pb-2">➕ Add Single Question</h3>
-                <form onsubmit="handleSingleQuestion(event)" class="space-y-3">
+            <!-- Single Question Add Form -->
+            <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
+                <h3 class="font-bold text-gray-800 text-sm border-b pb-2">➕ Add Single Question</h3>
+                <form onsubmit="handleSingleQuestionUpload(event)" class="space-y-3">
                     <div class="grid grid-cols-3 gap-2">
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Class</label>
-                            <input type="text" id="q-class" value="Class 10" required class="w-full p-2 border rounded text-xs mt-0.5">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Subject</label>
+                            <input type="text" id="q-subject" required placeholder="Physics" class="w-full p-2 border rounded text-xs bg-slate-50">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Subject</label>
-                            <input type="text" id="q-subject" value="Physics" required class="w-full p-2 border rounded text-xs mt-0.5">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Class</label>
+                            <input type="text" id="q-class" required value="Class 10" class="w-full p-2 border rounded text-xs bg-slate-50">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Chapter</label>
-                            <input type="text" id="q-chapter" value="Electricity" required class="w-full p-2 border rounded text-xs mt-0.5">
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Chapter</label>
+                            <input type="text" id="q-chapter" required placeholder="Light" class="w-full p-2 border rounded text-xs bg-slate-50">
                         </div>
                     </div>
+
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Question Text</label>
-                        <textarea id="q-text" placeholder="Enter Question Text..." required class="w-full p-2 border rounded text-xs h-20 mt-0.5"></textarea>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Question Text</label>
+                        <textarea id="q-text" rows="2" required placeholder="Enter question..." class="w-full p-2 border rounded text-xs bg-slate-50"></textarea>
                     </div>
+
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="text" id="opt-a" placeholder="Option A" required class="p-2 border rounded text-xs">
-                        <input type="text" id="opt-b" placeholder="Option B" required class="p-2 border rounded text-xs">
-                        <input type="text" id="opt-c" placeholder="Option C" required class="p-2 border rounded text-xs">
-                        <input type="text" id="opt-d" placeholder="Option D" required class="p-2 border rounded text-xs">
+                        <input type="text" id="q-optA" required placeholder="Option A" class="p-2 border rounded text-xs bg-slate-50">
+                        <input type="text" id="q-optB" required placeholder="Option B" class="p-2 border rounded text-xs bg-slate-50">
+                        <input type="text" id="q-optC" required placeholder="Option C" class="p-2 border rounded text-xs bg-slate-50">
+                        <input type="text" id="q-optD" required placeholder="Option D" class="p-2 border rounded text-xs bg-slate-50">
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase">Correct Option</label>
-                        <select id="opt-correct" class="w-full p-2 border rounded text-xs bg-white mt-0.5">
-                            <option value="A">Option A</option>
-                            <option value="B">Option B</option>
-                            <option value="C">Option C</option>
-                            <option value="D">Option D</option>
-                        </select>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Correct Option</label>
+                            <select id="q-correct" required class="w-full p-2 border rounded text-xs bg-slate-50 font-bold text-blue-700">
+                                <option value="A">Option A</option>
+                                <option value="B">Option B</option>
+                                <option value="C">Option C</option>
+                                <option value="D">Option D</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Teacher Name</label>
+                            <input type="text" id="q-teacher" required placeholder="Your Name" class="w-full p-2 border rounded text-xs bg-slate-50">
+                        </div>
                     </div>
+
                     <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded text-xs shadow transition">
                         💾 Save Question to Bank
                     </button>
                 </form>
             </div>
 
-            <!-- Right Box: Subject Filtered Question Bank with Checkboxes -->
-            <div class="bg-white p-6 rounded-xl border shadow-sm flex flex-col justify-between">
+            <!-- CSV Bulk Upload Box -->
+            <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4 flex flex-col justify-between">
                 <div>
-                    <div class="flex justify-between items-center border-b pb-3 mb-4">
-                        <div>
-                            <h3 class="font-bold text-gray-800 text-sm">📚 <span id="bank-subject-heading">Physics</span> Questions Bank</h3>
-                            <p class="text-[11px] text-gray-400">Only showing questions for selected subject</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button onclick="selectAllQuestions(true)" class="text-xs text-blue-600 hover:underline font-bold">Select All</button> |
-                            <button onclick="selectAllQuestions(false)" class="text-xs text-gray-500 hover:underline">Deselect All</button>
-                        </div>
-                    </div>
-
-                    <!-- Scrollable Question Cards List -->
-                    <div class="space-y-3 max-h-[430px] overflow-y-auto pr-1" id="question-bank-container">
-                        <p class="text-xs text-gray-400 text-center py-8">Loading subject questions...</p>
+                    <h3 class="font-bold text-gray-800 text-sm border-b pb-2 mb-3">📁 Bulk Question Upload (CSV File)</h3>
+                    <div class="bg-blue-50 p-4 rounded-xl border border-dashed border-blue-300 space-y-3">
+                        <p class="text-xs text-blue-900 font-bold">CSV Columns Required Format:</p>
+                        <p class="text-[11px] text-gray-600 font-mono bg-white p-2 border rounded">
+                            Question, OptionA, OptionB, OptionC, OptionD, CorrectOption, Subject, Class, Chapter
+                        </p>
+                        <input type="file" id="questions-csv-file" accept=".csv" class="w-full text-xs bg-white p-2 border rounded">
+                        <button onclick="processQuestionCSV()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded text-xs shadow transition">
+                            🚀 Process & Upload Questions CSV
+                        </button>
                     </div>
                 </div>
 
-                <!-- Bottom Action Bar -->
-                <div class="border-t pt-3 mt-4 flex justify-between items-center bg-gray-50 p-3 rounded-lg border">
-                    <span class="text-xs font-bold text-gray-700" id="selected-count-label">Selected: 0 Questions</span>
-                    <button onclick="saveActiveExamQuestions()" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-2 px-4 rounded shadow transition flex items-center gap-1">
-                        ✅ Activate Selected for Live Exam
-                    </button>
+                <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-lg text-xs text-emerald-800">
+                    💡 <b>Note:</b> Uploaded questions will appear in Master Bank for Admin deployment.
                 </div>
             </div>
 
         </div>
 
+        <!-- Question List View & Edit Panel -->
+        <div class="bg-white p-6 rounded-xl border shadow-sm space-y-4">
+            <h3 class="font-bold text-gray-800 text-sm border-b pb-2">📚 My Uploaded Questions Bank</h3>
+            <div class="space-y-3 max-h-[350px] overflow-y-auto pr-1" id="teacher-questions-container">
+                <p class="text-xs text-gray-400 text-center py-6">Loading questions...</p>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Firebase Script Logic -->
+    <!-- ✏️ EDIT QUESTION POPUP MODAL -->
+    <div id="edit-q-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="bg-blue-900 text-white p-4 flex justify-between items-center">
+                <h3 class="font-black text-sm md:text-base">✏️ Edit Question Details</h3>
+                <button onclick="closeEditModal()" class="text-white hover:bg-blue-800 text-xl font-bold px-3 py-1 rounded">✕</button>
+            </div>
+
+            <form onsubmit="handleUpdateQuestion(event)" class="p-6 overflow-y-auto space-y-4 bg-slate-50">
+                <input type="hidden" id="edit-q-id">
+                
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Subject</label>
+                        <input type="text" id="edit-q-subject" required class="w-full p-2 border rounded text-xs bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Class</label>
+                        <input type="text" id="edit-q-class" required class="w-full p-2 border rounded text-xs bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Chapter</label>
+                        <input type="text" id="edit-q-chapter" required class="w-full p-2 border rounded text-xs bg-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Question Text</label>
+                    <textarea id="edit-q-text" rows="3" required class="w-full p-2 border rounded text-xs bg-white font-medium"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Option A</label>
+                        <input type="text" id="edit-q-optA" required class="w-full p-2 border rounded text-xs bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Option B</label>
+                        <input type="text" id="edit-q-optB" required class="w-full p-2 border rounded text-xs bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Option C</label>
+                        <input type="text" id="edit-q-optC" required class="w-full p-2 border rounded text-xs bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Option D</label>
+                        <input type="text" id="edit-q-optD" required class="w-full p-2 border rounded text-xs bg-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Correct Option</label>
+                    <select id="edit-q-correct" required class="w-full p-2 border rounded text-xs bg-white font-bold text-blue-700">
+                        <option value="A">Option A</option>
+                        <option value="B">Option B</option>
+                        <option value="C">Option C</option>
+                        <option value="D">Option D</option>
+                    </select>
+                </div>
+
+                <div class="pt-3 border-t flex justify-end gap-2">
+                    <button type="button" onclick="closeEditModal()" class="bg-gray-400 text-white font-bold text-xs py-2 px-4 rounded">Cancel</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 px-5 rounded shadow">💾 Update Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script Logic -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
@@ -174,190 +197,170 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        const CURRENT_TEACHER_NAME = "Vikram Sir";
+        let questionsCacheMap = {};
 
         window.onload = function() {
-            loadQuestionBank();
+            loadTeacherQuestions();
         };
 
-        // Filtered Load Function: Only fetches questions for the Selected Subject
-        function loadQuestionBank() {
-            const activeSubject = document.getElementById('active-subject-filter').value;
-            document.getElementById('bank-subject-heading').innerText = activeSubject;
-            
-            // Auto-fill selected subject in Single Add Question form
-            document.getElementById('q-subject').value = activeSubject;
+        function handleSingleQuestionUpload(e) {
+            e.preventDefault();
 
-            const container = document.getElementById('question-bank-container');
-            container.innerHTML = `<p class="text-xs text-gray-400 text-center py-8">Loading ${activeSubject} questions...</p>`;
+            const data = {
+                subject: document.getElementById('q-subject').value.trim(),
+                class: document.getElementById('q-class').value.trim(),
+                chapter: document.getElementById('q-chapter').value.trim(),
+                question: document.getElementById('q-text').value.trim(),
+                options: {
+                    A: document.getElementById('q-optA').value.trim(),
+                    B: document.getElementById('q-optB').value.trim(),
+                    C: document.getElementById('q-optC').value.trim(),
+                    D: document.getElementById('q-optD').value.trim()
+                },
+                correctOption: document.getElementById('q-correct').value.trim().toUpperCase(),
+                uploadedBy: document.getElementById('q-teacher').value.trim(),
+                uploadedAt: new Date().toLocaleDateString(),
+                selectedForExam: false
+            };
 
-            // Firestore Query with Subject Filter
-            db.collection("question_bank")
-              .where("subject", "==", activeSubject)
-              .get()
-              .then(snapshot => {
+            db.collection("question_bank").add(data).then(() => {
+                alert("✅ Question Uploaded Successfully!");
+                e.target.reset();
+                loadTeacherQuestions();
+            });
+        }
+
+        function processQuestionCSV() {
+            const input = document.getElementById('questions-csv-file');
+            if(!input.files.length) return alert("Select a CSV File First!");
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n');
+                const batch = db.batch();
+                let count = 0;
+
+                for(let i = 1; i < lines.length; i++) {
+                    if(!lines[i].trim()) continue;
+                    const cols = lines[i].split(',').map(c => c.trim());
+                    if(cols.length >= 9) {
+                        let rawCorrect = cols[5].toUpperCase();
+                        if(rawCorrect.startsWith("OPTION")) rawCorrect = rawCorrect.replace("OPTION","").trim();
+
+                        const ref = db.collection("question_bank").doc();
+                        batch.set(ref, {
+                            question: cols[0],
+                            options: { A: cols[1], B: cols[2], C: cols[3], D: cols[4] },
+                            correctOption: rawCorrect,
+                            subject: cols[6],
+                            class: cols[7],
+                            chapter: cols[8],
+                            selectedForExam: false,
+                            uploadedBy: "CSV Batch",
+                            uploadedAt: new Date().toLocaleDateString()
+                        });
+                        count++;
+                    }
+                }
+                batch.commit().then(() => {
+                    alert(`✅ ${count} CSV Questions Uploaded!`);
+                    loadTeacherQuestions();
+                });
+            };
+            reader.readAsText(input.files[0]);
+        }
+
+        function loadTeacherQuestions() {
+            db.collection("question_bank").get().then(snapshot => {
+                const container = document.getElementById('teacher-questions-container');
                 container.innerHTML = "";
+                questionsCacheMap = {};
 
                 if(snapshot.empty) {
-                    container.innerHTML = `<p class="text-xs text-gray-400 text-center py-8">No questions found for <b>${activeSubject}</b>.</p>`;
-                    updateSelectedCount();
+                    container.innerHTML = `<p class="text-xs text-gray-400 text-center py-6">No questions found.</p>`;
                     return;
                 }
 
                 snapshot.forEach(doc => {
                     const q = doc.data();
                     q.id = doc.id;
-
-                    const isChecked = q.selectedForExam ? 'checked' : '';
-                    const uploadedBy = q.uploadedBy || "System Admin";
-                    const uploadedDate = q.uploadedAt || "Earlier";
+                    questionsCacheMap[q.id] = q;
 
                     container.innerHTML += `
-                        <div class="border rounded-lg p-3 bg-gray-50 hover:bg-blue-50/40 transition shadow-sm relative flex gap-3 items-start">
-                            <input type="checkbox" onchange="updateSelectedCount()" value="${q.id}" ${isChecked} class="q-checkbox w-4 h-4 text-blue-600 rounded mt-1 border-gray-300 cursor-pointer">
-                            <div class="flex-grow">
-                                <div class="flex flex-wrap gap-1.5 mb-1.5 items-center">
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-600 text-white">${q.subject || 'General'}</span>
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-700">${q.class || 'Class 10'}</span>
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-800 text-white">${q.chapter || 'Chapter'}</span>
+                        <div class="border rounded-lg p-3 bg-gray-50 flex justify-between items-start text-xs shadow-sm">
+                            <div>
+                                <div class="flex gap-2 mb-1">
+                                    <span class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold text-[10px]">${q.subject || 'General'}</span>
+                                    <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-bold text-[10px]">${q.chapter || 'Chapter'}</span>
                                 </div>
-                                <p class="text-xs font-bold text-gray-800 leading-snug">${q.question}</p>
-                                <p class="text-[11px] text-green-700 font-semibold mt-1">Ans: (${q.correctOption}) ${q.options ? q.options[q.correctOption] || '' : ''}</p>
-                                
-                                <div class="mt-2 pt-2 border-t border-gray-200 flex justify-between text-[10px] text-gray-500 font-medium">
-                                    <span>👤 <b>Uploaded By:</b> ${uploadedBy}</span>
-                                    <span>📅 <b>Date:</b> ${uploadedDate}</span>
-                                </div>
+                                <p class="font-bold text-gray-800">${q.question}</p>
+                                <p class="text-emerald-700 font-semibold mt-1 text-[11px]">Correct Option: (${q.correctOption})</p>
                             </div>
-                            <button onclick="deleteQuestion('${q.id}')" class="text-red-500 text-xs hover:underline font-semibold ml-1">Delete</button>
+                            <div class="flex gap-2 whitespace-nowrap">
+                                <button onclick="openEditModal('${q.id}')" class="text-blue-600 font-bold hover:underline">✏️ Edit</button>
+                                <button onclick="deleteDoc('${q.id}')" class="text-red-500 font-bold hover:underline">🗑️ Delete</button>
+                            </div>
                         </div>
                     `;
                 });
-
-                updateSelectedCount();
-            }).catch(error => {
-                console.error("Error loading questions: ", error);
             });
         }
 
-        function updateSelectedCount() {
-            const checkboxes = document.querySelectorAll('.q-checkbox:checked');
-            document.getElementById('selected-count-label').innerText = `Selected: ${checkboxes.length} Questions for Exam`;
+        function openEditModal(qId) {
+            const q = questionsCacheMap[qId];
+            if(!q) return;
+
+            document.getElementById('edit-q-id').value = qId;
+            document.getElementById('edit-q-subject').value = q.subject || 'Physics';
+            document.getElementById('edit-q-class').value = q.class || 'Class 10';
+            document.getElementById('edit-q-chapter').value = q.chapter || 'Chapter 1';
+            document.getElementById('edit-q-text').value = q.question || '';
+            
+            document.getElementById('edit-q-optA').value = q.options ? q.options.A : (q.optionA || '');
+            document.getElementById('edit-q-optB').value = q.options ? q.options.B : (q.optionB || '');
+            document.getElementById('edit-q-optC').value = q.options ? q.options.C : (q.optionC || '');
+            document.getElementById('edit-q-optD').value = q.options ? q.options.D : (q.optionD || '');
+            
+            let rawCorrect = (q.correctOption || 'A').toString().trim().toUpperCase();
+            if(rawCorrect.startsWith("OPTION")) rawCorrect = rawCorrect.replace("OPTION","").trim();
+            document.getElementById('edit-q-correct').value = rawCorrect;
+
+            document.getElementById('edit-q-modal').classList.remove('hidden');
         }
 
-        function selectAllQuestions(status) {
-            const checkboxes = document.querySelectorAll('.q-checkbox');
-            checkboxes.forEach(cb => cb.checked = status);
-            updateSelectedCount();
+        function closeEditModal() {
+            document.getElementById('edit-q-modal').classList.add('hidden');
         }
 
-        async function saveActiveExamQuestions() {
-            const checkboxes = document.querySelectorAll('.q-checkbox');
-            const batch = db.batch();
+        function handleUpdateQuestion(e) {
+            e.preventDefault();
+            const qId = document.getElementById('edit-q-id').value;
 
-            checkboxes.forEach(cb => {
-                const ref = db.collection("question_bank").doc(cb.value);
-                batch.update(ref, { selectedForExam: cb.checked });
-            });
-
-            await batch.commit();
-            alert("🎯 Subject questions updated for Live Exam!");
-        }
-
-        function processCSVUpload() {
-            const fileInput = document.getElementById('csv-file-input');
-            if (!fileInput.files.length) {
-                alert("Please select a CSV file first!");
-                return;
-            }
-
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                const lines = e.target.result.split('\n');
-                const batch = db.batch();
-                const todayStr = new Date().toLocaleDateString('en-IN');
-
-                let count = 0;
-                for (let i = 1; i < lines.length; i++) {
-                    if (!lines[i].trim()) continue;
-                    const cols = lines[i].split(',').map(c => c.trim());
-
-                    if (cols.length >= 9) {
-                        const newRef = db.collection("question_bank").doc();
-                        batch.set(newRef, {
-                            class: cols[0],
-                            subject: cols[1],
-                            chapter: cols[2],
-                            question: cols[3],
-                            options: { A: cols[4], B: cols[5], C: cols[6], D: cols[7] },
-                            correctOption: cols[8],
-                            selectedForExam: true,
-                            uploadedBy: CURRENT_TEACHER_NAME,
-                            uploadedAt: todayStr
-                        });
-                        count++;
-                    }
-                }
-
-                batch.commit().then(() => {
-                    alert(`✅ ${count} Questions Uploaded by ${CURRENT_TEACHER_NAME}!`);
-                    loadQuestionBank();
-                });
+            const updatedData = {
+                subject: document.getElementById('edit-q-subject').value.trim(),
+                class: document.getElementById('edit-q-class').value.trim(),
+                chapter: document.getElementById('edit-q-chapter').value.trim(),
+                question: document.getElementById('edit-q-text').value.trim(),
+                options: {
+                    A: document.getElementById('edit-q-optA').value.trim(),
+                    B: document.getElementById('edit-q-optB').value.trim(),
+                    C: document.getElementById('edit-q-optC').value.trim(),
+                    D: document.getElementById('edit-q-optD').value.trim()
+                },
+                correctOption: document.getElementById('edit-q-correct').value
             };
 
-            reader.readAsText(file);
-        }
-
-        function handleSingleQuestion(e) {
-            e.preventDefault();
-            const todayStr = new Date().toLocaleDateString('en-IN');
-
-            db.collection("question_bank").add({
-                class: document.getElementById('q-class').value,
-                subject: document.getElementById('q-subject').value,
-                chapter: document.getElementById('q-chapter').value,
-                question: document.getElementById('q-text').value,
-                options: {
-                    A: document.getElementById('opt-a').value,
-                    B: document.getElementById('opt-b').value,
-                    C: document.getElementById('opt-c').value,
-                    D: document.getElementById('opt-d').value
-                },
-                correctOption: document.getElementById('opt-correct').value,
-                selectedForExam: true,
-                uploadedBy: CURRENT_TEACHER_NAME,
-                uploadedAt: todayStr
-            }).then(() => {
-                alert("✅ Question added successfully!");
-                document.getElementById('q-text').value = "";
-                document.getElementById('opt-a').value = "";
-                document.getElementById('opt-b').value = "";
-                document.getElementById('opt-c').value = "";
-                document.getElementById('opt-d').value = "";
-                loadQuestionBank();
+            db.collection("question_bank").doc(qId).update(updatedData).then(() => {
+                alert("✅ Question Details Updated Successfully!");
+                closeEditModal();
+                loadTeacherQuestions();
             });
         }
 
-        function deleteQuestion(id) {
-            if (confirm("Are you sure you want to delete this question?")) {
-                db.collection("question_bank").doc(id).delete().then(() => loadQuestionBank());
+        function deleteDoc(id) {
+            if(confirm("Are you sure you want to delete this question?")) {
+                db.collection("question_bank").doc(id).delete().then(() => loadTeacherQuestions());
             }
-        }
-
-        function handleExamControl(e) {
-            e.preventDefault();
-            const isActive = document.getElementById('exam-status').value === "true";
-            const duration = parseInt(document.getElementById('exam-duration').value);
-            const title = document.getElementById('exam-title').value;
-
-            db.collection("exam_control").doc("current_exam").set({
-                title: title,
-                isActive: isActive,
-                duration: duration,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => alert("✅ Exam Control Settings Saved!"));
         }
     </script>
 </body>
