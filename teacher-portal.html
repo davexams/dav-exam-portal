@@ -4,122 +4,175 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Portal - DAV Public School</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-slate-100 font-sans min-h-screen p-3 md:p-6 select-none">
 
-    <div class="max-w-6xl mx-auto space-y-4">
+    <div class="max-w-7xl mx-auto space-y-4">
 
         <!-- 1. LOGIN SECTION -->
-        <div id="login-section" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-gray-200 max-w-md mx-auto space-y-4 my-10">
+        <div id="login-section" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border max-w-md mx-auto space-y-4 my-10">
             <div class="text-center">
-                <h1 class="text-xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
+                <h1 class="text-2xl font-black text-blue-900">DAV PUBLIC SCHOOL</h1>
                 <p class="text-xs text-gray-500 font-bold">Teacher Management Portal</p>
             </div>
             <form onsubmit="handleTeacherLogin(event)" class="space-y-3 text-xs">
                 <div>
-                    <label class="block font-bold text-gray-700 mb-1">Teacher Username / ID</label>
-                    <input type="text" id="t-user" placeholder="Enter Username" required class="w-full p-2.5 border rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 font-semibold">
+                    <label class="block font-bold text-gray-700 mb-1">Username</label>
+                    <input type="text" id="t-user" required class="w-full p-2.5 border rounded-lg bg-slate-50">
                 </div>
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">Password</label>
-                    <input type="password" id="t-pass" placeholder="Enter Password" required class="w-full p-2.5 border rounded-lg bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500">
+                    <input type="password" id="t-pass" required class="w-full p-2.5 border rounded-lg bg-slate-50">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow transition">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow">
                     🔑 Teacher Login
                 </button>
             </form>
         </div>
 
         <!-- 2. MAIN TEACHER DASHBOARD -->
-        <div id="dashboard-section" class="hidden space-y-4">
+        <div id="dashboard-section" class="hidden space-y-5">
 
             <!-- Top Header Bar with Logout -->
             <div class="bg-white p-4 rounded-xl shadow border flex justify-between items-center">
                 <div>
                     <h2 class="text-lg font-black text-blue-900" id="teacher-welcome">Teacher Portal</h2>
-                    <p class="text-xs text-gray-500 font-semibold">Question Bank & Assignment Control</p>
+                    <p class="text-xs text-gray-500 font-semibold">DAV Public School • CBT Exam Management</p>
                 </div>
-                <!-- 🚪 LOGOUT BUTTON -->
-                <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-4 py-2 rounded-lg shadow transition flex items-center gap-1.5">
+                <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-1.5 transition">
                     🚪 Logout
                 </button>
             </div>
 
-            <!-- Add Single Question Form -->
-            <div class="bg-white p-5 rounded-xl shadow border space-y-3">
-                <h3 class="font-bold text-sm text-blue-900 border-b pb-2">➕ Add New Question</h3>
-                <form onsubmit="handleAddQuestion(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                    <div>
-                        <label class="block font-bold text-gray-700 mb-1">Class</label>
-                        <select id="q-class" required class="w-full p-2 border rounded-lg bg-slate-50 font-bold text-blue-900">
+            <!-- Grid Layout: Add Question + Bulk CSV Upload -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                
+                <!-- Left: Single Question Form -->
+                <div class="lg:col-span-2 bg-white p-5 rounded-xl shadow border space-y-3">
+                    <h3 class="font-bold text-sm text-blue-900 border-b pb-2">➕ Add Single Question</h3>
+                    <form onsubmit="handleAddQuestion(event)" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <label class="block font-bold mb-1">Class</label>
+                            <select id="q-class" required class="w-full p-2 border rounded-lg bg-slate-50 font-bold text-blue-900">
+                                <option value="Class 8">Class 8th</option>
+                                <option value="Class 9">Class 9th</option>
+                                <option value="Class 10" selected>Class 10th</option>
+                                <option value="Class 11">Class 11th</option>
+                                <option value="Class 12">Class 12th</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1">Subject</label>
+                            <select id="q-subject" required class="w-full p-2 border rounded-lg bg-slate-50 font-bold text-blue-900">
+                                <option value="Physics">Physics</option>
+                                <option value="Chemistry">Chemistry</option>
+                                <option value="Mathematics">Mathematics</option>
+                                <option value="Biology">Biology</option>
+                                <option value="Science">Science</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block font-bold mb-1">Chapter Name</label>
+                            <input type="text" id="q-chapter" placeholder="e.g. Electricity / Motion" required class="w-full p-2 border rounded-lg bg-slate-50">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block font-bold mb-1">Question Statement</label>
+                            <textarea id="q-text" rows="2" required class="w-full p-2 border rounded-lg bg-slate-50" placeholder="Enter full question text..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1">Option A</label>
+                            <input type="text" id="q-optA" required class="w-full p-2 border rounded-lg bg-slate-50">
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1">Option B</label>
+                            <input type="text" id="q-optB" required class="w-full p-2 border rounded-lg bg-slate-50">
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1">Option C</label>
+                            <input type="text" id="q-optC" required class="w-full p-2 border rounded-lg bg-slate-50">
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1">Option D</label>
+                            <input type="text" id="q-optD" required class="w-full p-2 border rounded-lg bg-slate-50">
+                        </div>
+                        <div>
+                            <label class="block font-bold mb-1">Correct Answer Key</label>
+                            <select id="q-correct" required class="w-full p-2 border rounded-lg bg-slate-50 font-bold text-blue-900">
+                                <option value="A">Option A</option>
+                                <option value="B">Option B</option>
+                                <option value="C">Option C</option>
+                                <option value="D">Option D</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow">
+                                💾 Save Question
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Right: Bulk CSV Import -->
+                <div class="bg-white p-5 rounded-xl shadow border space-y-3 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-sm text-blue-900 border-b pb-2">📂 Bulk Question CSV Upload</h3>
+                        <p class="text-xs text-gray-500">CSV Header Format:<br><code class="bg-slate-100 p-1 rounded block text-[10px] mt-1">Class, Subject, Chapter, Question, OptionA, OptionB, OptionC, OptionD, Answer</code></p>
+                        <input type="file" id="csv-file-input" accept=".csv" class="w-full text-xs p-2 border rounded-lg bg-slate-50">
+                    </div>
+                    <button onclick="uploadCSVQuestions()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-lg shadow">
+                        📤 Upload Questions CSV
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Master Question Bank List -->
+            <div class="bg-white p-5 rounded-xl shadow border space-y-4">
+                <div class="flex flex-wrap justify-between items-center gap-2 border-b pb-3">
+                    <h3 class="font-bold text-sm text-blue-900">📚 Master Question Bank</h3>
+                    <div class="flex gap-2 text-xs">
+                        <select id="filter-class" onchange="fetchQuestionBank()" class="p-1.5 border rounded bg-slate-50 font-bold">
+                            <option value="Class 10">Class 10th</option>
                             <option value="Class 8">Class 8th</option>
                             <option value="Class 9">Class 9th</option>
-                            <option value="Class 10" selected>Class 10th</option>
                             <option value="Class 11">Class 11th</option>
                             <option value="Class 12">Class 12th</option>
                         </select>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700 mb-1">Subject</label>
-                        <select id="q-subject" required class="w-full p-2 border rounded-lg bg-slate-50 font-bold text-blue-900">
+                        <select id="filter-subject" onchange="fetchQuestionBank()" class="p-1.5 border rounded bg-slate-50 font-bold">
+                            <option value="ALL">All Subjects</option>
                             <option value="Physics">Physics</option>
                             <option value="Chemistry">Chemistry</option>
                             <option value="Mathematics">Mathematics</option>
                             <option value="Biology">Biology</option>
-                            <option value="Science">Science</option>
                         </select>
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="block font-bold text-gray-700 mb-1">Chapter Name</label>
-                        <input type="text" id="q-chapter" placeholder="e.g. Electricity / Motion" required class="w-full p-2 border rounded-lg bg-slate-50 font-semibold">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block font-bold text-gray-700 mb-1">Question Statement</label>
-                        <textarea id="q-text" rows="2" required class="w-full p-2 border rounded-lg bg-slate-50" placeholder="Enter full question text..."></textarea>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700 mb-1">Option A</label>
-                        <input type="text" id="q-optA" required class="w-full p-2 border rounded-lg bg-slate-50">
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700 mb-1">Option B</label>
-                        <input type="text" id="q-optB" required class="w-full p-2 border rounded-lg bg-slate-50">
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700 mb-1">Option C</label>
-                        <input type="text" id="q-optC" required class="w-full p-2 border rounded-lg bg-slate-50">
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700 mb-1">Option D</label>
-                        <input type="text" id="q-optD" required class="w-full p-2 border rounded-lg bg-slate-50">
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-700 mb-1">Correct Answer Key</label>
-                        <select id="q-correct" required class="w-full p-2 border rounded-lg bg-slate-50 font-bold text-blue-900">
-                            <option value="A">Option A</option>
-                            <option value="B">Option B</option>
-                            <option value="C">Option C</option>
-                            <option value="D">Option D</option>
-                        </select>
-                    </div>
-                    <div class="flex items-end">
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow transition">
-                            💾 Save Question to Database
-                        </button>
-                    </div>
-                </form>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-gray-700 uppercase font-black border-b">
+                                <th class="p-2.5">Deploy in Exam</th>
+                                <th class="p-2.5">Subject / Chapter</th>
+                                <th class="p-2.5">Question Text</th>
+                                <th class="p-2.5">Answer</th>
+                                <th class="p-2.5 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="questions-table-body">
+                            <tr><td colspan="5" class="text-center py-4 text-gray-400">Loading questions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
         </div>
 
     </div>
 
-    <!-- Firebase Logic -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
@@ -141,7 +194,8 @@
             if (user === "teacher" && pass === "dav123") {
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('dashboard-section').classList.remove('hidden');
-                document.getElementById('teacher-welcome').innerText = `Welcome, Teacher (${user})`;
+                document.getElementById('teacher-welcome').innerText = `Teacher Console (${user})`;
+                fetchQuestionBank();
             } else {
                 alert("❌ Invalid Teacher Username or Password!");
             }
@@ -161,26 +215,112 @@
                     D: document.getElementById('q-optD').value.trim()
                 },
                 correctAnswer: document.getElementById('q-correct').value,
-                selectedForExam: false,
+                selectedForExam: true,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             db.collection("question_bank").add(payload).then(() => {
-                alert("🎉 Question added successfully!");
+                alert("🎉 Question saved!");
                 document.getElementById('q-text').value = "";
                 document.getElementById('q-optA').value = "";
                 document.getElementById('q-optB').value = "";
                 document.getElementById('q-optC').value = "";
                 document.getElementById('q-optD').value = "";
-            }).catch(err => {
-                alert("Error adding question: " + err.message);
+                fetchQuestionBank();
             });
         }
 
-        function handleLogout() {
-            if (confirm("Are you sure you want to LOGOUT from Teacher Portal?")) {
-                location.reload();
+        function fetchQuestionBank() {
+            const cls = document.getElementById('filter-class').value;
+            const subj = document.getElementById('filter-subject').value;
+            const tbody = document.getElementById('questions-table-body');
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-400">Loading...</td></tr>`;
+
+            let query = db.collection("question_bank").where("class", "==", cls);
+
+            query.get().then(snapshot => {
+                if (snapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-400">No questions found.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = "";
+                snapshot.forEach(doc => {
+                    const q = doc.data();
+                    const qId = doc.id;
+
+                    if (subj !== "ALL" && (q.subject || '').trim().toLowerCase() !== subj.toLowerCase()) return;
+
+                    tbody.innerHTML += `
+                        <tr class="border-b hover:bg-slate-50">
+                            <td class="p-2.5">
+                                <input type="checkbox" ${q.selectedForExam ? 'checked' : ''} onchange="toggleDeploy('${qId}', this.checked)" class="w-4 h-4 text-blue-600">
+                            </td>
+                            <td class="p-2.5">
+                                <span class="font-bold text-blue-900 block">${q.subject || 'Gen'}</span>
+                                <span class="text-[10px] text-gray-500">${q.chapter || ''}</span>
+                            </td>
+                            <td class="p-2.5 font-semibold text-gray-800">${q.question}</td>
+                            <td class="p-2.5 font-bold text-emerald-700">(${q.correctAnswer})</td>
+                            <td class="p-2.5 text-right">
+                                <button onclick="deleteQuestion('${qId}')" class="bg-red-100 hover:bg-red-200 text-red-700 font-bold px-2.5 py-1 rounded">🗑️ Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        function toggleDeploy(qId, status) {
+            db.collection("question_bank").doc(qId).update({ selectedForExam: status });
+        }
+
+        function deleteQuestion(qId) {
+            if (confirm("Delete this question permanently?")) {
+                db.collection("question_bank").doc(qId).delete().then(() => fetchQuestionBank());
             }
+        }
+
+        function uploadCSVQuestions() {
+            const fileInput = document.getElementById('csv-file-input');
+            if (!fileInput.files.length) return alert("Please select a CSV file first.");
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n');
+                let batch = db.batch();
+                let count = 0;
+
+                for (let i = 1; i < lines.length; i++) {
+                    const row = lines[i].split(',');
+                    if (row.length >= 9) {
+                        const ref = db.collection("question_bank").doc();
+                        batch.set(ref, {
+                            class: row[0].trim(),
+                            subject: row[1].trim(),
+                            chapter: row[2].trim(),
+                            question: row[3].trim(),
+                            options: { A: row[4].trim(), B: row[5].trim(), C: row[6].trim(), D: row[7].trim() },
+                            correctAnswer: row[8].trim().toUpperCase(),
+                            selectedForExam: true,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        count++;
+                    }
+                }
+
+                batch.commit().then(() => {
+                    alert(`🎉 Uploaded ${count} questions successfully!`);
+                    fetchQuestionBank();
+                });
+            };
+            reader.readAsText(file);
+        }
+
+        function handleLogout() {
+            if (confirm("Logout from Teacher Portal?")) location.reload();
         }
     </script>
 </body>
