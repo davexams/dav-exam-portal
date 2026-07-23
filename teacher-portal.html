@@ -3,180 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Portal - DAV Public School</title>
-    <!-- Tailwind CSS -->
+    <title>Teacher Dashboard - DAV Public School</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-slate-100 font-sans min-h-screen">
+<body class="bg-slate-100 font-sans min-h-screen p-6">
 
-    <!-- TEACHER LOGIN SCREEN -->
-    <div id="login-container" class="flex items-center justify-center min-h-screen">
-        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border-t-4 border-blue-600">
-            <h2 class="text-2xl font-bold text-center text-blue-700 mb-1">DAV Teacher Portal</h2>
-            <p class="text-xs text-center text-gray-500 mb-6">Enter registered Teacher Credentials</p>
-            
-            <div id="login-error" class="hidden mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm text-center">
-                Invalid Teacher Email or Password!
-            </div>
+    <div class="max-w-7xl mx-auto space-y-6">
 
-            <form onsubmit="handleTeacherLogin(event)">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Teacher Email</label>
-                    <input type="email" id="teacher-email-input" required placeholder="teacher@dav.com" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <!-- Header Banner -->
+        <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow border">
+            <h1 class="text-2xl font-black text-blue-900 tracking-wide">DAV PUBLIC SCHOOL</h1>
+            <span class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-full font-bold" id="teacher-subject-tag">Subject: Physics & Math</span>
+        </div>
+
+        <!-- Exam Setup Control Box -->
+        <div class="bg-amber-50 border border-amber-200 p-6 rounded-xl shadow-sm">
+            <h2 class="text-md font-bold text-gray-800 mb-4 flex items-center gap-2">⚙️ Subject Exam Batch & Timing Control</h2>
+            <form onsubmit="handleExamControl(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Exam Title / Batch Name</label>
+                    <input type="text" id="exam-title" required value="Class 10 Combined Test" class="w-full p-2 border rounded text-sm">
                 </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
-                    <input type="password" id="teacher-pass-input" required placeholder="••••••••" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Exam Status</label>
+                    <select id="exam-status" class="w-full p-2 border rounded text-sm bg-white">
+                        <option value="true">🟢 ACTIVE (Live)</option>
+                        <option value="false">🔴 INACTIVE (Hidden)</option>
+                    </select>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 shadow">
-                    Login to Portal
-                </button>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Duration (Mins)</label>
+                    <input type="number" id="exam-duration" value="30" class="w-full p-2 border rounded text-sm">
+                </div>
+                <div class="md:col-span-2">
+                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded text-sm shadow transition">
+                        💾 Save & Activate Exam Settings
+                    </button>
+                </div>
             </form>
         </div>
-    </div>
 
-    <!-- TEACHER DASHBOARD -->
-    <div id="dashboard-container" class="hidden">
-        <!-- Header Bar -->
-        <nav class="bg-white p-4 shadow flex justify-between items-center px-8 border-b">
+        <!-- CSV Bulk Upload Box -->
+        <div class="bg-blue-50 border border-dashed border-blue-300 p-4 rounded-xl flex justify-between items-center">
             <div>
-                <h1 class="text-2xl font-black text-blue-600 tracking-wide">DAV PUBLIC SCHOOL</h1>
-                <p class="text-xs text-gray-600 font-medium">Welcome, <span id="teacher-display-name" class="font-bold text-gray-800">Teacher</span> <span id="teacher-subject-badge" class="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full ml-2">Subject</span></p>
+                <h3 class="font-bold text-sm text-blue-900">📁 Bulk Upload Questions via Excel / CSV</h3>
+                <p class="text-xs text-gray-600">Format: Class, Subject, Chapter, QuestionText, OptionA, OptionB, OptionC, OptionD, CorrectOption</p>
             </div>
-            <div class="flex gap-2">
-                <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs py-2 px-4 rounded-lg border flex items-center gap-1">
-                    📊 Exam Results
-                </button>
-                <button onclick="handleLogout()" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-semibold text-xs py-2 px-4 rounded-lg flex items-center gap-1">
-                    🔒 Logout
+            <div class="flex items-center gap-2">
+                <input type="file" id="csv-file-input" accept=".csv" class="text-xs bg-white p-1 border rounded">
+                <button onclick="processCSVUpload()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-4 rounded shadow">
+                    🚀 Upload All
                 </button>
             </div>
-        </nav>
+        </div>
 
-        <div class="max-w-7xl mx-auto p-6 space-y-6">
-            
-            <!-- 1. Subject Exam Batch Control -->
-            <div class="bg-amber-50 p-5 rounded-xl border border-amber-200 shadow-sm relative">
-                <span class="absolute top-4 right-4 bg-black text-white text-xs px-3 py-1 rounded-full font-bold" id="badge-assigned-subject">Subject: Physics</span>
-                <h2 class="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">⚙️ Subject Exam Batch & Timing Control</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Exam Title / Batch Name</label>
-                        <input type="text" id="batch-title" placeholder="Unit Test 1" class="w-full p-2 border rounded-lg text-xs bg-white">
+        <!-- Lower Section: Add Single Question & Enhanced Question Bank -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Left: Add Single Question Form -->
+            <div class="bg-white p-6 rounded-xl border shadow-sm">
+                <h3 class="font-bold text-gray-800 text-sm mb-4">➕ Add Single Question</h3>
+                <form onsubmit="handleSingleQuestion(event)" class="space-y-3">
+                    <div class="grid grid-cols-3 gap-2">
+                        <input type="text" id="q-class" placeholder="Class" value="Class 10" required class="p-2 border rounded text-xs">
+                        <input type="text" id="q-subject" placeholder="Subject" value="Physics" required class="p-2 border rounded text-xs">
+                        <input type="text" id="q-chapter" placeholder="Chapter" value="Electricity" required class="p-2 border rounded text-xs">
+                    </div>
+                    <textarea id="q-text" placeholder="Enter Question Text..." required class="w-full p-2 border rounded text-xs h-20"></textarea>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="opt-a" placeholder="Option A" required class="p-2 border rounded text-xs">
+                        <input type="text" id="opt-b" placeholder="Option B" required class="p-2 border rounded text-xs">
+                        <input type="text" id="opt-c" placeholder="Option C" required class="p-2 border rounded text-xs">
+                        <input type="text" id="opt-d" placeholder="Option D" required class="p-2 border rounded text-xs">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Exam Status</label>
-                        <select id="batch-status" class="w-full p-2 border rounded-lg text-xs bg-white">
-                            <option value="ACTIVE">🟢 ACTIVE (Live)</option>
-                            <option value="INACTIVE">🔴 INACTIVE (Stopped)</option>
+                        <label class="text-xs font-bold text-gray-600">Correct Option:</label>
+                        <select id="opt-correct" class="w-full p-2 border rounded text-xs bg-white mt-1">
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Start Time</label>
-                        <input type="datetime-local" id="batch-start" class="w-full p-2 border rounded-lg text-xs bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">End Time</label>
-                        <input type="datetime-local" id="batch-end" class="w-full p-2 border rounded-lg text-xs bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Duration (Mins)</label>
-                        <input type="number" id="batch-duration" placeholder="e.g. 45" class="w-full p-2 border rounded-lg text-xs bg-white">
-                    </div>
-                </div>
-                <button onclick="saveBatchTiming()" class="mt-4 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-2 px-6 rounded-lg shadow flex items-center gap-2">
-                    💾 Save & Activate Exam
-                </button>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded text-xs shadow">
+                        Save Question
+                    </button>
+                </form>
             </div>
 
-            <!-- 2. Bulk Upload Questions via Excel / CSV -->
-            <div class="bg-blue-50/50 p-4 rounded-xl border-2 border-dashed border-blue-300 flex flex-wrap items-center justify-between gap-4">
+            <!-- Right: QUESTION BANK WITH SELECT FOR EXAM FEATURE -->
+            <div class="bg-white p-6 rounded-xl border shadow-sm flex flex-col justify-between">
                 <div>
-                    <h3 class="text-sm font-bold text-blue-800 flex items-center gap-2">📁 Bulk Upload Questions via Excel / CSV</h3>
-                    <p class="text-xs text-gray-500">Upload CSV file formatted as: Class, Subject, Chapter, QuestionText, OptionA, OptionB, OptionC, OptionD, CorrectOption</p>
+                    <div class="flex justify-between items-center border-b pb-3 mb-4">
+                        <h3 class="font-bold text-gray-800 text-sm">📚 Question Bank (Selection Panel)</h3>
+                        <div class="flex items-center gap-2">
+                            <button onclick="selectAllQuestions(true)" class="text-xs text-blue-600 underline font-semibold">Select All</button> |
+                            <button onclick="selectAllQuestions(false)" class="text-xs text-gray-500 underline">Deselect All</button>
+                        </div>
+                    </div>
+
+                    <!-- Scrollable Questions Container with Checkboxes -->
+                    <div class="space-y-3 max-h-[420px] overflow-y-auto pr-1" id="question-bank-container">
+                        <p class="text-xs text-gray-400 text-center py-6">Loading questions from bank...</p>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <input type="file" id="csv-file-input" accept=".csv" class="text-xs border rounded p-1.5 bg-white">
-                    <button onclick="uploadCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-4 rounded-lg shadow">
-                        🚀 Upload All
+
+                <!-- Bottom Status & Save Action Button -->
+                <div class="border-t pt-4 mt-4 flex justify-between items-center bg-gray-50 p-3 rounded-lg border">
+                    <span class="text-xs font-bold text-gray-700" id="selected-count-label">Selected: 0 Questions</span>
+                    <button onclick="saveActiveExamQuestions()" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs py-2 px-4 rounded shadow flex items-center gap-1">
+                        ✅ Activate Selected for Live Exam
                     </button>
                 </div>
             </div>
 
-            <!-- 3. Add Single Question & Active Question Bank Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
-                <!-- Left: Add Single Question Form -->
-                <div class="bg-white p-5 rounded-xl border shadow-sm space-y-4">
-                    <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2 border-b pb-2">➕ Add Single Question</h3>
-                    <form onsubmit="addSingleQuestion(event)" class="space-y-3">
-                        <div class="grid grid-cols-3 gap-2">
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600">Class</label>
-                                <input type="text" id="q-class" required placeholder="Class 10" class="w-full p-2 border rounded text-xs">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600">Subject</label>
-                                <input type="text" id="q-subject" required placeholder="Physics" class="w-full p-2 border rounded text-xs">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600">Chapter</label>
-                                <input type="text" id="q-chapter" required placeholder="Electricity" class="w-full p-2 border rounded text-xs">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600">Question Text</label>
-                            <textarea id="q-text" rows="3" required placeholder="Enter question text..." class="w-full p-2 border rounded text-xs"></textarea>
-                        </div>
-
-                        <div class="space-y-2">
-                            <input type="text" id="q-optA" required placeholder="Option A" class="w-full p-2 border rounded text-xs">
-                            <input type="text" id="q-optB" required placeholder="Option B" class="w-full p-2 border rounded text-xs">
-                            <input type="text" id="q-optC" required placeholder="Option C" class="w-full p-2 border rounded text-xs">
-                            <input type="text" id="q-optD" required placeholder="Option D" class="w-full p-2 border rounded text-xs">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600">Correct Option</label>
-                            <select id="q-correct" required class="w-full p-2 border rounded text-xs bg-white">
-                                <option value="A">A</option>
-                                <option value="B">B</option>
-                                <option value="C">C</option>
-                                <option value="D">D</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 rounded-lg shadow">
-                            Save Question
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Right: Active Question Bank Display -->
-                <div class="bg-white p-5 rounded-xl border shadow-sm flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center border-b pb-2 mb-3">
-                            <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2">📚 Active Question Bank</h3>
-                            <button onclick="loadQuestions()" class="text-xs text-blue-600 hover:underline border px-2 py-1 rounded">🔄 Refresh</button>
-                        </div>
-                        
-                        <div id="active-questions-list" class="space-y-3 max-h-[420px] overflow-y-auto pr-1">
-                            <p class="text-xs text-gray-500">Loading questions...</p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
         </div>
+
     </div>
 
-    <!-- JavaScript Logic -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCi63JHOSRmn58ccbSOg82sJUOXUtTsumo",
@@ -184,149 +130,141 @@
             projectId: "myexamportal-abf3f",
             storageBucket: "myexamportal-abf3f.firebasestorage.app",
             messagingSenderId: "8464475917",
-            appId: "1:8464475917:web:dd31ca0bba84a56ae17244",
-            measurementId: "G-G0VRMX7EQT"
+            appId: "1:8464475917:web:dd31ca0bba84a56ae17244"
         };
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        let loggedInTeacher = null;
 
-        async function handleTeacherLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('teacher-email-input').value.trim();
-            const password = document.getElementById('teacher-pass-input').value.trim();
+        let allQuestions = [];
 
-            const snapshot = await db.collection("teachers").where("email", "==", email).get();
-            if (snapshot.empty) {
-                document.getElementById('login-error').classList.remove('hidden');
-                return;
-            }
+        window.onload = function() {
+            loadQuestionBank();
+        };
 
-            let found = null;
-            snapshot.forEach(doc => {
-                if (doc.data().password === password) found = doc.data();
-            });
-
-            if (found) {
-                loggedInTeacher = found;
-                document.getElementById('login-container').classList.add('hidden');
-                document.getElementById('dashboard-container').classList.remove('hidden');
-                
-                document.getElementById('teacher-display-name').innerText = found.name || 'Teacher';
-                document.getElementById('teacher-subject-badge').innerText = found.subject || 'General';
-                document.getElementById('badge-assigned-subject').innerText = `Subject: ${found.subject || 'General'}`;
-
-                loadQuestions();
-            } else {
-                document.getElementById('login-error').classList.remove('hidden');
-            }
-        }
-
-        function handleLogout() {
-            location.reload();
-        }
-
-        function saveBatchTiming() {
-            const batchData = {
-                title: document.getElementById('batch-title').value,
-                status: document.getElementById('batch-status').value,
-                startTime: document.getElementById('batch-start').value,
-                endTime: document.getElementById('batch-end').value,
-                duration: document.getElementById('batch-duration').value,
-                subject: loggedInTeacher?.subject || "General",
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            db.collection("exam_control").doc("current_exam").set({
-                isActive: batchData.status === "ACTIVE",
-                subject: batchData.subject,
-                duration: Number(batchData.duration || 30),
-                batchTitle: batchData.title
-            }).then(() => alert("Exam Batch Timing Updated & Saved!"));
-        }
-
-        function addSingleQuestion(e) {
-            e.preventDefault();
-            db.collection("question_bank").add({
-                className: document.getElementById('q-class').value,
-                subject: document.getElementById('q-subject').value,
-                chapter: document.getElementById('q-chapter').value,
-                question: document.getElementById('q-text').value,
-                options: {
-                    A: document.getElementById('q-optA').value,
-                    B: document.getElementById('q-optB').value,
-                    C: document.getElementById('q-optC').value,
-                    D: document.getElementById('q-optD').value
-                },
-                correctAnswer: document.getElementById('q-correct').value,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                alert("Question Saved!");
-                loadQuestions();
-            });
-        }
-
-        function loadQuestions() {
-            const list = document.getElementById('active-questions-list');
+        // Load Questions and render Checkboxes
+        function loadQuestionBank() {
             db.collection("question_bank").get().then(snapshot => {
-                list.innerHTML = "";
-                if (snapshot.empty) {
-                    list.innerHTML = "<p class='text-xs text-gray-500'>No questions found.</p>";
+                allQuestions = [];
+                const container = document.getElementById('question-bank-container');
+                container.innerHTML = "";
+
+                if(snapshot.empty) {
+                    container.innerHTML = `<p class="text-xs text-gray-400 text-center py-6">No questions found. Upload CSV first.</p>`;
                     return;
                 }
+
                 snapshot.forEach(doc => {
                     const q = doc.data();
-                    list.innerHTML += `
-                        <div class="p-3 border rounded-lg bg-slate-50 text-xs space-y-1 relative">
-                            <div class="flex gap-1">
-                                <span class="bg-blue-600 text-white px-2 py-0.5 rounded font-bold">${q.subject || 'Physics'}</span>
-                                <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-semibold">${q.className || 'Class 10'}</span>
-                                <span class="bg-gray-800 text-white px-2 py-0.5 rounded font-semibold">${q.chapter || 'Topic'}</span>
+                    q.id = doc.id;
+                    allQuestions.push(q);
+
+                    const isChecked = q.selectedForExam ? 'checked' : '';
+
+                    container.innerHTML += `
+                        <div class="border rounded-lg p-3 bg-gray-50 hover:bg-white transition shadow-sm relative flex gap-3 items-start">
+                            <input type="checkbox" onchange="updateSelectedCount()" value="${q.id}" ${isChecked} class="q-checkbox w-4 h-4 text-blue-600 rounded mt-1 border-gray-300">
+                            <div class="flex-grow">
+                                <div class="flex gap-2 mb-1">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-600 text-white">${q.subject || 'General'}</span>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-700">${q.class || 'Class 10'}</span>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-black text-white">${q.chapter || 'Chapter'}</span>
+                                </div>
+                                <p class="text-xs font-bold text-gray-800">${q.question}</p>
+                                <p class="text-[11px] text-green-700 font-semibold mt-1">Ans: (${q.correctOption}) ${q.options ? q.options[q.correctOption] || '' : ''}</p>
                             </div>
-                            <p class="font-bold text-gray-800 pt-1">${q.question}</p>
-                            <p class="${q.correctAnswer === 'A' ? 'text-green-600 font-bold' : 'text-gray-600'}">(A) ${q.options?.A || ''} ${q.correctAnswer === 'A' ? '✓' : ''}</p>
-                            <p class="${q.correctAnswer === 'B' ? 'text-green-600 font-bold' : 'text-gray-600'}">(B) ${q.options?.B || ''} ${q.correctAnswer === 'B' ? '✓' : ''}</p>
-                            <p class="${q.correctAnswer === 'C' ? 'text-green-600 font-bold' : 'text-gray-600'}">(C) ${q.options?.C || ''} ${q.correctAnswer === 'C' ? '✓' : ''}</p>
-                            <p class="${q.correctAnswer === 'D' ? 'text-green-600 font-bold' : 'text-gray-600'}">(D) ${q.options?.D || ''} ${q.correctAnswer === 'D' ? '✓' : ''}</p>
-                            <button onclick="deleteDoc('${doc.id}')" class="absolute top-2 right-2 text-red-500 hover:underline text-xs">🗑 Delete</button>
+                            <button onclick="deleteQuestion('${q.id}')" class="text-red-500 text-xs hover:underline font-semibold">Delete</button>
                         </div>
                     `;
                 });
+
+                updateSelectedCount();
             });
         }
 
-        function deleteDoc(id) {
-            if (confirm("Delete this question?")) {
-                db.collection("question_bank").doc(id).delete().then(() => loadQuestions());
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('.q-checkbox:checked');
+            document.getElementById('selected-count-label').innerText = `Selected: ${checkboxes.length} Questions for Exam`;
+        }
+
+        function selectAllQuestions(status) {
+            const checkboxes = document.querySelectorAll('.q-checkbox');
+            checkboxes.forEach(cb => cb.checked = status);
+            updateSelectedCount();
+        }
+
+        // Save selected questions to database for live exam
+        async function saveActiveExamQuestions() {
+            const checkboxes = document.querySelectorAll('.q-checkbox');
+            const batch = db.batch();
+
+            checkboxes.forEach(cb => {
+                const ref = db.collection("question_bank").doc(cb.value);
+                batch.update(ref, { selectedForExam: cb.checked });
+            });
+
+            await batch.commit();
+            alert("🎯 Selected questions successfully activated for the Student Exam!");
+        }
+
+        // CSV Upload Handler
+        function processCSVUpload() {
+            const fileInput = document.getElementById('csv-file-input');
+            if (!fileInput.files.length) {
+                alert("Please select a CSV file first!");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n');
+                const batch = db.batch();
+
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    const cols = lines[i].split(',').map(c => c.trim());
+
+                    if (cols.length >= 9) {
+                        const newRef = db.collection("question_bank").doc();
+                        batch.set(newRef, {
+                            class: cols[0],
+                            subject: cols[1],
+                            chapter: cols[2],
+                            question: cols[3],
+                            options: { A: cols[4], B: cols[5], C: cols[6], D: cols[7] },
+                            correctOption: cols[8],
+                            selectedForExam: true // Upload hote hi selected maana jayega
+                        });
+                    }
+                }
+
+                batch.commit().then(() => {
+                    alert("✅ CSV Uploaded & Auto-Selected successfully!");
+                    loadQuestionBank();
+                });
+            };
+
+            reader.readAsText(file);
+        }
+
+        function deleteQuestion(id) {
+            if (confirm("Are you sure you want to delete this question?")) {
+                db.collection("question_bank").doc(id).delete().then(() => loadQuestionBank());
             }
         }
 
-        function uploadCSV() {
-            const file = document.getElementById('csv-file-input').files[0];
-            if (!file) return alert("Select a CSV file first!");
+        function handleExamControl(e) {
+            e.preventDefault();
+            const isActive = document.getElementById('exam-status').value === "true";
+            const duration = parseInt(document.getElementById('exam-duration').value);
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const lines = e.target.result.split('\n');
-                lines.forEach((line, idx) => {
-                    if (idx === 0 || !line.trim()) return; // Skip Header
-                    const cols = line.split(',');
-                    if (cols.length >= 9) {
-                        db.collection("question_bank").add({
-                            className: cols[0].trim(),
-                            subject: cols[1].trim(),
-                            chapter: cols[2].trim(),
-                            question: cols[3].trim(),
-                            options: { A: cols[4].trim(), B: cols[5].trim(), C: cols[6].trim(), D: cols[7].trim() },
-                            correctAnswer: cols[8].trim().toUpperCase()
-                        });
-                    }
-                });
-                alert("CSV Batch Upload Complete!");
-                loadQuestions();
-            };
-            reader.readAsText(file);
+            db.collection("exam_control").doc("current_exam").set({
+                isActive: isActive,
+                duration: duration,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => alert("Exam Settings Saved Successfully!"));
         }
     </script>
 </body>
